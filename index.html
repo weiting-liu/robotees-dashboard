@@ -1,0 +1,2669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Robotees 运营后台 - 看板</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: { 50:'#EFF6FF',100:'#DBEAFE',200:'#BFDBFE',300:'#93C5FD',400:'#60A5FA',500:'#3B82F6',600:'#2563EB',700:'#1D4ED8' },
+            success: { 50:'#ECFDF5',100:'#D1FAE5',400:'#34D399',500:'#10B981',600:'#059669' },
+            warn: { 50:'#FFFBEB',100:'#FEF3C7',400:'#FBBF24',500:'#F59E0B',600:'#D97706' },
+            danger: { 50:'#FEF2F2',100:'#FEE2E2',400:'#F87171',500:'#EF4444',600:'#DC2626' },
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #F8FAFC; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    /* 侧边栏 */
+    .sidebar-item { transition: all 0.2s ease; position: relative; }
+    .sidebar-item::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 50%; transform: translateY(-50%);
+      width: 3px; height: 0;
+      background: #60A5FA;
+      border-radius: 0 3px 3px 0;
+      transition: height 0.2s ease;
+    }
+    .sidebar-item:hover { background: rgba(59,130,246,0.1); color: #93C5FD; }
+    .sidebar-item.active { background: rgba(59,130,246,0.15); color: #fff; }
+    .sidebar-item.active::before { height: 60%; }
+
+    /* 胶囊Tab */
+    .tab-capsule {
+      display: inline-flex;
+      background: #F1F5F9;
+      border-radius: 12px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .tab-btn {
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      border-radius: 10px;
+      position: relative;
+    }
+    .tab-btn.active {
+      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(59,130,246,0.35);
+    }
+    .tab-btn:not(.active) { color: #64748B; }
+    .tab-btn:not(.active):hover { color: #3B82F6; background: rgba(59,130,246,0.08); }
+
+    /* 脉冲动画 */
+    .pulse-dot { animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+    .alert-badge { animation: alertPulse 1.5s ease-in-out infinite; }
+    @keyframes alertPulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50%{ box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+
+    /* 下钻展开/收起动画 */
+    .drilldown-section {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, padding 0.3s ease;
+    }
+    .drilldown-section.open {
+      max-height: 800px;
+      opacity: 1;
+    }
+
+    /* 预警行 - 仅用背景色区分，不用色条避免表格错位 */
+    .warn-row { background: rgba(245, 158, 11, 0.06); }
+    .danger-row { background: rgba(239, 68, 68, 0.06); }
+
+    /* 漏斗层可点击样式 */
+    .funnel-layer {
+      transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+      cursor: pointer;
+    }
+    .funnel-layer:hover {
+      transform: translateX(4px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    .funnel-layer.selected {
+      box-shadow: 0 4px 20px rgba(59,130,246,0.2);
+      outline: 2px solid rgba(59,130,246,0.5);
+      outline-offset: 2px;
+    }
+
+    /* 卡片悬浮效果 */
+    .card-hover {
+      transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+    }
+    /* ⚠️ 禁止在card-hover中使用transform，会为position:fixed子元素创建新的containing block，导致tooltip被overflow:hidden裁切 */
+    .card-hover:hover {
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    /* 时间线样式 */
+    .timeline-item { position: relative; padding-left: 40px; }
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: 15px; top: 0; bottom: 0;
+      width: 2px;
+      background: #E2E8F0;
+    }
+    .timeline-item:last-child::before { display: none; }
+    .timeline-dot {
+      position: absolute;
+      left: 8px; top: 6px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      border: 3px solid #E2E8F0;
+      background: #fff;
+      z-index: 1;
+      transition: all 0.3s ease;
+    }
+    .timeline-dot.has-alert {
+      border-color: #EF4444;
+      background: #FEE2E2;
+      box-shadow: 0 0 0 4px rgba(239,68,68,0.15);
+    }
+    .timeline-dot.has-warn {
+      border-color: #F59E0B;
+      background: #FEF3C7;
+      box-shadow: 0 0 0 4px rgba(245,158,11,0.15);
+    }
+    .timeline-dot.is-clear {
+      border-color: #10B981;
+      background: #D1FAE5;
+    }
+
+    /* 脉冲红点 */
+    .pulse-red {
+      animation: pulseRed 1.5s ease-in-out infinite;
+    }
+    @keyframes pulseRed {
+      0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.5); }
+      50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+
+    /* 进度条 */
+    .pct-bar {
+      height: 6px;
+      border-radius: 3px;
+      background: #F1F5F9;
+      overflow: hidden;
+      min-width: 60px;
+    }
+    .pct-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.4s ease;
+    }
+
+    /* 表格优化 - 不设 text-align，对齐100%由Tailwind工具类控制 */
+    .data-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
+    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 10px 16px; }
+    .data-table td { font-size: 12px; padding: 10px 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table .num-col { font-family: 'Inter', monospace; }
+    .data-table thead tr { background: #F8FAFC; }
+
+    /* 搜索框装饰 */
+    .search-box {
+      background: #F1F5F9;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+    .search-box:focus-within {
+      background: #fff;
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+
+    /* 通知铃铛 */
+    .notification-bell {
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+    .notification-bell:hover { transform: scale(1.1); }
+    .notification-dot {
+      position: absolute;
+      top: -2px; right: -2px;
+      width: 8px; height: 8px;
+      background: #EF4444;
+      border-radius: 50%;
+      border: 2px solid #fff;
+    }
+
+    /* 状态徽章 */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    /* 子项展开区域 */
+    .sub-item-expand {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+    }
+    .sub-item-expand.open {
+      max-height: 600px;
+      opacity: 1;
+    }
+    /* 开发逻辑备注 - 点击弹出，避免hover定位问题 */
+    .dev-note { display: inline-flex; align-items: center; margin-left: 4px; cursor: pointer; vertical-align: middle; }
+    .dev-note-icon { width: 14px; height: 14px; border-radius: 50%; background: #94A3B8; color: #fff; font-size: 9px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; line-height: 1; transition: background 0.2s; }
+    .dev-note.active .dev-note-icon { background: #64748B; }
+    .dev-note-tip { position: fixed; background: #1E293B; color: #F1F5F9; font-size: 11px; line-height: 1.6; padding: 8px 12px; border-radius: 6px; white-space: normal; width: max-content; max-width: 320px; z-index: 99999; pointer-events: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 400; opacity: 0; visibility: hidden; transform: translateX(-50%); }
+    .dev-note-tip::after { content: ''; position: absolute; left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid #1E293B; bottom: -5px; }
+    .dev-note.active .dev-note-tip { opacity: 1; visibility: visible; }
+  
+    /* 预警配置 - 输入框 */
+    .config-input {
+      width: 6rem;
+      text-align: right;
+      border: 1px solid #E2E8F0;
+      border-radius: 0.5rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.875rem;
+      font-variant-numeric: tabular-nums;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    .config-input:focus {
+      border-color: #3B82F6;
+      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+    }
+    .config-input::-webkit-inner-spin-button,
+    .config-input::-webkit-outer-spin-button {
+      opacity: 1;
+    }
+
+    /* Toast 提示 */
+    .toast-bar {
+      position: fixed;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      transition: top 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+    .toast-bar.show {
+      top: 20px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex">
+  <!-- Toast -->
+  <div id="toastBar" class="toast-bar">
+    <div class="bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20 flex items-center gap-2 text-sm font-semibold">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+      <span id="toastText">保存成功 ✓</span>
+    </div>
+  </div>
+
+  <!-- 左侧导航栏 - 深色主题 -->
+  <aside class="w-60 bg-slate-800 flex flex-col fixed h-full z-20">
+    <!-- Logo区域 -->
+    <div class="h-16 flex items-center px-5 border-b border-slate-700/50">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+          </svg>
+        </div>
+        <div>
+          <span class="text-base font-bold text-white tracking-tight">Robotees</span>
+          <span class="block text-[10px] text-slate-400 font-medium -mt-0.5">运营后台</span>
+        </div>
+      </div>
+    </div>
+    <nav class="flex-1 py-4 px-3 space-y-1">
+      <a id="navDashboard" href="#" onclick="switchPage('dashboard');return false;" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        数据看板
+      </a>
+      <a id="navAlertConfig" href="#" onclick="switchPage('alertConfig');return false;" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+        预警配置
+      </a>
+      <a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        客户管理
+      </a>
+      <a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+        订单管理
+      </a>
+      <a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        财务管理
+      </a>
+      <a href="#" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-400">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        系统设置
+      </a>
+    </nav>
+    <div class="px-5 py-4 border-t border-slate-700/50">
+      <p class="text-xs text-slate-500">Robotees SAAS v2.5.0</p>
+    </div>
+  </aside>
+
+  <!-- 右侧主区域 -->
+  <div class="flex-1 ml-60 flex flex-col min-h-screen">
+    <!-- 顶部 Header -->
+    <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-6 fixed top-0 right-0 left-60 z-10">
+      <div class="flex items-center gap-2 text-sm">
+        <span class="text-gray-400">运营后台</span>
+        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span id="headerPageName" class="text-gray-700 font-semibold">数据看板</span>
+      </div>
+      <div class="flex items-center gap-5">
+        <!-- 搜索框 -->
+        <div class="search-box flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" placeholder="搜索..." class="bg-transparent outline-none text-sm text-gray-600 placeholder-gray-400 w-36" />
+          <kbd class="hidden sm:inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium text-gray-400 bg-gray-100 rounded border border-gray-200">⌘K</kbd>
+        </div>
+        <!-- 通知铃铛 -->
+        <button class="notification-bell p-1.5 rounded-lg hover:bg-gray-100 transition-colors">
+          <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <div class="notification-dot"></div>
+        </button>
+        <div class="w-px h-6 bg-gray-200"></div>
+        <!-- 实时状态 -->
+        <div class="flex items-center gap-1.5 text-xs text-gray-400">
+          <span class="pulse-dot w-2 h-2 bg-success-500 rounded-full inline-block"></span>
+          实时
+        </div>
+        <div class="w-px h-6 bg-gray-200"></div>
+        <!-- 用户信息 -->
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-sm font-semibold text-white shadow-sm">A</div>
+          <span class="text-sm text-gray-700 font-medium">Admin</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主内容区 -->
+    <main class="mt-16 p-6 flex-1">
+    <div id="dashboardPage">
+
+      <!-- 平台切换 Tab + 更新时间 -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="tab-capsule">
+          <button class="tab-btn active px-5 py-2 text-sm font-semibold" data-platform="temu" onclick="switchPlatform('temu')">
+            Temu
+            <span id="temuBadge" class="ml-1 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-white/25 text-white">1,284</span>
+          </button>
+          <button class="tab-btn px-5 py-2 text-sm font-semibold" data-platform="shein" onclick="switchPlatform('shein')">Shein</button>
+          <button class="tab-btn px-5 py-2 text-sm font-semibold" data-platform="qink" onclick="switchPlatform('qink')">Qink</button>
+        </div>
+        <div class="flex items-center gap-2 text-sm text-gray-400">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          最后更新：<span id="updateTime" class="font-mono"></span>
+        </div>
+      </div>
+
+      <!-- ========== 模块1：美区半托订单概览（纵向漏斗） ========== -->
+      <div class="mb-6">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-1.5 h-5 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+          <h2 class="text-base font-semibold text-gray-800">美区半托订单概览</h2>
+          <span class="text-xs text-gray-400 ml-1">点击漏斗层下钻</span>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
+          <div class="p-6">
+            <!-- 自定义纵向漏斗 -->
+            <div id="verticalFunnel"></div>
+          </div>
+          <!-- 下钻区域 -->
+          <div id="funnelDrilldown" class="drilldown-section border-t border-gray-100">
+            <div id="funnelDrilldownInner" class="p-5 bg-gray-50/50"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 模块2：物流下单情况 ========== -->
+      <div class="mb-6">
+        <div class="flex items-center gap-2 mb-4">
+          <div class="w-1.5 h-5 bg-gradient-to-b from-amber-500 to-amber-600 rounded-full"></div>
+          <h2 class="text-base font-semibold text-gray-800">物流下单情况</h2>
+        </div>
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
+          <!-- 3个独立数据卡 -->
+          <div class="p-6 grid grid-cols-3 gap-4">
+            <!-- 待下单 -->
+            <div class="bg-amber-50/60 border border-amber-100 rounded-xl p-4 relative overflow-hidden cursor-pointer" onclick="toggleDrilldown('pending')">
+              <div class="absolute top-3 right-3 text-2xl opacity-20">📦</div>
+              <div class="text-xs font-medium text-amber-600 mb-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+                待下单数<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">统计当前萝卜头履约订单待下面单数，当有预警时，下方标注预警信息</span></span>
+                <svg class="w-3.5 h-3.5 text-amber-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </div>
+              <div class="text-3xl font-extrabold text-amber-700 tracking-tight" style="font-variant-numeric:tabular-nums" id="logistics_pending">86</div>
+              <div id="logistics_pending_warn" class="mt-1.5 text-[11px] font-semibold"></div>
+            </div>
+            <!-- 已下单 -->
+            <div class="bg-emerald-50/60 border border-emerald-100 rounded-xl p-4 relative overflow-hidden cursor-pointer" onclick="toggleDrilldown('ordered')">
+              <div class="absolute top-3 right-3 text-2xl opacity-20">✅</div>
+              <div class="text-xs font-medium text-emerald-600 mb-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                已下单数<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">统计萝卜头当日已下面单数，已下单面单如有超时未同步OMP的，下方显示预警信息</span></span>
+                <svg class="w-3.5 h-3.5 text-emerald-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </div>
+              <div class="text-3xl font-extrabold text-emerald-700 tracking-tight" style="font-variant-numeric:tabular-nums" id="logistics_ordered">643</div>
+              <div id="logistics_ordered_warn" class="mt-1.5 text-[11px] font-semibold"></div>
+            </div>
+            <!-- 下单失败 -->
+            <div class="bg-red-50/60 border border-red-100 rounded-xl p-4 relative overflow-hidden cursor-pointer" onclick="toggleDrilldown('failed')">
+              <div class="absolute top-3 right-3 text-2xl opacity-20">❌</div>
+              <div class="text-xs font-medium text-red-600 mb-1 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-red-400"></span>
+                下单失败数<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">统计当前萝卜头下单失败的面单数量</span></span>
+                <svg class="w-3.5 h-3.5 text-red-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </div>
+              <div class="text-3xl font-extrabold text-red-700 tracking-tight flex items-baseline gap-2" style="font-variant-numeric:tabular-nums">
+                <span id="logistics_failed">23</span>
+                <span id="logistics_failed_badge" class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-600 align-middle">3.5%</span>
+              </div>
+            </div>
+          </div>
+          <!-- 下钻：待下单超时预警 -->
+          <div id="drilldownPending" class="drilldown-section border-t border-gray-100">
+            <div class="p-5 bg-gray-50/30">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <span class="w-1 h-4 bg-amber-400 rounded-full"></span>
+                  待下单超时预警<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按客户统计当前超时未下单的面单数</span></span>
+                </h4>
+                <button onclick="toggleDrilldown('pending')" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
+                  收起 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs data-table">
+                  <colgroup><col style="width:30%"><col style="width:20%"><col style="width:25%"><col style="width:25%"></colgroup>
+                  <thead>
+                    <tr class="border-b border-gray-200/60">
+                      <th class="text-left font-semibold">客户名称</th>
+                      <th class="text-right font-semibold">待下单数</th>
+                      <th class="text-center font-semibold">超2h未获面单</th>
+                      <th class="text-center font-semibold">超6h未获面单</th>
+                    </tr>
+                  </thead>
+                  <tbody id="pendingTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          <!-- 下钻：已下单明细 -->
+          <div id="drilldownOrdered" class="drilldown-section border-t border-gray-100">
+            <div class="p-5 bg-gray-50/30">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <span class="w-1 h-4 bg-emerald-400 rounded-full"></span>
+                  已下单明细<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按物流商+产品类型统计当日已下单的面单数量、平均预估运费及占比，如有预警，显示预警标识</span></span>
+                </h4>
+                <button onclick="toggleDrilldown('ordered')" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
+                  收起 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs data-table">
+                  <colgroup><col style="width:10%"><col style="width:42%"><col style="width:12%"><col style="width:16%"><col style="width:20%"></colgroup>
+                  <thead>
+                    <tr class="border-b border-gray-200/60">
+                      <th class="text-left font-semibold">物流商</th>
+                      <th class="text-left font-semibold">产品类型</th>
+                      <th class="text-right font-semibold">下单数</th>
+                      <th class="text-right font-semibold">平均预估运费</th>
+                      <th class="text-right font-semibold">占比</th>
+                    </tr>
+                  </thead>
+                  <tbody id="orderedTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
+                </table>
+              </div>
+              <!-- 物流同步异常监控 -->
+              <div id="syncExceptionSection" class="mt-5 pt-5 border-t border-gray-200/60">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                    <span class="w-1 h-4 bg-red-400 rounded-full"></span>
+                    物流同步异常监控<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">已下单超时未同步或同步失败的，按客户统计异常订单数，点击复制异常订单号复制来源单号</span></span>
+                    <span id="syncExceptionBadge" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600"></span>
+                  </h4>
+                  <button id="btnCopySyncOrders" onclick="copySyncExceptionOrders()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制异常订单号
+                  </button>
+                </div>
+                <div class="overflow-x-auto">
+                  <table class="w-full text-xs data-table">
+                    <colgroup><col style="width:60%"><col style="width:40%"></colgroup>
+                    <thead>
+                      <tr class="border-b border-gray-200/60">
+                        <th class="text-left font-semibold">客户名称</th>
+                        <th class="text-right font-semibold">同步异常订单数</th>
+                      </tr>
+                    </thead>
+                    <tbody id="syncExceptionTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
+                  </table>
+                </div>
+                <div id="syncExceptionEmpty" class="py-4 text-center text-xs text-emerald-500 font-medium" style="display:none">暂无同步异常 ✅</div>
+              </div>
+            </div>
+          </div>
+          <!-- 下钻：下单失败明细 -->
+          <div id="drilldownFailed" class="drilldown-section border-t border-gray-100">
+            <div class="p-5 bg-gray-50/30">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <span class="w-1 h-4 bg-red-400 rounded-full"></span>
+                  下单失败明细<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按失败原因统计当前下单失败的面单数量及占比</span></span>
+                </h4>
+                <button onclick="toggleDrilldown('failed')" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
+                  收起 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs data-table">
+                  <colgroup><col style="width:40%"><col style="width:20%"><col style="width:40%"></colgroup>
+                  <thead>
+                    <tr class="border-b border-gray-200/60">
+                      <th class="text-left font-semibold">失败原因</th>
+                      <th class="text-right font-semibold">单数</th>
+                      <th class="text-right font-semibold">占比</th>
+                    </tr>
+                  </thead>
+                  <tbody id="failedTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========== 模块3：异常预警及监控（纵向时间线） ========== -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="w-1.5 h-5 bg-gradient-to-b from-red-500 to-red-600 rounded-full"></div>
+            <h2 class="text-base font-semibold text-gray-800">异常预警及监控</h2>
+            <span class="text-xs text-gray-400 ml-1">履约链路四环节</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <select id="alertCustomerFilter" onchange="filterAlertByCustomer(this.value)" class="text-xs rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-gray-600 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all cursor-pointer hover:border-gray-300">
+              <option value="">全部客户</option>
+            </select>
+            <button id="copyCustomerOrdersBtn" onclick="copyCustomerAbnormalOrders()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              复制异常订单
+            </button>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
+          <div class="p-6">
+            <div class="space-y-0">
+
+              <!-- 3.1 拉单环节 - 时间线 -->
+              <div class="timeline-item pb-6">
+                <div id="timeline-dot-31" class="timeline-dot"></div>
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <span class="text-white text-xs font-bold">1</span>
+                  </div>
+                  <h3 class="text-sm font-semibold text-gray-700">拉单环节 — 店铺Token失效预警<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按客户+预警级别显示时效预警期内及已失效的店铺（注意只监控启用状态店铺）</span></span></h3>
+                  <span id="badge31" class="status-badge"></span>
+<button id="btn31" onclick="copyShopNames()" class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制店铺名称
+                  </button>
+                </div>
+                <div id="section31" class="ml-0"></div>
+              </div>
+
+              <!-- 3.2 产品匹配环节 - 时间线 -->
+              <div class="timeline-item pb-6">
+                <div id="timeline-dot-32" class="timeline-dot"></div>
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <span class="text-white text-xs font-bold">2</span>
+                  </div>
+                  <h3 class="text-sm font-semibold text-gray-700">产品匹配环节 — 匹配异常</h3>
+                  <span id="badge32" class="status-badge"></span>
+
+                </div>
+                <div id="section32" class="ml-0 space-y-3">
+                  <!-- 匹配SKU禁用 -->
+                  <div id="section32a" class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2 cursor-pointer hover:bg-gray-50/50 transition-colors" onclick="toggleSubExpand('32a')">
+                      <svg id="expand-icon-32a" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span class="text-xs font-medium text-gray-600">① 匹配的产品SKU已禁用<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">显示当前匹配异常的订单信息</span></span></span>
+                      <span id="badge32a" class="status-badge"></span>
+<button id="btn32a" onclick="copySectionOrders('32a')" class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制异常订单
+                  </button>
+                    </div>
+                    <div id="section32aExpand" class="sub-item-expand">
+                      <div class="p-4" id="section32aContent"></div>
+                    </div>
+                  </div>
+                  <!-- 匹配超时 -->
+                  <div id="section32b" class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2 cursor-pointer hover:bg-gray-50/50 transition-colors" onclick="toggleSubExpand('32b')">
+                      <svg id="expand-icon-32b" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span class="text-xs font-medium text-gray-600">② 匹配时间过长预警<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">显示待确认已有匹配任务且任务执行时间超出预警的订单信息</span></span></span>
+                      <span id="badge32b" class="status-badge"></span>
+<button id="btn32b" onclick="copySectionOrders('32b')" class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制异常订单
+                  </button>
+                    </div>
+                    <div id="section32bExpand" class="sub-item-expand">
+                      <div class="p-4" id="section32bContent"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3.3 订单推送环节 - 时间线 -->
+              <div class="timeline-item pb-6">
+                <div id="timeline-dot-33" class="timeline-dot"></div>
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <span class="text-white text-xs font-bold">3</span>
+                  </div>
+                  <h3 class="text-sm font-semibold text-gray-700">订单推送环节 — 推单异常</h3>
+                  <span id="badge33" class="status-badge"></span>
+                </div>
+                <div id="section33" class="ml-0 space-y-3">
+                  <!-- 有明确报错 -->
+                  <div id="section33a" class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2 cursor-pointer hover:bg-gray-50/50 transition-colors" onclick="toggleSubExpand('33a')">
+                      <svg id="expand-icon-33a" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span class="text-xs font-medium text-gray-600">① 推单失败<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按失败原因统计待处理状态下的异常订单的订单数</span></span></span>
+                      <span id="section33aBadge" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-danger-100 text-danger-600">46</span>
+<button id="btn33a" onclick="copySectionOrders('33a')" class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制异常订单
+                  </button>
+                    </div>
+                    <div id="section33aExpand" class="sub-item-expand">
+                      <div class="p-4" id="section33aContent"></div>
+                      <div id="section33aDrill" class="drilldown-section border-t border-gray-100">
+                        <div class="p-4 bg-gray-50/50" id="section33aDrillInner"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 无报错但卡单 -->
+                  <div id="section33b" class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2 cursor-pointer hover:bg-gray-50/50 transition-colors" onclick="toggleSubExpand('33b')">
+                      <svg id="expand-icon-33b" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span class="text-xs font-medium text-gray-600">② 卡单预警<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">监控卡在待推送、待接单状态，超出配置预警值范围的订单（当前时间-付款时间>N）</span></span></span>
+                      <span id="badge33b" class="status-badge"></span>
+<button id="btn33b" onclick="copySectionOrders('33b')" class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制异常订单
+                  </button>
+                    </div>
+                    <div id="section33bExpand" class="sub-item-expand">
+                      <div class="p-4" id="section33bContent"></div>
+                      <div id="section33bDrill" class="drilldown-section border-t border-gray-100">
+                        <div class="p-4 bg-gray-50/50" id="section33bDrillInner"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3.4 生产环节 - 时间线 -->
+              <div class="timeline-item">
+                <div id="timeline-dot-34" class="timeline-dot"></div>
+                <div class="flex items-center gap-3 mb-3">
+                  <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <span class="text-white text-xs font-bold">4</span>
+                  </div>
+                  <h3 class="text-sm font-semibold text-gray-700">生产环节 — 生产异常</h3>
+                  <span id="badge34" class="status-badge"></span>
+                </div>
+                <div id="section34" class="ml-0 space-y-3">
+                  <!-- 反审状态 -->
+                  <div id="section34a" class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2 cursor-pointer hover:bg-gray-50/50 transition-colors" onclick="toggleSubExpand('34a')">
+                      <svg id="expand-icon-34a" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span class="text-xs font-medium text-gray-600">① 订单反审状态<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按反审原因类型统计当前工厂反审状态下的订单</span></span></span>
+                      <span id="section34aBadge" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-warn-100 text-warn-600">32</span>
+<button id="btn34a" onclick="copySectionOrders('34a')" class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制异常订单
+                  </button>
+                    </div>
+                    <div id="section34aExpand" class="sub-item-expand">
+                      <div class="p-4" id="section34aContent"></div>
+                      <div id="section34aDrill" class="drilldown-section border-t border-gray-100">
+                        <div class="p-4 bg-gray-50/50" id="section34aDrillInner"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- 反审卡单 -->
+                  <div id="section34b" class="bg-white rounded-xl border border-gray-100 overflow-hidden">
+                    <div class="px-4 py-3 border-b border-gray-50 flex items-center gap-2 cursor-pointer hover:bg-gray-50/50 transition-colors" onclick="toggleSubExpand('34b')">
+                      <svg id="expand-icon-34b" class="w-4 h-4 text-gray-400 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                      <span class="text-xs font-medium text-gray-600">② 反审卡单预警<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">监控卡在工厂反审状态，超出配置预警范围的订单（当前时间-最新反审时间>N）</span></span></span>
+                      <span id="badge34b" class="status-badge"></span>
+<button id="btn34b" onclick="copySectionOrders('34b')" class="ml-auto inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors border border-blue-200" style="display:none">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制异常订单
+                  </button>
+                    </div>
+                    <div id="section34bExpand" class="sub-item-expand">
+                      <div class="p-4" id="section34bContent"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div id="alertConfigPage" style="display:none">
+<!-- 页面标题 -->
+      <div class="mb-6">
+        <div class="flex items-center gap-2">
+          <div class="w-1.5 h-6 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full"></div>
+          <h1 class="text-lg font-bold text-gray-800">预警配置</h1>
+          <span class="text-xs text-gray-400 ml-1">设置各模块预警阈值</span>
+        </div>
+      </div>
+
+      <div class="max-w-3xl space-y-5">
+
+        <!-- 卡片1 - 拉单环节 -->
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100/80 bg-gradient-to-r from-blue-50/50 to-transparent">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <span class="text-white text-xs font-bold">1</span>
+              </div>
+              <h2 class="text-sm font-semibold text-gray-800">拉单环节</h2>
+            </div>
+          </div>
+          <div class="p-6">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">Token即将失效预警天数</div>
+                <div class="text-xs text-gray-400 mt-0.5">距失效不足此天数时触发预警提示</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_tokenExpiringDays" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">天</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片2 - 产品匹配环节 -->
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100/80 bg-gradient-to-r from-purple-50/50 to-transparent">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <span class="text-white text-xs font-bold">2</span>
+              </div>
+              <h2 class="text-sm font-semibold text-gray-800">产品匹配环节</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">匹配超时预警阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">产品匹配耗时超过此时长触发预警</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_matchingTimeoutHours" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">小时</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片3 - 订单推送环节 -->
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100/80 bg-gradient-to-r from-amber-50/50 to-transparent">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <span class="text-white text-xs font-bold">3</span>
+              </div>
+              <h2 class="text-sm font-semibold text-gray-800">订单推送环节</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">待推送卡单预警阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">订单停留在"待推送"状态超过此时长触发预警</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_pushStuckHours" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">小时</span>
+              </div>
+            </div>
+            <div class="border-t border-gray-100/60"></div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">待接单卡单预警阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">订单停留在"待接单"状态超过此时长触发预警</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_acceptStuckHours" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">小时</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片4 - 生产环节 -->
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100/80 bg-gradient-to-r from-rose-50/50 to-transparent">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-rose-500 to-rose-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <span class="text-white text-xs font-bold">4</span>
+              </div>
+              <h2 class="text-sm font-semibold text-gray-800">生产环节</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">反审卡单预警阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">订单反审等待时间超过此时长触发预警</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_reamitStuckHours" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">小时</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 卡片5 - 物流下单 -->
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100/80 bg-gradient-to-r from-emerald-50/50 to-transparent">
+            <div class="flex items-center gap-2.5">
+              <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                <span class="text-white text-xs font-bold">5</span>
+              </div>
+              <h2 class="text-sm font-semibold text-gray-800">物流下单</h2>
+            </div>
+          </div>
+          <div class="p-6 space-y-5">
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">待下单超时警告级阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">待下单超过此时长未获取面单，显示为黄色警告</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_pendingOver2hHours" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">小时</span>
+              </div>
+            </div>
+            <div class="border-t border-gray-100/60"></div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">待下单超时严重级阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">待下单超过此时长未获取面单，显示为红色严重警告</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_pendingOver6hHours" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">小时</span>
+              </div>
+            </div>
+            <div class="border-t border-gray-100/60"></div>
+            <div class="flex items-center justify-between">
+              <div>
+                <div class="text-sm font-medium text-gray-700">物流同步异常阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">已下单物流信息超过此时长未同步，标记为同步异常</div>
+              </div>
+              <div class="flex items-center gap-2">
+                <input id="cfg_syncExceptionHours" type="number" min="0" class="config-input" />
+                <span class="text-xs text-gray-500 font-medium">小时</span>
+              </div>
+            </div>
+            <div class="border-t border-gray-100/60"></div>
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <div class="text-sm font-medium text-gray-700">物流产品占比预警</div>
+                  <div class="text-xs text-gray-400 mt-0.5">指定物流商+产品类型的下单占比超过阈值时触发预警</div>
+                </div>
+                <button onclick="alertAddAlertRule()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-all">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  添加预警规则
+                </button>
+              </div>
+              <div class="bg-gray-50/80 rounded-xl border border-gray-100 p-4">
+                <div class="flex items-center gap-3 mb-3">
+                  <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider w-28">物流商</span>
+                  <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider flex-1">产品类型</span>
+                  <span class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider w-20">占比阈值(%)</span>
+                  <span class="w-8"></span>
+                </div>
+                <div id="alertRulesContainer" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 操作栏 -->
+        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] p-6 flex items-center justify-between">
+          <div class="text-xs text-gray-400">
+            <svg class="w-4 h-4 inline-block mr-1 -mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            修改后将存入本地，在看板页刷新数据时生效
+          </div>
+          <div class="flex items-center gap-3">
+
+            <button onclick="alertSaveConfig()" class="px-5 py-2 rounded-xl text-sm font-semibold bg-primary-500 text-white hover:bg-primary-600 transition-all shadow-sm shadow-primary-500/20">
+              保存配置
+            </button>
+          </div>
+        </div>
+
+        <!-- 提示卡片 -->
+        <div class="bg-gray-50/80 rounded-xl border border-gray-100 p-4 flex items-start gap-3">
+          <svg class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <p class="text-xs text-gray-500 leading-relaxed">配置修改后将在下次数据刷新时生效。预警阈值仅对当前平台生效，如需按平台分别配置请联系管理员。</p>
+        </div>
+
+      </div>
+    </div>
+  </main>
+  </div>
+
+<script>
+
+// ============ 页面切换 ============
+function switchPage(page) {
+  const dashboardPage = document.getElementById('dashboardPage');
+  const alertConfigPage = document.getElementById('alertConfigPage');
+  const navDashboard = document.getElementById('navDashboard');
+  const navAlertConfig = document.getElementById('navAlertConfig');
+  const headerPageName = document.getElementById('headerPageName');
+  
+  if (page === 'dashboard') {
+    dashboardPage.style.display = '';
+    alertConfigPage.style.display = 'none';
+    navDashboard.classList.add('active');
+    navDashboard.classList.remove('text-slate-400');
+    navAlertConfig.classList.remove('active');
+    navAlertConfig.classList.add('text-slate-400');
+    headerPageName.textContent = '数据看板';
+  } else if (page === 'alertConfig') {
+    dashboardPage.style.display = 'none';
+    alertConfigPage.style.display = '';
+    navDashboard.classList.remove('active');
+    navDashboard.classList.add('text-slate-400');
+    navAlertConfig.classList.add('active');
+    navAlertConfig.classList.remove('text-slate-400');
+    headerPageName.textContent = '预警配置';
+  }
+}
+
+// ============ 默认配置 ============
+const alertDefaultConfig = {
+  tokenExpiringDays: 7,
+  matchingTimeoutHours: 2,
+  pushStuckHours: 2,
+  acceptStuckHours: 4,
+  reauditStuckHours: 3,
+  pendingOver2hHours: 2,
+  pendingOver6hHours: 6,
+  syncExceptionHours: 1,
+  logisticsProductAlerts: [
+    { carrier: 'USPS', product: 'Ground Advantage Available via Logistics Provider', threshold: 2 }
+  ]
+};
+
+// 配置项 key → input id 映射
+const alertKeyToInputId = {
+  tokenExpiringDays: 'cfg_tokenExpiringDays',
+  matchingTimeoutHours: 'cfg_matchingTimeoutHours',
+  pushStuckHours: 'cfg_pushStuckHours',
+  acceptStuckHours: 'cfg_acceptStuckHours',
+  reauditStuckHours: 'cfg_reamitStuckHours',
+  pendingOver2hHours: 'cfg_pendingOver2hHours',
+  pendingOver6hHours: 'cfg_pendingOver6hHours',
+  syncExceptionHours: 'cfg_syncExceptionHours'
+};
+
+// ============ 加载配置 ============
+function alertLoadConfig() {
+  const stored = localStorage.getItem('robotees_alert_config');
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored);
+      // 兼容旧配置：如果有 uspsGapctThreshold 但没有 logisticsProductAlerts，自动迁移
+      if (parsed.uspsGapctThreshold !== undefined && !parsed.logisticsProductAlerts) {
+        parsed.logisticsProductAlerts = [
+          { carrier: 'USPS', product: 'Ground Advantage Available via Logistics Provider', threshold: parsed.uspsGapctThreshold }
+        ];
+        delete parsed.uspsGapctThreshold;
+      }
+      return parsed;
+    } catch (e) {
+      return { ...alertDefaultConfig };
+    }
+  }
+  return { ...alertDefaultConfig };
+}
+
+// ============ 填入表单 ============
+function alertPopulateForm(config) {
+  Object.keys(alertKeyToInputId).forEach(key => {
+    const input = document.getElementById(alertKeyToInputId[key]);
+    if (input) {
+      input.value = config[key] !== undefined ? config[key] : alertDefaultConfig[key];
+    }
+  });
+  // 渲染物流产品预警规则
+  alertRenderAlertRules(config);
+}
+
+// ============ 渲染预警规则 ============
+function alertRenderAlertRules(config) {
+  const rules = config.logisticsProductAlerts || alertDefaultConfig.logisticsProductAlerts;
+  const container = document.getElementById('alertRulesContainer');
+  const canDelete = rules.length > 1;
+  container.innerHTML = rules.map((rule, idx) => `
+    <div class="flex items-center gap-3 alert-rule-row" data-index="${idx}">
+      <input type="text" class="alert-carrier w-28 text-xs rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" value="${rule.carrier || ''}" placeholder="物流商" />
+      <input type="text" class="alert-product flex-1 text-xs rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" value="${rule.product || ''}" placeholder="产品类型" />
+      <input type="number" class="alert-threshold w-20 text-xs rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400" value="${rule.threshold !== undefined ? rule.threshold : ''}" placeholder="占比" min="0" max="100" />
+      ${canDelete ? `<button onclick="alertRemoveAlertRule(${idx})" class="w-8 h-8 rounded-full flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all" title="删除此规则">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      </button>` : '<span class="w-8"></span>'}
+    </div>
+  `).join('');
+}
+
+// ============ 添加预警规则 ============
+function alertAddAlertRule() {
+  const config = alertCollectFormConfig();
+  config.logisticsProductAlerts.push({ carrier: '', product: '', threshold: '' });
+  alertRenderAlertRules(config);
+}
+
+// ============ 删除预警规则 ============
+function alertRemoveAlertRule(idx) {
+  const config = alertCollectFormConfig();
+  if (config.logisticsProductAlerts.length <= 1) return;
+  config.logisticsProductAlerts.splice(idx, 1);
+  alertRenderAlertRules(config);
+}
+
+// ============ 收集表单配置 ============
+function alertCollectFormConfig() {
+  const config = {};
+  Object.keys(alertKeyToInputId).forEach(key => {
+    const input = document.getElementById(alertKeyToInputId[key]);
+    if (input) {
+      const val = parseFloat(input.value);
+      config[key] = isNaN(val) ? alertDefaultConfig[key] : val;
+    } else {
+      config[key] = alertDefaultConfig[key];
+    }
+  });
+  // 收集预警规则
+  const rules = [];
+  document.querySelectorAll('.alert-rule-row').forEach(row => {
+    const carrier = row.querySelector('.alert-carrier').value.trim();
+    const product = row.querySelector('.alert-product').value.trim();
+    const thresholdStr = row.querySelector('.alert-threshold').value;
+    const threshold = parseFloat(thresholdStr);
+    rules.push({
+      carrier: carrier,
+      product: product,
+      threshold: isNaN(threshold) ? '' : threshold
+    });
+  });
+  config.logisticsProductAlerts = rules;
+  return config;
+}
+
+// ============ 保存配置 ============
+function alertSaveConfig() {
+  const config = alertCollectFormConfig();
+  localStorage.setItem('robotees_alert_config', JSON.stringify(config));
+  alertShowToast('保存成功 ✓');
+}
+
+// ============ Toast 提示 ============
+function alertShowToast(msg) {
+  const bar = document.getElementById('toastBar');
+  const text = document.getElementById('toastText');
+  text.textContent = msg;
+  bar.classList.add('show');
+  setTimeout(() => { bar.classList.remove('show'); }, 3000);
+}
+
+// ============ 初始化 ============
+const alertCurrentConfig = alertLoadConfig();
+alertPopulateForm(alertCurrentConfig);
+
+// ============ 数据模型 ============
+const platformData = {
+  temu: {
+    funnel: [
+      { name: '今日订单创建总数', value: 1284 },
+      { name: '萝卜头履约订单数', value: 927, pct: 72.2 },
+    ],
+    funnelByCustomer: [
+      { name: '拍歐德國際貿易有限公司', totalOrders: 530, fulfillOrders: 412 },
+      { name: '广州天天酷衣电子贸易有限公司', totalOrders: 445, fulfillOrders: 325 },
+      { name: '广州尔棉贸易有限公司', totalOrders: 309, fulfillOrders: 190 },
+    ],
+    funnelByStatus: [
+      { name: '待确认', orders: 357, alert: false },
+      { name: '待付款', orders: 289, alert: false },
+      { name: '待推送', orders: 134, alert: false },
+      { name: '待接单', orders: 23, alert: true },
+      { name: '待处理', orders: 48, alert: true },
+      { name: '生产中', orders: 456, alert: false },
+      { name: '待反审', orders: 15, alert: true },
+      { name: '今日发货', orders: 345, alert: false },
+    ],
+    logistics: {
+      pending: 86,
+      ordered: 643,
+      failed: 23,
+      pendingRows: [
+        { name: '拍歐德國際貿易有限公司', count: 38, over2h: 8, over6h: 2 },
+        { name: '广州天天酷衣电子贸易有限公司', count: 33, over2h: 5, over6h: 1 },
+        { name: '广州尔棉贸易有限公司', count: 15, over2h: 3, over6h: 0 },
+      ],
+      orderedRows: [
+        { carrier: 'USPS', product: 'Ground Advantage', count: 120, fee: '$3.45', pct: 8.5, warn: true },
+        { carrier: 'USPS', product: 'Priority Mail', count: 450, fee: '$7.20', pct: 31.8, warn: false },
+        { carrier: 'UPS', product: 'Ground', count: 380, fee: '$5.80', pct: 26.9, warn: false },
+        { carrier: 'FedEx', product: 'Ground', count: 280, fee: '$6.10', pct: 19.8, warn: false },
+        { carrier: 'DHL', product: 'eCommerce', count: 185, fee: '$4.50', pct: 13.1, warn: false },
+      ],
+      failedRows: [
+        { reason: '物流商接口超时', count: 15, pct: 35.7 },
+        { reason: '地址信息不完整', count: 12, pct: 28.6 },
+        { reason: '面单生成失败', count: 8, pct: 19.0 },
+        { reason: '其他', count: 7, pct: 16.7 },
+      ],
+      syncExceptionRows: [
+        { name: '拍歐德國際貿易有限公司', count: 5, orders: ['PO-211-04259049615993767','PO-211-05183274608391234','PO-211-03762185904215678','PO-211-04317856209183746','PO-211-05729461084325917'] },
+        { name: '广州天天酷衣电子贸易有限公司', count: 3, orders: ['PO-211-01538472609184563','PO-211-07625194083267512','PO-211-09384751206451837'] },
+        { name: '广州尔棉贸易有限公司', count: 2, orders: ['PO-211-06894321753081245','PO-211-02451687390463128'] },
+      ]
+    },
+    section31: {
+      hasData: true,
+      rows: [
+        { level: 'expired', levelText: '🔴 已失效', customer: 'PD-001', name: '拍歐德國際貿易有限公司', shop: '拍歐德-主店', platform: 'Temu', time: '已失效 2天' },
+        { level: 'expiring', levelText: '⚠️ 即将失效', customer: 'EM-001', name: '广州尔棉贸易有限公司', shop: '尔棉-Shein店', platform: 'Shein', time: '剩余3天' },
+        { level: 'expiring', levelText: '⚠️ 即将失效', customer: 'PD-001', name: '拍歐德國際貿易有限公司', shop: '拍歐德-Temu店', platform: 'Temu', time: '剩余5天' },
+        { level: 'expiring', levelText: '⚠️ 即将失效', customer: 'TT-001', name: '广州天天酷衣电子贸易有限公司', shop: '天天酷衣-美国站', platform: 'Qink', time: '剩余6天' },
+      ]
+    },
+    section32a: {
+      hasData: true,
+      rows: [
+        { customer: 'PD-001', name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767', disabledSku: 'P202509000010524, P202509000010538' },
+        { customer: 'PD-001', name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-05183274608391234', disabledSku: 'P202509000010524' },
+        { customer: 'PD-001', name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-03762185904215678', disabledSku: 'P202509000020316' },
+        { customer: 'EM-001', name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245', disabledSku: 'P202509000030478, P202509000062194' },
+        { customer: 'EM-001', name: '广州尔棉贸易有限公司', orderNo: 'PO-211-02451687390463128', disabledSku: 'P202509000041512' },
+        { customer: 'EM-001', name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08973246051728394', disabledSku: 'P202509000057823' },
+      ]
+    },
+    section32b: {
+      hasData: true,
+      rows: [
+        { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-01538472609184563', waitTime: '4小时32分' },
+        { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-07625194083267512', waitTime: '3小时18分' },
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-09384751206451837', waitTime: '2小时45分' },
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06129438572016549', waitTime: '2小时15分' },
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08247561039472618', waitTime: '2小时03分' },
+        { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04826173958102476', waitTime: '2小时01分' },
+      ]
+    },
+    section33a: {
+      hasData: true,
+      mainRows: [
+        { reason: '物流商接口超时', count: 23, pct: 50.0 },
+        { reason: '面单生成失败', count: 15, pct: 32.6 },
+        { reason: '地址信息不完整', count: 8, pct: 17.4 },
+      ],
+      drilldown: {
+        '物流商接口超时': [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-05183274608391234' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-03762185904215678' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04826173958102476' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-01483629570146382' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-07640813295647025' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-02451687390463128' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08973246051728394' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05930482176495013' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-01538472609184563' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-07625194083267512' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-09384751206451837' },
+        ],
+        '面单生成失败': [
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06129438572016549' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08247561039472618' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-09125748306128457' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06584072139581204' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-02839476015829364' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08462159703214658' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-07625194083267512' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-01538472609184563' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09384751206451837' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-06129438572016549' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-08247561039472618' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09125748306128457' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-06584072139581204' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-02839476015829364' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-08462159703214658' },
+        ],
+        '地址信息不完整': [
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-02451687390463128' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08973246051728394' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05930482176495013' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06129438572016549' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08247561039472618' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-09125748306128457' },
+        ],
+      }
+    },
+    section33b: {
+      hasData: true,
+      rows: [
+        { stage: '待推送', stuckCount: 12 },
+        { stage: '待接单', stuckCount: 5 },
+      ],
+      drilldown: {
+        '待推送': [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-05183274608391234' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-03762185904215678' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-02451687390463128' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-01538472609184563' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-07625194083267512' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-09384751206451837' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-06129438572016549' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-08247561039472618' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-04826173958102476' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-01483629570146382' },
+        ],
+        '待接单': [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-07640813295647025' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09125748306128457' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08973246051728394' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05930482176495013' },
+        ],
+      }
+    },
+    section34a: {
+      hasData: true,
+      mainRows: [
+        { reason: '库存不足', count: 23, status: 'danger', level: 'danger' },
+        { reason: '生产图异常', count: 9, status: 'warn', level: 'warn' },
+      ],
+      drilldown: {
+        '库存不足': [
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05930482176495013' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-02451687390463128' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08973246051728394' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-07625194083267512' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-01538472609184563' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-09384751206451837' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06129438572016549' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-08247561039472618' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-01483629570146382' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-07640813295647025' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09125748306128457' },
+        ],
+        '生产图异常': [
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-06584072139581204' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-02839476015829364' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-08462159703214658' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-04826173958102476' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-04259049615993767' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05183274608391234' },
+        ],
+      }
+    },
+    section34b: {
+      hasData: true,
+      rows: [
+        { customer: 'EM-001', name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839', waitTime: '6小时22分', level: 'danger' },
+        { customer: 'EM-001', name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05930482176495013', waitTime: '5小时15分', level: 'danger' },
+        { customer: 'PD-001', name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-01483629570146382', waitTime: '4小时48分', level: 'danger' },
+        { customer: 'PD-001', name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-07640813295647025', waitTime: '4小时05分', level: 'danger' },
+        { customer: 'PD-001', name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09125748306128457', waitTime: '4小时01分', level: 'danger' },
+        { customer: 'TT-001', name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-06584072139581204', waitTime: '3小时33分', level: 'warn' },
+        { customer: 'TT-001', name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-02839476015829364', waitTime: '3小时12分', level: 'warn' },
+        { customer: 'TT-001', name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-08462159703214658', waitTime: '3小时02分', level: 'warn' },
+      ]
+    }
+  },
+  shein: {
+    funnel: [
+      { name: '今日订单创建总数', value: 42 },
+      { name: '萝卜头履约订单数', value: 31, pct: 73.8 },
+    ],
+    funnelByCustomer: [
+      { name: '拍歐德國際貿易有限公司', totalOrders: 18, fulfillOrders: 14 },
+      { name: '广州天天酷衣电子贸易有限公司', totalOrders: 14, fulfillOrders: 10 },
+      { name: '广州尔棉贸易有限公司', totalOrders: 10, fulfillOrders: 7 },
+    ],
+    funnelByStatus: [
+      { name: '待确认', orders: 11, alert: false },
+      { name: '待付款', orders: 8, alert: false },
+      { name: '待推送', orders: 4, alert: false },
+      { name: '待接单', orders: 1, alert: true },
+      { name: '待处理', orders: 2, alert: true },
+      { name: '生产中', orders: 15, alert: false },
+      { name: '待反审', orders: 0, alert: false },
+      { name: '今日发货', orders: 9, alert: false },
+    ],
+    logistics: {
+      pending: 5,
+      ordered: 27,
+      failed: 1,
+      pendingRows: [
+        { name: '广州尔棉贸易有限公司', count: 3, over2h: 0, over6h: 0 },
+        { name: '拍歐德國際貿易有限公司', count: 2, over2h: 0, over6h: 0 },
+      ],
+      orderedRows: [
+        { carrier: 'DHL', product: 'eCommerce', count: 12, fee: '$3.80', pct: 44.4, warn: false },
+        { carrier: 'USPS', product: 'Ground Advantage', count: 8, fee: '$4.20', pct: 29.6, warn: false },
+        { carrier: 'FedEx', product: 'Ground', count: 4, fee: '$5.50', pct: 14.8, warn: false },
+        { carrier: 'UPS', product: 'Ground', count: 3, fee: '$6.00', pct: 11.1, warn: false },
+      ],
+      failedRows: [
+        { reason: '地址信息不完整', count: 1, pct: 100 },
+      ],
+      syncExceptionRows: []
+    },
+    section31: { hasData: false, rows: [] },
+    section32a: { hasData: false, rows: [] },
+    section32b: { hasData: false, rows: [] },
+    section33a: { hasData: false, mainRows: [] },
+    section33b: { hasData: false, rows: [] },
+    section34a: { hasData: false, mainRows: [], drilldown: {} },
+    section34b: { hasData: false, rows: [] }
+  },
+  qink: {
+    funnel: [
+      { name: '今日订单创建总数', value: 18 },
+      { name: '萝卜头履约订单数', value: 12, pct: 66.7 },
+    ],
+    funnelByCustomer: [
+      { name: '广州尔棉贸易有限公司', totalOrders: 10, fulfillOrders: 7 },
+      { name: '广州天天酷衣电子贸易有限公司', totalOrders: 8, fulfillOrders: 5 },
+    ],
+    funnelByStatus: [
+      { name: '待确认', orders: 6, alert: false },
+      { name: '待付款', orders: 4, alert: false },
+      { name: '待推送', orders: 1, alert: false },
+      { name: '待接单', orders: 0, alert: false },
+      { name: '待处理', orders: 0, alert: false },
+      { name: '生产中', orders: 5, alert: false },
+      { name: '待反审', orders: 0, alert: false },
+      { name: '今日发货', orders: 4, alert: false },
+    ],
+    logistics: {
+      pending: 3,
+      ordered: 10,
+      failed: 0,
+      pendingRows: [
+        { name: '拍歐德國際貿易有限公司', count: 2, over2h: 0, over6h: 0 },
+        { name: '广州天天酷衣电子贸易有限公司', count: 1, over2h: 0, over6h: 0 },
+      ],
+      orderedRows: [
+        { carrier: 'DHL', product: 'eCommerce', count: 5, fee: '$3.80', pct: 50.0, warn: false },
+        { carrier: 'USPS', product: 'Ground Advantage', count: 3, fee: '$4.20', pct: 30.0, warn: false },
+        { carrier: 'FedEx', product: 'Ground', count: 2, fee: '$5.50', pct: 20.0, warn: false },
+      ],
+      failedRows: [],
+      syncExceptionRows: []
+    },
+    section31: { hasData: false, rows: [] },
+    section32a: { hasData: false, rows: [] },
+    section32b: { hasData: false, rows: [] },
+    section33a: { hasData: false, mainRows: [] },
+    section33b: { hasData: false, rows: [] },
+    section34a: { hasData: false, mainRows: [], drilldown: {} },
+    section34b: { hasData: false, rows: [] }
+  }
+};
+
+const alertConfig = Object.assign({
+  tokenExpiringDays: 7,
+  matchingTimeoutHours: 2,
+  pushStuckHours: 2,
+  acceptStuckHours: 4,
+  reauditStuckHours: 3,
+  pendingOver2hHours: 2,
+  pendingOver6hHours: 6,
+  syncExceptionHours: 1,
+  logisticsProductAlerts: [{ carrier: 'USPS', product: 'Ground Advantage', threshold: 2 }]
+}, JSON.parse(localStorage.getItem('robotees_alert_config') || '{}'));
+
+let currentPlatform = 'temu';
+let funnelSelectedLayer = null;
+let drillPieChart = null;
+let alertCustomerFilter = '';
+let filtered33aDrilldown = null;
+let filtered34aDrilldown = null;
+
+// ============ 工具函数 ============
+function fmt(n) { return n.toLocaleString('en-US'); }
+
+function updateTime() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('updateTime').textContent =
+    `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+}
+updateTime();
+setInterval(updateTime, 1000);
+
+// ============ 平台切换 ============
+function switchPlatform(platform) {
+  currentPlatform = platform;
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    b.classList.remove('active');
+  });
+  const activeBtn = document.querySelector(`[data-platform="${platform}"]`);
+  activeBtn.classList.add('active');
+  // 收起所有下钻
+  closeAllDrilldowns();
+  // 收起所有子项
+  document.querySelectorAll('.sub-item-expand').forEach(el => el.classList.remove('open'));
+  document.querySelectorAll('[id^="expand-icon-"]').forEach(el => el.style.transform = '');
+  // 重置客户筛选
+  alertCustomerFilter = '';
+  const filterBtn = document.getElementById('copyCustomerOrdersBtn');
+  if (filterBtn) filterBtn.style.display = 'none';
+  renderAll();
+}
+
+function closeAllDrilldowns() {
+  document.getElementById('funnelDrilldown').classList.remove('open');
+  document.getElementById('drilldownOrdered').classList.remove('open');
+  document.getElementById('drilldownFailed').classList.remove('open');
+  document.getElementById('drilldownPending').classList.remove('open');
+  document.getElementById('section33aDrill').classList.remove('open');
+  document.getElementById('section33bDrill').classList.remove('open');
+  document.getElementById('section34aDrill').classList.remove('open');
+  funnelSelectedLayer = null;
+  // 移除漏斗选中态
+  document.querySelectorAll('.funnel-layer').forEach(el => el.classList.remove('selected'));
+}
+
+// ============ 子项展开/收起 ============
+function toggleSubExpand(id) {
+  const expandEl = document.getElementById('section' + id + 'Expand');
+  const iconEl = document.getElementById('expand-icon-' + id);
+  const isOpen = expandEl.classList.contains('open');
+  expandEl.classList.toggle('open');
+  iconEl.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+// ============ 模块2：物流下单下钻 ============
+function toggleDrilldown(type) {
+  const idMap = { ordered: 'drilldownOrdered', failed: 'drilldownFailed', pending: 'drilldownPending' };
+  const el = document.getElementById(idMap[type]);
+  // 关闭其他
+  Object.keys(idMap).forEach(k => { if (k !== type) document.getElementById(idMap[k]).classList.remove('open'); });
+  el.classList.toggle('open');
+  if (el.classList.contains('open')) {
+    if (type === 'ordered') { renderOrderedTable(); renderSyncExceptionTable(); }
+    else if (type === 'failed') renderFailedTable();
+    else if (type === 'pending') renderPendingTable();
+  }
+}
+
+function renderPendingTable() {
+  const data = platformData[currentPlatform].logistics.pendingRows;
+  const tbody = document.getElementById('pendingTableBody');
+  const totalOver2h = data.reduce((s, r) => s + r.over2h, 0);
+  const totalOver6h = data.reduce((s, r) => s + r.over6h, 0);
+
+  // 更新待下单卡片上的预警提示
+  const warnEl = document.getElementById('logistics_pending_warn');
+  if (totalOver6h > 0) {
+    warnEl.innerHTML = `<span class="text-red-600">🔴 ${totalOver6h}单超6h</span>`;
+  } else if (totalOver2h > 0) {
+    warnEl.innerHTML = `<span class="text-amber-600">🟡 ${totalOver2h}单超2h</span>`;
+  } else {
+    warnEl.innerHTML = '';
+  }
+
+  tbody.innerHTML = data.map(row => {
+    const hasOver6h = row.over6h > 0;
+    const hasOver2h = row.over2h > 0;
+    const rowClass = hasOver6h ? 'danger-row bg-red-50/30' : hasOver2h ? 'warn-row bg-amber-50/30' : '';
+    return `<tr class="${rowClass} hover:bg-gray-50/80 transition-colors">
+      <td class="text-left font-semibold text-gray-800">${row.name}</td>
+      <td class="text-right num-col font-semibold text-gray-800">${fmt(row.count)}</td>
+      <td class="text-center font-semibold font-mono ${hasOver2h ? 'text-amber-600' : 'text-gray-400'}">${row.over2h > 0 ? row.over2h : '-'}</td>
+      <td class="text-center font-semibold font-mono ${hasOver6h ? 'text-red-600' : 'text-gray-400'}">${row.over6h > 0 ? row.over6h : '-'}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderOrderedTable() {
+  const data = platformData[currentPlatform].logistics.orderedRows;
+  const tbody = document.getElementById('orderedTableBody');
+  tbody.innerHTML = data.map(row => {
+    const isWarn = alertConfig.logisticsProductAlerts && alertConfig.logisticsProductAlerts.some(alert => 
+      row.carrier === alert.carrier && row.product === alert.product && row.pct > alert.threshold
+    );
+    const rowBg = isWarn ? 'bg-amber-50/50' : '';
+    const pctBarColor = isWarn ? '#F59E0B' : '#3B82F6';
+    return `<tr class="${rowBg} hover:bg-gray-50/80 transition-colors">
+      <td class="text-left font-semibold text-gray-800">${row.carrier}</td>
+      <td class="text-left text-gray-600">${row.product}${row.warn ? ' <span class="ml-1 text-[10px] font-bold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">预警</span>' : ''}</td>
+      <td class="text-right num-col font-semibold text-gray-800">${fmt(row.count)}</td>
+      <td class="text-right num-col text-gray-500">${row.fee}</td>
+      <td class="text-right ">
+        <div class="flex items-center justify-end gap-2">
+          <div class="pct-bar flex-1 max-w-[80px]">
+            <div class="pct-bar-fill" style="width:${row.pct}%;background:${pctBarColor}"></div>
+          </div>
+          <span class="num-col ${isWarn ? 'text-amber-600 font-bold' : 'text-gray-500'}" style="min-width:40px">${row.pct}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderFailedTable() {
+  const data = platformData[currentPlatform].logistics.failedRows;
+  const tbody = document.getElementById('failedTableBody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="text-center text-sm text-gray-400">暂无下单失败订单 ✅</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(row => `<tr class="hover:bg-gray-50/80 transition-colors relative">
+    <td class="text-left font-semibold text-gray-800">${row.reason}</td>
+    <td class="text-right num-col font-semibold text-danger-600">${fmt(row.count)}</td>
+    <td class="text-right ">
+      <div class="flex items-center justify-end gap-2">
+        <div class="pct-bar flex-1 max-w-[80px]">
+          <div class="pct-bar-fill" style="width:${row.pct}%;background:#EF4444"></div>
+        </div>
+        <span class="num-col text-gray-500" style="min-width:40px">${row.pct}%</span>
+      </div>
+    </td>
+  </tr>`).join('');
+}
+
+// 物流同步异常监控
+function renderSyncExceptionTable() {
+  const data = platformData[currentPlatform].logistics.syncExceptionRows;
+  const tbody = document.getElementById('syncExceptionTableBody');
+  const badge = document.getElementById('syncExceptionBadge');
+  const btn = document.getElementById('btnCopySyncOrders');
+  const emptyEl = document.getElementById('syncExceptionEmpty');
+
+  if (!data || !data.length) {
+    tbody.innerHTML = '';
+    badge.textContent = '0';
+    badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-600';
+    if (btn) btn.style.display = 'none';
+    if (emptyEl) emptyEl.style.display = '';
+    return;
+  }
+
+  const totalCount = data.reduce((s, r) => s + r.count, 0);
+  badge.textContent = totalCount;
+  badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600';
+  if (btn) btn.style.display = '';
+  if (emptyEl) emptyEl.style.display = 'none';
+
+  tbody.innerHTML = data.map(row => `<tr class="danger-row bg-red-50/20 hover:bg-gray-50/80 transition-colors">
+    <td class="text-left font-semibold text-gray-800">${row.name}</td>
+    <td class="text-right num-col font-bold text-red-600">${row.count}</td>
+  </tr>`).join('');
+}
+
+function copySyncExceptionOrders() {
+  const data = platformData[currentPlatform].logistics.syncExceptionRows;
+  if (!data || !data.length) return;
+  const orderNos = [];
+  data.forEach(r => { if (r.orders) orderNos.push(...r.orders); });
+  if (!orderNos.length) return;
+  navigator.clipboard.writeText(orderNos.join('\n')).then(() => {
+    const btn = document.getElementById('btnCopySyncOrders');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> 已复制 ' + orderNos.length + ' 单';
+    setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+  });
+}
+
+
+// 各模块复制异常订单号
+function copySectionOrders(sectionId) {
+  const data = platformData[currentPlatform];
+  const orderNos = [];
+  if (sectionId === '32a') {
+    if (data.section32a.hasData && data.section32a.rows) {
+      data.section32a.rows.forEach(r => orderNos.push(r.orderNo));
+    }
+  } else if (sectionId === '32b') {
+    if (data.section32b.hasData && data.section32b.rows) {
+      data.section32b.rows.forEach(r => orderNos.push(r.orderNo));
+    }
+  } else if (sectionId === '33a') {
+    if (data.section33a.hasData && data.section33a.drilldown) {
+      Object.values(data.section33a.drilldown).forEach(rows => rows.forEach(r => orderNos.push(r.orderNo)));
+    }
+  } else if (sectionId === '33b') {
+    if (data.section33b.hasData && data.section33b.drilldown) {
+      Object.values(data.section33b.drilldown).forEach(rows => rows.forEach(r => orderNos.push(r.orderNo)));
+    }
+  } else if (sectionId === '34a') {
+    if (data.section34a.hasData && data.section34a.drilldown) {
+      Object.values(data.section34a.drilldown).forEach(rows => rows.forEach(r => orderNos.push(r.orderNo)));
+    }
+  } else if (sectionId === '34b') {
+    if (data.section34b.hasData && data.section34b.rows) {
+      data.section34b.rows.forEach(r => orderNos.push(r.orderNo));
+    }
+  }
+  if (!orderNos.length) return;
+  navigator.clipboard.writeText(orderNos.join('\n')).then(() => {
+    const btn = document.getElementById('btn' + sectionId);
+    if (!btn) return;
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> 已复制 ' + orderNos.length + ' 单';
+    setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+  });
+}
+function updateOrderedCardWarn() {
+  const data = platformData[currentPlatform].logistics.syncExceptionRows;
+  const warnEl = document.getElementById('logistics_ordered_warn');
+  if (!warnEl) return;
+  if (data && data.length) {
+    const total = data.reduce((s, r) => s + r.count, 0);
+    warnEl.innerHTML = `<span class="text-red-600">🔴 ${total}单同步异常</span>`;
+  } else {
+    warnEl.innerHTML = '';
+  }
+}
+
+// ============ 模块1：纵向漏斗 ============
+function renderVerticalFunnel() {
+  const data = platformData[currentPlatform].funnel;
+  const container = document.getElementById('verticalFunnel');
+  const maxVal = Math.max(data[0].value, 1);
+
+  const layerNames = ['orderTotal', 'fulfill'];
+  const bgGradients = [
+    'from-blue-600 to-blue-500',
+    'from-emerald-500 to-emerald-400'
+  ];
+
+  let html = '<div class="space-y-3">';
+
+  data.forEach((item, idx) => {
+    const widthPct = Math.max((item.value / maxVal) * 100, 30);
+    const isSelected = funnelSelectedLayer === layerNames[idx];
+    const pctHtml = item.pct ? `<span class="text-lg font-bold text-white/70 ml-2">${item.pct}%</span>` : '';
+
+    html += `
+      <div class="funnel-layer ${isSelected ? 'selected' : ''} bg-gradient-to-r ${bgGradients[idx]} rounded-xl px-5 py-4 text-white cursor-pointer relative overflow-hidden"
+           onclick="toggleFunnelDrill('${layerNames[idx]}')"
+           style="width:${widthPct}%; min-width:280px;">
+        <div class="absolute inset-0 bg-white/5"></div>
+        <div class="relative flex items-center justify-between">
+          <div>
+            <div class="text-sm font-medium text-white/80">${item.name}${item.name === '今日订单创建总数' ? '<span class="funnel-dev-note" data-tip="创建时间为当天的订单数" style="vertical-align:middle;cursor:pointer;display:inline-flex;align-items:center;margin-left:4px"><span class="dev-note-icon">i</span></span>' : item.name === '萝卜头履约订单数' ? '<span class="funnel-dev-note" data-tip="创建时间为当天且履约方式为萝卜头履约的订单数及占比" style="vertical-align:middle;cursor:pointer;display:inline-flex;align-items:center;margin-left:4px"><span class="dev-note-icon">i</span></span>' : ''}</div>
+            <div class="text-2xl font-extrabold tracking-tight mt-0.5 flex items-baseline" style="font-variant-numeric:tabular-nums">
+              ${fmt(item.value) + '单'}
+              ${pctHtml}
+            </div>
+          </div>
+          <div class="text-white/50 text-xs flex items-center gap-1">
+            点击下钻
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>`;
+
+    // 连接箭头
+    if (idx < data.length - 1) {
+      html += `
+        <div class="flex items-center justify-center py-1" style="margin-left:${widthPct * 0.4}%;">
+          <svg class="w-5 h-5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
+          </svg>
+        </div>`;
+    }
+  });
+
+  html += '</div>';
+  container.innerHTML = html;
+}
+
+function toggleFunnelDrill(layer) {
+  const el = document.getElementById('funnelDrilldown');
+  if (funnelSelectedLayer === layer && el.classList.contains('open')) {
+    el.classList.remove('open');
+    funnelSelectedLayer = null;
+    document.querySelectorAll('.funnel-layer').forEach(el => el.classList.remove('selected'));
+    return;
+  }
+  funnelSelectedLayer = layer;
+  el.classList.add('open');
+  renderFunnelDrillContent(layer);
+  renderVerticalFunnel(); // re-render to show selected state
+}
+
+function renderFunnelDrillContent(layer) {
+  const container = document.getElementById('funnelDrilldownInner');
+  const data = platformData[currentPlatform];
+  const customerRows = data.funnelByCustomer;
+  const statusRows = data.funnelByStatus;
+  const statusColors = {
+    '待确认':'bg-blue-500','待付款':'bg-blue-400','待推送':'bg-amber-400',
+    '待接单':'bg-orange-500','待处理':'bg-red-500','生产中':'bg-emerald-500',
+    '待反审':'bg-red-400','今日发货':'bg-purple-500'
+  };
+
+  const html = `
+    <div class="flex items-center justify-between mb-4">
+      <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+        <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        下钻详情
+      </h4>
+      <button onclick="closeFunnelDrill()" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
+        收起 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+      </button>
+    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <!-- 左：按客户分布 -->
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-1 h-4 bg-blue-400 rounded-full"></span>
+          <span class="text-xs font-semibold text-gray-600">按客户分布</span><span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按客户统计创建时间为当天的萝卜头履约订单数占创建当天的占比</span></span>
+        </div>
+        <div class="flex items-start gap-4">
+          <div class="flex-1 overflow-x-auto">
+            <table class="w-full text-xs data-table">
+              <colgroup><col style="width:35%"><col style="width:30%"><col style="width:35%"></colgroup>
+              <thead>
+                <tr class="border-b border-gray-200/60">
+                  <th class="text-left font-semibold">客户名称</th>
+                  <th class="text-right font-semibold">萝卜头履约订单数</th>
+                  <th class="text-right font-semibold">履约占比</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100/80 text-gray-700">
+                ${customerRows.map(r => {
+                  const rate = r.totalOrders > 0 ? (r.fulfillOrders / r.totalOrders * 100).toFixed(1) : 0;
+                  return `<tr class="hover:bg-gray-50/80 transition-colors">
+                  <td class="text-left font-semibold text-gray-800">${r.name}</td>
+                  <td class="text-right num-col font-semibold">${fmt(r.fulfillOrders)}<span class="text-gray-400 font-normal">/${fmt(r.totalOrders)}</span></td>
+                  <td class="text-right">
+                    <div class="flex items-center justify-end gap-2">
+                      <div class="pct-bar flex-1 max-w-[60px]">
+                        <div class="pct-bar-fill" style="width:${rate}%;background:${rate >= 70 ? '#10B981' : rate >= 50 ? '#F59E0B' : '#EF4444'}"></div>
+                      </div>
+                      <span class="num-col" style="min-width:40px;color:${rate >= 70 ? '#10B981' : rate >= 50 ? '#D97706' : '#EF4444'}">${rate}%</span>
+                    </div>
+                  </td>
+                </tr>`;}).join('')}
+              </tbody>
+            </table>
+          </div>
+          <div class="w-36 flex-shrink-0 hidden lg:block">
+            <div id="drillPieChart" style="height:140px;"></div>
+          </div>
+        </div>
+      </div>
+      <!-- 右：按订单状态分布 -->
+      <div>
+        <div class="flex items-center gap-2 mb-3">
+          <span class="w-1 h-4 bg-emerald-400 rounded-full"></span>
+          <span class="text-xs font-semibold text-gray-600">按订单状态分布</span><span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按状态统计当前各个状态下的订单数，当对应状态下有预警订单时显示标红并显示警告图标</span></span>
+        </div>
+        <div class="grid grid-cols-4 gap-2.5">${statusRows.map(r => `
+          <div class="bg-white rounded-lg p-3 text-center border ${r.alert ? 'border-red-200' : 'border-gray-100'} shadow-sm ${r.alert ? 'bg-red-50/30' : ''}">
+            <div class="w-2 h-2 rounded-full ${statusColors[r.name] || 'bg-gray-400'} inline-block mb-1"></div>
+            <div class="text-[11px] text-gray-500 mb-0.5">${r.name}${r.alert ? ' ⚠' : ''}</div>
+            <div class="text-lg font-extrabold ${r.alert ? 'text-red-600' : 'text-gray-800'}" style="font-variant-numeric:tabular-nums">${fmt(r.orders)}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+
+  container.innerHTML = html;
+
+  // 渲染下钻饼图
+  setTimeout(() => {
+    const pieEl = document.getElementById('drillPieChart');
+    if (!pieEl) return;
+    if (drillPieChart) drillPieChart.dispose();
+    drillPieChart = echarts.init(pieEl);
+    const colors = ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#EC4899'];
+    drillPieChart.setOption({
+      tooltip: { trigger: 'item', formatter: (p) => `${p.name}<br/>${fmt(p.value)}单 (${p.percent}%)` },
+      series: [{
+        type: 'pie', radius: ['45%','70%'], center: ['50%','50%'],
+        label: { show: false }, labelLine: { show: false },
+        data: customerRows.map((r, i) => ({ name: r.name, value: r.fulfillOrders, itemStyle: { color: colors[i % colors.length] } }))
+      }]
+    });
+  }, 50);
+}
+
+function closeFunnelDrill() {
+  document.getElementById('funnelDrilldown').classList.remove('open');
+  funnelSelectedLayer = null;
+  document.querySelectorAll('.funnel-layer').forEach(el => el.classList.remove('selected'));
+  renderVerticalFunnel();
+}
+
+// ============ 模块3：异常预警渲染 ============
+
+// 辅助函数：生成预警级别色点
+function levelDot(level) {
+  if (level === 'expired' || level === 'danger') return '<span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block pulse-red"></span>';
+  if (level === 'expiring' || level === 'warn') return '<span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span>';
+  return '<span class="w-2.5 h-2.5 rounded-full bg-emerald-400 inline-block"></span>';
+}
+
+// 辅助函数：设置时间线圆点状态
+function setTimelineDot(dotId, status) {
+  const dot = document.getElementById(dotId);
+  dot.className = 'timeline-dot';
+  if (status === 'danger') dot.classList.add('has-alert');
+  else if (status === 'warn') dot.classList.add('has-warn');
+  else dot.classList.add('is-clear');
+}
+
+// 辅助函数：设置状态徽章
+function setStatusBadge(badgeId, type, text) {
+  const badge = document.getElementById(badgeId);
+  if (type === 'danger') {
+    badge.className = 'status-badge bg-red-50 text-red-600 border border-red-200';
+    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500 inline-block pulse-red"></span>' + text;
+  } else if (type === 'warn') {
+    badge.className = 'status-badge bg-amber-50 text-amber-600 border border-amber-200';
+    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>' + text;
+  } else {
+    badge.className = 'status-badge bg-emerald-50 text-emerald-600 border border-emerald-200';
+    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>' + text;
+  }
+}
+
+// 3.1 店铺Token失效
+function renderSection31() {
+  const data = platformData[currentPlatform].section31;
+  const container = document.getElementById('section31');
+
+  if (!data.hasData || !data.rows.length) {
+    setTimelineDot('timeline-dot-31', 'clear');
+    setStatusBadge('badge31', 'clear', '暂无异常');
+    const btn31El = document.getElementById('btn31');
+    if (btn31El) btn31El.style.display = 'none';
+    container.innerHTML = '<div class="bg-emerald-50/50 border border-emerald-100 rounded-xl py-4 px-4 text-center text-sm text-emerald-600 font-medium">暂无店铺异常 ✅</div>';
+    return;
+  }
+
+  let filteredRows = data.rows || [];
+  if (alertCustomerFilter) {
+    filteredRows = data.rows.filter(r => r.name === alertCustomerFilter);
+  }
+
+  const btn31El = document.getElementById('btn31');
+  if (btn31El) btn31El.style.display = filteredRows.length ? '' : 'none';
+
+  const hasExpired = data.rows.some(r => r.level === 'expired');
+  const hasExpiring = data.rows.some(r => r.level === 'expiring');
+
+  if (hasExpired) {
+    setTimelineDot('timeline-dot-31', 'danger');
+    setStatusBadge('badge31', 'danger', '有异常');
+  } else if (hasExpiring) {
+    setTimelineDot('timeline-dot-31', 'warn');
+    setStatusBadge('badge31', 'warn', '有预警');
+  }
+
+  if (alertCustomerFilter && filteredRows.length === 0) {
+    container.innerHTML = '<div class="bg-gray-50/50 border border-gray-100 rounded-xl py-4 px-4 text-center text-sm text-gray-400 font-medium">该客户暂无此类异常</div>';
+    return;
+  }
+
+  container.innerHTML = `<div class="overflow-x-auto rounded-xl border border-gray-100">
+    <table class="w-full text-xs data-table">
+      <colgroup><col style="width:14%"><col style="width:12%"><col style="width:22%"><col style="width:22%"><col style="width:30%"></colgroup>
+      <thead>
+        <tr class="border-b border-gray-200/60">
+          <th class="text-left font-semibold">预警级别</th>
+          <th class="text-left font-semibold">客户</th>
+          <th class="text-left font-semibold">客户名称</th>
+          <th class="text-left font-semibold">店铺名称</th>
+          <th class="text-right font-semibold">失效时间/剩余天数</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100/80">
+        ${filteredRows.map(r => `<tr class="${r.level === 'expired' ? 'danger-row bg-red-50/30' : r.level === 'expiring' ? 'warn-row bg-amber-50/30' : ''} hover:bg-gray-50/80 transition-colors">
+          <td class="text-left font-semibold">
+            <span class="inline-flex items-center gap-1.5">
+              ${levelDot(r.level)}
+              <span class="${r.level === 'expired' ? 'text-red-600' : 'text-amber-600'}">${r.level === 'expired' ? '已失效' : '即将失效'}</span>
+            </span>
+          </td>
+          <td class="text-left text-gray-600">${r.customer}</td>
+          <td class="text-left text-gray-700 font-medium">${r.name}</td>
+          <td class="text-left text-gray-600">${r.shop}</td>
+          <td class="text-right ${r.level === 'expired' ? 'text-red-600 font-semibold' : 'text-amber-600 font-semibold'}">${r.time}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// 3.2a SKU禁用
+function renderSection32a() {
+  const data = platformData[currentPlatform].section32a;
+  const content = document.getElementById('section32aContent');
+  const btn = document.getElementById('btn32a');
+
+  if (!data.hasData || !data.rows.length) {
+    setStatusBadge('badge32a', 'clear', '正常');
+    if (btn) btn.style.display = 'none';
+    content.innerHTML = '<div class="py-4 text-center text-xs text-emerald-500 font-medium">暂无SKU禁用 ✅</div>';
+    return;
+  }
+
+  let filteredRows = data.rows || [];
+  if (alertCustomerFilter) {
+    filteredRows = data.rows.filter(r => r.name === alertCustomerFilter);
+  }
+
+  setStatusBadge('badge32a', 'danger', data.rows.length + '项');
+  if (btn) btn.style.display = '';
+
+  if (alertCustomerFilter && filteredRows.length === 0) {
+    content.innerHTML = '<div class="py-4 text-center text-xs text-gray-400 font-medium">该客户暂无此类异常</div>';
+    return;
+  }
+
+  content.innerHTML = `<div class="overflow-x-auto rounded-lg border border-gray-100">
+    <table class="w-full text-xs data-table">
+      <colgroup><col style="width:30%"><col style="width:35%"><col style="width:35%"></colgroup>
+      <thead>
+        <tr class="border-b border-gray-200/60">
+          <th class="text-left font-semibold">客户名称</th>
+          <th class="text-left font-semibold">订单号</th>
+          <th class="text-right font-semibold">禁用SKU号</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100/80 text-gray-700">
+        ${filteredRows.map(r => `<tr class="danger-row bg-red-50/20 hover:bg-gray-50/80 transition-colors">
+          <td class="text-left text-gray-700 font-medium">${r.name}</td>
+          <td class="text-left text-gray-600 font-mono">${r.orderNo}</td>
+          <td class="text-right font-bold text-red-600 font-mono">${r.disabledSku}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// 3.2b 匹配超时
+function renderSection32b() {
+  const data = platformData[currentPlatform].section32b;
+  const content = document.getElementById('section32bContent');
+
+  if (!data.hasData || !data.rows.length) {
+    setStatusBadge('badge32b', 'clear', '正常');
+    const btn32bEl = document.getElementById('btn32b');
+    if (btn32bEl) btn32bEl.style.display = 'none';
+    content.innerHTML = '<div class="py-4 text-center text-xs text-emerald-500 font-medium">暂无匹配超时 ✅</div>';
+    return;
+  }
+
+  let filteredRows = data.rows || [];
+  if (alertCustomerFilter) {
+    filteredRows = data.rows.filter(r => r.name === alertCustomerFilter);
+  }
+
+  setStatusBadge('badge32b', 'warn', data.rows.length + '项');
+  const btn32bEl = document.getElementById('btn32b');
+  if (btn32bEl) btn32bEl.style.display = '';
+
+  if (alertCustomerFilter && filteredRows.length === 0) {
+    content.innerHTML = '<div class="py-4 text-center text-xs text-gray-400 font-medium">该客户暂无此类异常</div>';
+    return;
+  }
+
+  content.innerHTML = `<div class="overflow-x-auto rounded-lg border border-gray-100">
+    <table class="w-full text-xs data-table">
+      <colgroup><col style="width:30%"><col style="width:40%"><col style="width:30%"></colgroup>
+      <thead>
+        <tr class="border-b border-gray-200/60">
+          <th class="text-left font-semibold">客户名称</th>
+          <th class="text-left font-semibold">订单号</th>
+          <th class="text-right font-semibold">等待时间</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100/80 text-gray-700">
+        ${filteredRows.map(r => `<tr class="warn-row bg-amber-50/20 hover:bg-gray-50/80 transition-colors">
+          <td class="text-left text-gray-600">${r.name}</td>
+          <td class="text-left text-gray-600 font-mono">${r.orderNo}</td>
+          <td class="text-right text-amber-600 font-semibold">${r.waitTime}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// 3.3a 推单失败
+function renderSection33a() {
+  const data = platformData[currentPlatform].section33a;
+  const content = document.getElementById('section33aContent');
+
+  if (!data.hasData || !data.mainRows.length) {
+    document.getElementById('section33aBadge').textContent = '0';
+    document.getElementById('section33aBadge').className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-600';
+    const btn33aEl = document.getElementById('btn33a');
+    if (btn33aEl) btn33aEl.style.display = 'none';
+    content.innerHTML = '<div class="py-4 text-center text-xs text-emerald-500 font-medium">暂无推单失败 ✅</div>';
+    filtered33aDrilldown = null;
+    return;
+  }
+
+  let filteredDrilldown = {};
+  if (alertCustomerFilter && data.hasData && data.drilldown) {
+    Object.keys(data.drilldown).forEach(reason => {
+      const filtered = data.drilldown[reason].filter(r => r.name === alertCustomerFilter);
+      if (filtered.length > 0) filteredDrilldown[reason] = filtered;
+    });
+  } else if (data.drilldown) {
+    filteredDrilldown = data.drilldown;
+  }
+  filtered33aDrilldown = filteredDrilldown;
+
+  const totalCount = data.mainRows.reduce((s,r) => s + r.count, 0);
+  document.getElementById('section33aBadge').textContent = totalCount;
+  document.getElementById('section33aBadge').className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-100 text-red-600';
+  const btn33aEl = document.getElementById('btn33a');
+  if (btn33aEl) btn33aEl.style.display = '';
+
+  if (alertCustomerFilter && Object.keys(filteredDrilldown).length === 0) {
+    content.innerHTML = '<div class="py-4 text-center text-xs text-gray-400 font-medium">该客户暂无此类异常</div>';
+    return;
+  }
+
+  content.innerHTML = `<div class="overflow-x-auto rounded-lg border border-gray-100">
+    <table class="w-full text-xs data-table">
+      <colgroup><col style="width:40%"><col style="width:20%"><col style="width:40%"></colgroup>
+      <thead>
+        <tr class="border-b border-gray-200/60">
+          <th class="text-left font-semibold">异常原因</th>
+          <th class="text-right font-semibold">单数</th>
+          <th class="text-right font-semibold">占比</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100/80 text-gray-700">
+        ${data.mainRows.map(r => `<tr class="hover:bg-gray-50/80 transition-colors cursor-pointer" onclick="toggleSection33aDrill('${r.reason}')">
+          <td class="text-left font-medium text-gray-800">${r.reason}</td>
+          <td class="text-right num-col font-bold text-red-600">${fmt(r.count)}</td>
+          <td class="text-right">
+            <div class="flex items-center justify-end gap-2">
+              <div class="pct-bar flex-1 max-w-[80px]">
+                <div class="pct-bar-fill" style="width:${r.pct}%;background:#EF4444"></div>
+              </div>
+              <span class="num-col text-gray-500" style="min-width:40px">${r.pct}%</span>
+            </div>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+let current33aDrill = null;
+function toggleSection33aDrill(reason) {
+  const el = document.getElementById('section33aDrill');
+  const inner = document.getElementById('section33aDrillInner');
+  if (current33aDrill === reason && el.classList.contains('open')) {
+    el.classList.remove('open');
+    current33aDrill = null;
+    return;
+  }
+  current33aDrill = reason;
+  el.classList.add('open');
+  const drilldownData = filtered33aDrilldown || platformData[currentPlatform].section33a.drilldown;
+  const rows = drilldownData[reason] || [];
+  inner.innerHTML = `<div class="flex items-center justify-between mb-3">
+    <span class="text-xs font-semibold text-gray-600 flex items-center gap-2">
+      <span class="w-1 h-3 bg-red-400 rounded-full"></span>
+      按客户下钻：「${reason}」
+    </span>
+    <button onclick="closeSection33aDrill()" class="text-xs text-gray-400 hover:text-gray-600">收起 ×</button>
+  </div>
+  <table class="w-full text-xs data-table">
+    <colgroup><col style="width:60%"><col style="width:40%"></colgroup>
+    <thead><tr class="border-b border-gray-200/60">
+      <th class="text-left font-semibold">客户名称</th><th class="text-left font-semibold">订单号</th>
+    </tr></thead>
+    <tbody class="divide-y divide-gray-100/80 text-gray-600">
+      ${rows.map(r => `<tr class="hover:bg-gray-50/80 transition-colors">
+        <td>${r.name}</td><td class="text-left font-mono">${r.orderNo}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+function closeSection33aDrill() {
+  document.getElementById('section33aDrill').classList.remove('open');
+  current33aDrill = null;
+}
+
+let current33bDrill = null;
+function toggleSection33bDrill(stage) {
+  const el = document.getElementById('section33bDrill');
+  const inner = document.getElementById('section33bDrillInner');
+  if (current33bDrill === stage && el.classList.contains('open')) {
+    el.classList.remove('open');
+    current33bDrill = null;
+    return;
+  }
+  current33bDrill = stage;
+  el.classList.add('open');
+  const data = platformData[currentPlatform].section33b;
+  const rows = (data.drilldown && data.drilldown[stage]) ? data.drilldown[stage] : [];
+  inner.innerHTML = `<div class="flex items-center justify-between mb-3">
+    <span class="text-xs font-semibold text-gray-600 flex items-center gap-2">
+      <span class="w-1 h-3 bg-amber-400 rounded-full"></span>
+      按客户下钻：「${stage}」
+    </span>
+    <button onclick="closeSection33bDrill()" class="text-xs text-gray-400 hover:text-gray-600">收起 ×</button>
+  </div>
+  <table class="w-full text-xs data-table">
+    <colgroup><col style="width:60%"><col style="width:40%"></colgroup>
+    <thead><tr class="border-b border-gray-200/60">
+      <th class="text-left font-semibold">客户名称</th><th class="text-left font-semibold">订单号</th>
+    </tr></thead>
+    <tbody class="divide-y divide-gray-100/80 text-gray-600">
+      ${rows.map(r => `<tr class="hover:bg-gray-50/80 transition-colors">
+        <td>${r.name}</td><td class="text-left font-mono">${r.orderNo}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+function closeSection33bDrill() {
+  document.getElementById('section33bDrill').classList.remove('open');
+  current33bDrill = null;
+}
+
+// 3.3b 推单卡单
+function renderSection33b() {
+  const data = platformData[currentPlatform].section33b;
+  const content = document.getElementById('section33bContent');
+
+  if (!data.hasData || !data.rows.length) {
+    setStatusBadge('badge33b', 'clear', '正常');
+    const btn33bEl = document.getElementById('btn33b');
+    if (btn33bEl) btn33bEl.style.display = 'none';
+    content.innerHTML = '<div class="py-4 text-center text-xs text-emerald-500 font-medium">暂无卡单 ✅</div>';
+    return;
+  }
+  setStatusBadge('badge33b', 'warn', data.rows.length + '项');
+  const btn33bEl = document.getElementById('btn33b');
+  if (btn33bEl) btn33bEl.style.display = '';
+
+  content.innerHTML = `<div class="overflow-x-auto rounded-lg border border-gray-100">
+    <table class="w-full text-xs data-table">
+      <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
+      <thead>
+        <tr class="border-b border-gray-200/60">
+          <th class="text-left font-semibold">环节</th>
+          <th class="text-right font-semibold">卡单数</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100/80 text-gray-700">
+        ${data.rows.map(r => `<tr class="hover:bg-gray-50/80 transition-colors cursor-pointer" onclick="toggleSection33bDrill('${r.stage}')">
+          <td class="text-left font-medium text-gray-800">${r.stage}</td>
+          <td class="text-right num-col font-bold text-amber-600">${r.stuckCount}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// 3.4a 反审状态
+function renderSection34a() {
+  const data = platformData[currentPlatform].section34a;
+  const content = document.getElementById('section34aContent');
+
+  if (!data.hasData || !data.mainRows.length) {
+    document.getElementById('section34aBadge').textContent = '0';
+    document.getElementById('section34aBadge').className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-600';
+    const btn34aEl = document.getElementById('btn34a');
+    if (btn34aEl) btn34aEl.style.display = 'none';
+    content.innerHTML = '<div class="py-4 text-center text-xs text-emerald-500 font-medium">暂无反审订单 ✅</div>';
+    filtered34aDrilldown = null;
+    return;
+  }
+
+  let filteredDrilldown = {};
+  if (alertCustomerFilter && data.hasData) {
+    Object.keys(data.drilldown).forEach(reason => {
+      const filtered = data.drilldown[reason].filter(r => r.name === alertCustomerFilter);
+      if (filtered.length > 0) filteredDrilldown[reason] = filtered;
+    });
+  } else {
+    filteredDrilldown = data.drilldown;
+  }
+  filtered34aDrilldown = filteredDrilldown;
+
+  const totalCount = data.mainRows.reduce((s,r) => s + r.count, 0);
+  document.getElementById('section34aBadge').textContent = totalCount;
+  document.getElementById('section34aBadge').className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-100 text-amber-600';
+  const btn34aEl = document.getElementById('btn34a');
+  if (btn34aEl) btn34aEl.style.display = '';
+
+  if (alertCustomerFilter && Object.keys(filteredDrilldown).length === 0) {
+    content.innerHTML = '<div class="py-4 text-center text-xs text-gray-400 font-medium">该客户暂无此类异常</div>';
+    return;
+  }
+
+  content.innerHTML = `<div class="overflow-x-auto rounded-lg border border-gray-100">
+    <table class="w-full text-xs data-table">
+      <colgroup><col style="width:50%"><col style="width:50%"></colgroup>
+      <thead>
+        <tr class="border-b border-gray-200/60">
+          <th class="text-left font-semibold">反审原因</th>
+          <th class="text-right font-semibold">单数</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100/80 text-gray-700">
+        ${data.mainRows.map(r => `<tr class="hover:bg-gray-50/80 transition-colors cursor-pointer" onclick="toggleSection34aDrill('${r.reason}')">
+          <td class="text-left font-medium text-gray-800">${r.reason}</td>
+          <td class="text-right num-col font-bold ${r.status === 'danger' ? 'text-red-600' : 'text-amber-600'}">${fmt(r.count)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+let current34aDrill = null;
+function toggleSection34aDrill(reason) {
+  const el = document.getElementById('section34aDrill');
+  const inner = document.getElementById('section34aDrillInner');
+  if (current34aDrill === reason && el.classList.contains('open')) {
+    el.classList.remove('open');
+    current34aDrill = null;
+    return;
+  }
+  current34aDrill = reason;
+  el.classList.add('open');
+  const drilldownData = filtered34aDrilldown || platformData[currentPlatform].section34a.drilldown;
+  const rows = drilldownData[reason] || [];
+  inner.innerHTML = `<div class="flex items-center justify-between mb-3">
+    <span class="text-xs font-semibold text-gray-600 flex items-center gap-2">
+      <span class="w-1 h-3 bg-amber-400 rounded-full"></span>
+      按客户下钻：「${reason}」
+    </span>
+    <button onclick="closeSection34aDrill()" class="text-xs text-gray-400 hover:text-gray-600">收起 ×</button>
+  </div>
+  <table class="w-full text-xs data-table">
+    <colgroup><col style="width:60%"><col style="width:40%"></colgroup>
+    <thead><tr class="border-b border-gray-200/60">
+      <th class="text-left font-semibold">客户名称</th><th class="text-left font-semibold">订单号</th>
+    </tr></thead>
+    <tbody class="divide-y divide-gray-100/80 text-gray-600">
+      ${rows.map(r => `<tr class="hover:bg-gray-50/80 transition-colors">
+        <td>${r.name}</td><td class="text-left font-mono">${r.orderNo}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+function closeSection34aDrill() {
+  document.getElementById('section34aDrill').classList.remove('open');
+  current34aDrill = null;
+}
+
+// 3.4b 反审卡单
+function renderSection34b() {
+  const data = platformData[currentPlatform].section34b;
+  const content = document.getElementById('section34bContent');
+  const btn = document.getElementById('btn34b');
+
+  if (!data.hasData || !data.rows || !data.rows.length) {
+    setStatusBadge('badge34b', 'clear', '正常');
+    if (btn) btn.style.display = 'none';
+    content.innerHTML = '<div class="py-4 text-center text-xs text-emerald-500 font-medium">暂无反审卡单 ✅</div>';
+    return;
+  }
+
+  let filteredRows = data.rows || [];
+  if (alertCustomerFilter && data.rows) {
+    filteredRows = data.rows.filter(r => r.name === alertCustomerFilter);
+  }
+
+  const hasDanger = data.rows.some(r => r.level === 'danger');
+  setStatusBadge('badge34b', hasDanger ? 'danger' : 'warn', data.rows.length + '项');
+  if (btn) btn.style.display = '';
+
+  if (alertCustomerFilter && filteredRows.length === 0) {
+    content.innerHTML = '<div class="py-4 text-center text-xs text-gray-400 font-medium">该客户暂无此类异常</div>';
+    return;
+  }
+
+  content.innerHTML = `<div class="overflow-x-auto rounded-lg border border-gray-100">
+    <table class="w-full text-xs data-table">
+      <colgroup><col style="width:30%"><col style="width:40%"><col style="width:30%"></colgroup>
+      <thead>
+        <tr class="border-b border-gray-200/60">
+          <th class="text-left font-semibold">客户名称</th>
+          <th class="text-left font-semibold">订单号</th>
+          <th class="text-right font-semibold">反审等待时间</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-100/80 text-gray-700">
+        ${filteredRows.map(r => `<tr class="${r.level === 'danger' ? 'danger-row bg-red-50/20' : 'warn-row bg-amber-50/20'} hover:bg-gray-50/80 transition-colors">
+          <td class="text-left text-gray-700 font-medium">${r.name}</td>
+          <td class="text-left text-gray-600 font-mono">${r.orderNo}</td>
+          <td class="text-right font-bold ${r.level === 'danger' ? 'text-red-600' : 'text-amber-600'}">${r.waitTime}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// 更新模块3的整体时间线状态
+function updateTimelineStatus() {
+  const data = platformData[currentPlatform];
+
+  // 3.1 拉单
+  if (data.section31.hasData && data.section31.rows.length) {
+    const hasExpired = data.section31.rows.some(r => r.level === 'expired');
+    setTimelineDot('timeline-dot-31', hasExpired ? 'danger' : 'warn');
+    setStatusBadge('badge31', hasExpired ? 'danger' : 'warn', '有异常');
+  } else {
+    setTimelineDot('timeline-dot-31', 'clear');
+    setStatusBadge('badge31', 'clear', '暂无异常');
+  }
+
+  // 3.2 产品匹配
+  const has32Alert = data.section32a.hasData || data.section32b.hasData;
+  if (has32Alert) {
+    const has32Danger = data.section32a.hasData;
+    setTimelineDot('timeline-dot-32', has32Danger ? 'danger' : 'warn');
+    setStatusBadge('badge32', has32Danger ? 'danger' : 'warn', '有异常');
+  } else {
+    setTimelineDot('timeline-dot-32', 'clear');
+    setStatusBadge('badge32', 'clear', '暂无异常');
+  }
+
+  // 3.3 订单推送
+  const has33Alert = (data.section33a.hasData && data.section33a.mainRows.length) || (data.section33b.hasData && data.section33b.rows.length);
+  if (has33Alert) {
+    setTimelineDot('timeline-dot-33', 'danger');
+    setStatusBadge('badge33', 'danger', '有异常');
+  } else {
+    setTimelineDot('timeline-dot-33', 'clear');
+    setStatusBadge('badge33', 'clear', '暂无异常');
+  }
+
+  // 3.4 生产
+  const has34Alert = (data.section34a.hasData && data.section34a.mainRows.length) || (data.section34b.hasData && data.section34b.rows && data.section34b.rows.length);
+  if (has34Alert) {
+    setTimelineDot('timeline-dot-34', 'danger');
+    setStatusBadge('badge34', 'danger', '有异常');
+  } else {
+    setTimelineDot('timeline-dot-34', 'clear');
+    setStatusBadge('badge34', 'clear', '暂无异常');
+  }
+}
+
+// ============ 客户筛选 & 复制功能 ============
+function getAllCustomers() {
+  const data = platformData[currentPlatform];
+  const names = new Set();
+  // section31
+  if (data.section31.hasData) data.section31.rows.forEach(r => names.add(r.name));
+  // section32a
+  if (data.section32a.hasData) data.section32a.rows.forEach(r => names.add(r.name));
+  // section32b
+  if (data.section32b.hasData) data.section32b.rows.forEach(r => names.add(r.name));
+  // section33a drilldown
+  if (data.section33a.hasData && data.section33a.drilldown) {
+    Object.values(data.section33a.drilldown).forEach(rows => rows.forEach(r => names.add(r.name)));
+  }
+  // section33b drilldown
+  if (data.section33b.hasData && data.section33b.drilldown) {
+    Object.values(data.section33b.drilldown).forEach(rows => rows.forEach(r => names.add(r.name)));
+  }
+  // section34a drilldown
+  if (data.section34a.hasData && data.section34a.drilldown) {
+    Object.values(data.section34a.drilldown).forEach(rows => rows.forEach(r => names.add(r.name)));
+  }
+  // section34b
+  if (data.section34b.hasData && data.section34b.rows) data.section34b.rows.forEach(r => names.add(r.name));
+  return Array.from(names).sort();
+}
+
+function populateCustomerFilter() {
+  const select = document.getElementById('alertCustomerFilter');
+  if (!select) return;
+  const currentVal = alertCustomerFilter;
+  const customers = getAllCustomers();
+  select.innerHTML = '<option value="">全部客户</option>';
+  customers.forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name;
+    if (name === currentVal) opt.selected = true;
+    select.appendChild(opt);
+  });
+}
+
+function filterAlertByCustomer(value) {
+  alertCustomerFilter = value;
+  const btn = document.getElementById('copyCustomerOrdersBtn');
+  if (btn) btn.style.display = value ? '' : 'none';
+  renderAll();
+}
+
+function copyShopNames() {
+  const data = platformData[currentPlatform].section31;
+  if (!data.hasData || !data.rows.length) return;
+  const shopNames = data.rows.map(r => r.shop).join('\n');
+  navigator.clipboard.writeText(shopNames).then(() => {
+    const btn = document.getElementById('btn31');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '已复制 ✓';
+    setTimeout(() => { btn.innerHTML = originalHTML; }, 1500);
+  });
+}
+
+function copyCustomerAbnormalOrders() {
+  if (!alertCustomerFilter) return;
+  const data = platformData[currentPlatform];
+  const orderNos = [];
+  // section32a - SKU禁用
+  if (data.section32a.hasData) {
+    data.section32a.rows.filter(r => r.name === alertCustomerFilter).forEach(r => orderNos.push(r.orderNo));
+  }
+  // section32b - 匹配超时
+  if (data.section32b.hasData) {
+    data.section32b.rows.filter(r => r.name === alertCustomerFilter).forEach(r => orderNos.push(r.orderNo));
+  }
+  // section33b drilldown - 卡单预警
+  if (data.section33b.hasData && data.section33b.drilldown) {
+    Object.values(data.section33b.drilldown).forEach(rows => rows.filter(r => r.name === alertCustomerFilter).forEach(r => orderNos.push(r.orderNo)));
+  }
+  // section33a drilldown - 推单失败
+  if (data.section33a.hasData && data.section33a.drilldown) {
+    Object.values(data.section33a.drilldown).forEach(rows => rows.filter(r => r.name === alertCustomerFilter).forEach(r => orderNos.push(r.orderNo)));
+  }
+  // section34a drilldown - 反审状态
+  if (data.section34a.hasData && data.section34a.drilldown) {
+    Object.values(data.section34a.drilldown).forEach(rows => rows.filter(r => r.name === alertCustomerFilter).forEach(r => orderNos.push(r.orderNo)));
+  }
+  // section34b - 反审卡单
+  if (data.section34b.hasData && data.section34b.rows) {
+    data.section34b.rows.filter(r => r.name === alertCustomerFilter).forEach(r => orderNos.push(r.orderNo));
+  }
+  if (orderNos.length === 0) return;
+  navigator.clipboard.writeText(orderNos.join('\n')).then(() => {
+    const btn = document.getElementById('copyCustomerOrdersBtn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> 已复制 ' + orderNos.length + ' 单';
+    setTimeout(() => { btn.innerHTML = originalHTML; }, 2000);
+  });
+}
+
+// ============ 渲染所有 ============
+function renderAll() {
+  const data = platformData[currentPlatform];
+
+  // 更新客户筛选下拉
+  populateCustomerFilter();
+
+  // 更新Tab徽章
+  const temuBadge = document.getElementById('temuBadge');
+  if (currentPlatform === 'temu') {
+    temuBadge.textContent = fmt(data.funnel[0].value);
+    temuBadge.style.display = '';
+  } else {
+    temuBadge.style.display = 'none';
+  }
+
+  // 模块1 - 纵向漏斗
+  renderVerticalFunnel();
+
+  // 模块2 数据
+  document.getElementById('logistics_pending').textContent = fmt(data.logistics.pending);
+  document.getElementById('logistics_ordered').textContent = fmt(data.logistics.ordered);
+  document.getElementById('logistics_failed').textContent = fmt(data.logistics.failed);
+  const totalOrdered = data.logistics.ordered + data.logistics.pending + data.logistics.failed;
+  const failPct = totalOrdered > 0 ? (data.logistics.failed / totalOrdered * 100).toFixed(1) : '0';
+  document.getElementById('logistics_failed_badge').textContent = failPct + '%';
+
+  // 模块2 - 表格
+  renderPendingTable();
+  renderOrderedTable();
+  renderFailedTable();
+  renderSyncExceptionTable();
+  updateOrderedCardWarn();
+
+  // 模块3
+  renderSection31();
+  renderSection32a();
+  renderSection32b();
+  renderSection33a();
+  renderSection33b();
+  renderSection34a();
+  renderSection34b();
+  updateTimelineStatus();
+}
+
+// ============ 窗口自适应 ============
+window.addEventListener('resize', () => {
+  if (drillPieChart) drillPieChart.resize();
+});
+
+// ============ 开发逻辑备注 - 点击弹出/关闭 ============
+function positionDevNoteTip(tip, icon) {
+  const iconRect = icon.getBoundingClientRect();
+  // 临时设为可见但隐藏，用于测量尺寸
+  tip.style.visibility = 'hidden';
+  tip.style.opacity = '1';
+  const tipH = tip.offsetHeight;
+  const tipW = tip.offsetWidth;
+  // 清除内联样式，让CSS类控制显隐（内联样式优先级高于类选择器，会覆盖.active的visibility/opacity）
+  tip.style.opacity = '';
+  tip.style.visibility = '';
+  let top = iconRect.top - tipH - 8;
+  let left = iconRect.left + iconRect.width / 2;
+  if (top < 8) top = iconRect.bottom + 8;
+  if (left - tipW / 2 < 8) left = tipW / 2 + 8;
+  if (left + tipW / 2 > window.innerWidth - 8) left = window.innerWidth - tipW / 2 - 8;
+  tip.style.top = top + 'px';
+  tip.style.left = left + 'px';
+}
+
+function closeAllDevNotes() {
+  document.querySelectorAll('.dev-note.active').forEach(n => n.classList.remove('active'));
+}
+
+function initDevNoteTooltips() {
+  document.querySelectorAll('.dev-note').forEach(note => {
+    if (note.dataset.bindClick) return;
+    note.dataset.bindClick = '1';
+    note.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isActive = note.classList.contains('active');
+      closeAllDevNotes();
+      if (!isActive) {
+        const icon = note.querySelector('.dev-note-icon');
+        const tip = note.querySelector('.dev-note-tip');
+        if (icon && tip) {
+          positionDevNoteTip(tip, icon);
+          note.classList.add('active');
+        }
+      }
+    });
+  });
+}
+
+// 点击页面其他地方关闭tooltip
+document.addEventListener('click', function() { closeAllDevNotes(); closeFunnelDevNotes(); });
+
+// MutationObserver自动绑定动态DOM
+initDevNoteTooltips();
+const _tooltipObserver = new MutationObserver(() => { initDevNoteTooltips(); initFunnelDevNotes(); });
+_tooltipObserver.observe(document.body, { childList: true, subtree: true });
+
+// ============ 漏斗图层内的dev-note（overflow:hidden容器内，tooltip需挂到body上） ============
+let _funnelTipEl = null;
+function closeFunnelDevNotes() {
+  if (_funnelTipEl) { _funnelTipEl.remove(); _funnelTipEl = null; }
+}
+function initFunnelDevNotes() {
+  document.querySelectorAll('.funnel-dev-note').forEach(el => {
+    if (el.dataset.bindClick) return;
+    el.dataset.bindClick = '1';
+    el.addEventListener('click', function(e) {
+      e.stopPropagation();
+      closeAllDevNotes();
+      closeFunnelDevNotes();
+      const tip = document.createElement('div');
+      tip.className = 'dev-note-tip';
+      tip.textContent = el.getAttribute('data-tip');
+      // 先临时挂上测量尺寸
+      tip.style.visibility = 'hidden';
+      tip.style.opacity = '1';
+      document.body.appendChild(tip);
+      const tipH = tip.offsetHeight;
+      const tipW = tip.offsetWidth;
+      // 清除临时样式
+      tip.style.opacity = '';
+      tip.style.visibility = '';
+      // 计算位置
+      const iconRect = el.querySelector('.dev-note-icon').getBoundingClientRect();
+      let top = iconRect.top - tipH - 8;
+      let left = iconRect.left + iconRect.width / 2;
+      if (top < 8) top = iconRect.bottom + 8;
+      if (left - tipW / 2 < 8) left = tipW / 2 + 8;
+      if (left + tipW / 2 > window.innerWidth - 8) left = window.innerWidth - tipW / 2 - 8;
+      tip.style.top = top + 'px';
+      tip.style.left = left + 'px';
+      tip.style.transform = 'translateX(-50%)';
+      tip.style.opacity = '1';
+      tip.style.visibility = 'visible';
+      // 关闭按钮：点击tip自身关闭
+      tip.addEventListener('click', function(ev) { ev.stopPropagation(); closeFunnelDevNotes(); });
+      _funnelTipEl = tip;
+    });
+  });
+}
+
+// ============ 初始化 ============
+renderAll();
+</script>
+</body>
+</html>
