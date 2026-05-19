@@ -183,6 +183,14 @@
       top: 20px;
     }
 
+    /* 异常原因文字截断 - 鼠标移入显示完整内容 */
+    td .reason-text {
+      display: inline-block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
     /* === 异常中心专属样式 === */
     .tab-capsule {
@@ -358,12 +366,12 @@
             <!-- 核心指标卡 x3 -->
             <div class="grid grid-cols-3 gap-4 mb-6">
               <!-- 今日订单总数 -->
-              <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 relative overflow-hidden cursor-pointer" onclick="showToast('跳转订单列表，筛选今日')">
+              <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 relative overflow-hidden" style="cursor:default">
                 <div class="absolute top-3 right-3 text-2xl opacity-20">📦</div>
                 <div class="text-xs font-medium text-blue-600 mb-1 flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-blue-400"></span>
                   今日订单总数
-                  <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">今日创建的所有订单数量，点击可跳转订单列表并自动筛选"今日"</span></span>
+                  <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">今日创建的所有订单数量，纯展示不跳转</span></span>
                 </div>
                 <div class="text-3xl font-extrabold text-blue-700 tracking-tight" style="font-variant-numeric:tabular-nums" id="totalOrders">530</div>
               </div>
@@ -394,7 +402,7 @@
             <div class="mb-2">
               <div class="flex items-center gap-2 mb-3">
                 <h3 class="text-sm font-semibold text-gray-700">订单状态分布</h3>
-                <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按订单状态统计今日订单分布，与运营看板术语保持一致。点击状态行可跳转订单列表并筛选对应状态</span></span>
+                <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按订单状态统计今日订单分布，与运营看板术语保持一致。纯展示，不跳转</span></span>
               </div>
               <div class="space-y-2" id="statusDistribution">
                 <!-- 由JS渲染 -->
@@ -502,7 +510,6 @@
                   <tbody id="shippedTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
                 </table>
               </div>
-              <!-- 物流追踪异常已移除（属系统监控，非客户跟进异常） -->
             </div>
           </div>
 
@@ -520,13 +527,12 @@
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-xs data-table">
-                  <colgroup><col style="width:40%"><col style="width:20%"><col style="width:20%"><col style="width:20%"></colgroup>
+                  <colgroup><col style="width:50%"><col style="width:25%"><col style="width:25%"></colgroup>
                   <thead>
                     <tr class="border-b border-gray-200/60">
                       <th class="text-left font-semibold">失败原因</th>
                       <th class="text-right font-semibold">单数</th>
                       <th class="text-right font-semibold">占比</th>
-                      <th class="text-right font-semibold">操作建议</th>
                     </tr>
                   </thead>
                   <tbody id="shipFailedTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
@@ -584,7 +590,7 @@
             <h2 class="text-base font-semibold text-gray-800">异常提醒</h2>
             <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">运营看板模块3的简化版：去掉时间线形式，改为异常汇总+快捷入口。发现异常后可跳转异常中心处理</span></span>
           </div>
-          <button onclick="switchPage('alertCenter')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-500 text-white hover:bg-primary-600 transition-all shadow-sm shadow-primary-500/20">
+          <button onclick="merchant_switchPage('alertCenter')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-500 text-white hover:bg-primary-600 transition-all shadow-sm shadow-primary-500/20">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
             查看全部异常
           </button>
@@ -592,14 +598,26 @@
         <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
           <div class="p-6">
 
-            <!-- 店铺连接状态 -->
+            <!-- 店铺连接状态 - 列表式 -->
             <div class="mb-6">
               <div class="flex items-center gap-2 mb-3">
                 <h3 class="text-sm font-semibold text-gray-700">店铺连接状态</h3>
-                <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">与运营看板术语保持一致：Token失效、Token即将失效</span></span>
+                <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">与运营看板术语保持一致：Token失效、Token即将失效。列表式展示</span></span>
               </div>
-              <div class="grid grid-cols-2 gap-3" id="shopConnectionArea">
-                <!-- 由JS渲染 -->
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs data-table">
+                  <colgroup><col style="width:30%"><col style="width:15%"><col style="width:20%"><col style="width:20%"><col style="width:15%"></colgroup>
+                  <thead>
+                    <tr class="border-b border-gray-200/60">
+                      <th class="text-left font-semibold">店铺名称</th>
+                      <th class="text-left font-semibold">平台</th>
+                      <th class="text-left font-semibold">状态</th>
+                      <th class="text-left font-semibold">时间</th>
+                      <th class="text-left font-semibold">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody id="shopConnectionArea" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
+                </table>
               </div>
             </div>
 
@@ -610,7 +628,7 @@
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                   <h3 class="text-sm font-semibold text-gray-700">待处理异常汇总</h3>
-                  <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按订单流转状态分组：待处理、生产中、工厂反审。点击异常卡片跳转异常中心</span></span>
+                  <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">按订单流转状态分组：待处理、生产中、工厂反审。点击异常卡片跳转异常中心并切换对应环节</span></span>
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="text-xs text-gray-400">待处理异常总数</span>
@@ -632,11 +650,10 @@
 
       <div id="alertCenterPage" style="display:none">
 
-      <!-- ========== 平台Tab ========== -->
+      <!-- ========== 平台Tab（去掉"全部"，默认Temu） ========== -->
       <div class="flex items-center gap-4 mb-5">
         <div class="tab-capsule" id="alertPlatformFilter">
-          <button class="tab-btn active px-5 py-2 text-xs font-semibold" data-platform="all" onclick="alertFilterPlatform('all')">全部</button>
-          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu</button>
+          <button class="tab-btn active px-5 py-2 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu</button>
           <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Shein" onclick="alertFilterPlatform('Shein')">Shein</button>
           <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Qink" onclick="alertFilterPlatform('Qink')">Qink</button>
         </div>
@@ -666,29 +683,31 @@
         <!-- 批量操作 -->
         <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
           <span class="text-xs text-gray-500" id="resultCount">显示 16 条异常</span>
-          <div class="flex items-center gap-2" id="batchActions" style="display:none;">
+          <div class="flex items-center gap-2 flex-nowrap" id="batchActions">
             <span class="text-xs text-gray-400">已选 <strong id="selectedCount" class="text-primary-500">0</strong> 条</span>
-            <button onclick="alertBatchCopyOrders()" class="px-3 py-1.5 text-xs font-medium bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 transition-colors flex items-center gap-1">
+            <!-- 环节专属批量按钮 - flex不换行 -->
+            <span id="stageBatchBtns" class="flex items-center gap-2 flex-nowrap">
+              <!-- 由JS动态渲染 -->
+            </span>
+            <button id="btnBatchCopy" onclick="alertBatchCopyOrders()" class="px-3 py-1.5 text-xs font-medium bg-gray-200 text-gray-400 rounded-lg cursor-not-allowed flex items-center gap-1 transition-colors" disabled>
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               批量复制订单号
             </button>
-            <button onclick="alertClearSelection()" class="px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">取消选择</button>
+            <button id="btnClearSel" onclick="alertClearSelection()" class="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed transition-colors" disabled>取消选择</button>
           </div>
         </div>
       </div>
 
-      <!-- ========== 异常列表表格 ========== -->
+      <!-- ========== 异常列表表格（去掉"平台"列） ========== -->
       <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
         <div class="overflow-x-auto">
           <table class="data-table" id="exceptionTable">
             <colgroup>
               <col style="width:50px;">
               <col style="width:200px;">
-              <col style="width:200px;">
-              <col style="width:130px;">
-              <col style="width:70px;">
+              <col style="width:220px;">
               <col style="width:auto;">
-              <col style="width:200px;">
+              <col style="width:220px;">
             </colgroup>
             <thead>
               <tr>
@@ -700,8 +719,6 @@
                 </th>
                 <th class="text-left">异常类型</th>
                 <th class="text-left">订单号</th>
-                <th class="text-left">店铺名称</th>
-                <th class="text-left">平台</th>
                 <th class="text-left">异常原因</th>
                 <th class="text-left">操作</th>
               </tr>
@@ -803,25 +820,22 @@ document.addEventListener('click', function(e) {
 
 
 
-// ============ 模块A：订单状态分布 ============
+// ============ 模块A：订单状态分布（去掉点击跳转） ============
 function renderStatusDistribution() {
   const container = document.getElementById('statusDistribution');
   const statusData = platformData[currentPlatform].statusData;
-  const totalOrders = platformData[currentPlatform].totalOrders;
   const maxOrders = Math.max(...statusData.map(s => s.orders));
   container.innerHTML = statusData.map(s => {
     const barWidth = (s.orders / maxOrders * 100).toFixed(1);
     const alertClass = s.alert ? (s.name === '待反审' ? 'border-l-2 border-red-400 pl-3' : 'border-l-2 border-amber-400 pl-3') : 'pl-3';
-    const clickAction = `onclick="showToast('跳转订单列表，筛选${s.name}')"`;
     return `
-      <div class="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-gray-50/60 transition-colors cursor-pointer ${alertClass}" ${clickAction}>
+      <div class="flex items-center gap-3 py-2 px-2 rounded-lg transition-colors ${alertClass}" style="cursor:default">
         <span class="text-xs font-semibold text-gray-700 w-20 flex-shrink-0">${s.name}${s.alert ? (s.name === '待反审' ? ' <span class="w-2 h-2 rounded-full bg-red-500 inline-block align-middle"></span>' : ' <span class="w-2 h-2 rounded-full bg-amber-400 inline-block align-middle"></span>') : ''}</span>
         <div class="flex-1 status-bar">
           <div class="status-bar-fill" style="width:${barWidth}%;background:${s.color}">
             ${s.orders > maxOrders * 0.15 ? `<span class="text-[10px] font-bold text-white num-col">${s.orders}</span>` : ''}
           </div>
         </div>
-        
         <span class="funnel-dev-note"><span class="funnel-dev-note-icon">i</span><span class="funnel-dev-note-tip">${s.tip}</span></span>
       </div>`;
   }).join('');
@@ -863,12 +877,11 @@ function renderLogisticsFeeTable() {
     </tr>`).join('');
 }
 
-// 下单失败明细
+// 下单失败明细（去掉"操作建议"列）
 function renderShipFailedTable() {
   const data = platformData[currentPlatform].shipFailedReasons;
   const tbody = document.getElementById('shipFailedTableBody');
   tbody.innerHTML = data.map(row => {
-    const suggestionClass = row.suggestionType === 'action' ? 'text-amber-600 bg-amber-50' : row.suggestionType === 'auto' ? 'text-blue-600 bg-blue-50' : 'text-gray-500 bg-gray-50';
     return `
     <tr class="hover:bg-gray-50/80 transition-colors">
       <td class="text-left font-semibold text-gray-800">${row.reason}</td>
@@ -880,9 +893,6 @@ function renderShipFailedTable() {
           </div>
           <span class="num-col text-gray-500" style="min-width:40px">${row.pct}%</span>
         </div>
-      </td>
-      <td class="text-right">
-        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold ${suggestionClass}">${row.suggestion}</span>
       </td>
     </tr>`;
   }).join('');
@@ -923,51 +933,44 @@ function renderShipPendingChart() {
   });
 }
 
-// ============ 模块C：店铺连接状态 ============
+// ============ 模块C：店铺连接状态 - 列表式 ============
 function renderShopConnections() {
   const shops = platformData[currentPlatform].shops;
+  const container = document.getElementById('shopConnectionArea');
+  if (!container) return;
   if (!shops || shops.length === 0) {
-    document.getElementById('shopConnectionArea').innerHTML = '<div class="col-span-2 text-center text-xs text-gray-400 py-4">当前平台无店铺连接异常</div>';
+    container.innerHTML = '<tr><td colspan="5" class="text-center text-xs text-gray-400 py-4">当前平台无店铺连接</td></tr>';
     return;
   }
-  const container = document.getElementById('shopConnectionArea');
   container.innerHTML = shops.map(shop => {
-    const borderColor = shop.statusColor === 'danger' ? 'border-red-200' : 'border-amber-200';
-    const bgColor = shop.statusColor === 'danger' ? 'bg-red-50/40' : 'bg-amber-50/40';
-    const dotColor = shop.statusColor === 'danger' ? 'bg-red-500' : 'bg-amber-500';
-    const textColor = shop.statusColor === 'danger' ? 'text-red-600' : 'text-amber-600';
     const badgeBg = shop.statusColor === 'danger' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
-    const btnClass = shop.statusColor === 'danger' ? 'bg-red-500 hover:bg-red-600' : 'bg-amber-500 hover:bg-amber-600';
     return `
-    <div class="shop-connection ${bgColor} border ${borderColor} rounded-xl p-4">
-      <div class="flex items-center justify-between mb-2">
-        <div class="flex items-center gap-2">
-          <span class="w-2.5 h-2.5 rounded-full ${dotColor} ${shop.status === 'expired' ? 'alert-badge' : ''}"></span>
-          <span class="text-sm font-semibold text-gray-800">${shop.name}</span>
-          <span class="status-badge bg-slate-100 text-slate-600">${shop.platform}</span>
-        </div>
-      </div>
-      <div class="flex items-center justify-between">
-        <div>
-          <span class="status-badge ${badgeBg}">${shop.statusText}</span>
-          <span class="text-xs text-gray-500 ml-2">${shop.time}</span>
-        </div>
-        <button onclick="showToast('跳转店铺授权页面')" class="px-3 py-1 rounded-lg text-xs font-semibold text-white ${btnClass} transition-colors shadow-sm">
-          ${shop.action}
-        </button>
-      </div>
-    </div>`;
+    <tr class="hover:bg-gray-50/60 transition-colors shop-connection">
+      <td class="text-left">
+        <span class="text-sm font-semibold text-gray-800">${shop.name}</span>
+      </td>
+      <td class="text-left">
+        <span class="status-badge bg-blue-50 text-blue-600">${shop.platform}</span>
+      </td>
+      <td class="text-left">
+        <span class="status-badge ${badgeBg}">${shop.statusText}</span>
+      </td>
+      <td class="text-left">
+        <span class="text-xs text-gray-500">${shop.time}</span>
+      </td>
+      <td class="text-left">
+        <button onclick="showToast('跳转店铺授权页面')" class="px-3 py-1 rounded-lg text-xs font-semibold text-white bg-primary-500 hover:bg-primary-600 transition-colors shadow-sm">去授权</button>
+      </td>
+    </tr>`;
   }).join('');
 }
 
-// ============ 模块C：异常汇总 - 按订单流转状态分组 ============
+// ============ 模块C：异常汇总 - 点击跳转 + 切换环节 ============
 function renderExceptionSummary() {
-  // 从 alertExceptionData 动态统计，按当前平台过滤
   const platformMap = { temu: 'Temu', shein: 'Shein', qink: 'Qink' };
   const currentPlatformName = platformMap[currentPlatform] || 'Temu';
   const filtered = alertExceptionData.filter(i => i.platform === currentPlatformName);
 
-  // 按订单流转状态分组
   const groups = [
     {
       stage: '待处理',
@@ -1014,7 +1017,7 @@ function renderExceptionSummary() {
           const badgeBg = 'bg-red-100 text-red-600';
           const dotColor = 'bg-red-500';
           return `
-          <div class="exception-card flex items-center gap-2 px-3 py-2 rounded-lg ${levelBg}" onclick="switchPage('alertCenter')">
+          <div class="exception-card flex items-center gap-2 px-3 py-2 rounded-lg ${levelBg}" onclick="merchant_exceptionCardClick('${group.stageKey}')">
             <span class="w-2 h-2 rounded-full ${dotColor} flex-shrink-0"></span>
             <span class="text-xs font-medium text-gray-700 flex-1">${item.name}</span>
             <span class="text-[9px] font-semibold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">需操作</span>
@@ -1029,6 +1032,11 @@ function renderExceptionSummary() {
   document.getElementById('totalExceptionBadge').textContent = filtered.length;
 }
 
+// 异常卡片点击：跳转到异常中心并切换环节
+function merchant_exceptionCardClick(stageKey) {
+  merchant_switchPage('alertCenter');
+  alertFilterStage(stageKey);
+}
 
 // ============ 平台数据 ============
 let currentPlatform = 'temu';
@@ -1053,10 +1061,10 @@ const platformData = {
       { carrier: 'DHL', product: 'eCommerce', count: 13, fee: '$4.50', pct: 5.3 },
     ],
     shipFailedReasons: [
-      { reason: '物流商接口超时', count: 5, pct: 41.7, suggestion: '系统自动重试', suggestionType: 'auto' },
-      { reason: '地址信息不完整', count: 4, pct: 33.3, suggestion: '补充地址信息', suggestionType: 'action' },
-      { reason: '面单生成失败', count: 2, pct: 16.7, suggestion: '请联系客服', suggestionType: 'contact' },
-      { reason: '其他异常', count: 1, pct: 8.3, suggestion: '请联系客服', suggestionType: 'contact' },
+      { reason: '物流商接口超时', count: 5, pct: 41.7 },
+      { reason: '地址信息不完整', count: 4, pct: 33.3 },
+      { reason: '面单生成失败', count: 2, pct: 16.7 },
+      { reason: '其他异常', count: 1, pct: 8.3 },
     ],
     pendingShipDetails: { confirm: 8, match: 12, push: 18 },
     shops: [
@@ -1097,7 +1105,7 @@ const platformData = {
       { carrier: 'UPS', product: 'Ground', count: 3, fee: '$6.00', pct: 11.1 },
     ],
     shipFailedReasons: [
-      { reason: '地址信息不完整', count: 1, pct: 100, suggestion: '补充地址信息', suggestionType: 'action' },
+      { reason: '地址信息不完整', count: 1, pct: 100 },
     ],
     pendingShipDetails: { confirm: 2, match: 2, push: 1 },
     shops: [],
@@ -1181,6 +1189,11 @@ function renderPendingShipDetails() {
 
 // ============ 页面切换 ============
 function switchPage(page) {
+  // 兼容旧调用方式，内部统一走 merchant_switchPage
+  merchant_switchPage(page);
+}
+
+function merchant_switchPage(page) {
   const dashboardPage = document.getElementById('dashboardPage');
   const alertCenterPage = document.getElementById('alertCenterPage');
   const navDashboard = document.getElementById('navDashboard');
@@ -1206,7 +1219,7 @@ function switchPage(page) {
 }
 
 // ============ 异常中心JS ============
-// ============ 异常数据 - 按订单流转状态分类 ============
+// ============ 异常数据 ============
 const alertExceptionData = [
   // === 待处理阶段 ===
   { id: 1, severity: 'urgent', severityLabel: '紧急', stage: 'pending', type: '库存不足', typeCode: 'PENDING_STOCK', orderNo: 'PO-211-04259049615993767', shop: '拍歐德-主店', platform: 'Temu', reason: '底衫SKU库存不足，无法推送工厂', duration: '6小时30分', needAction: true, actionType: 'fix_or_close', rowClass: 'danger-row' },
@@ -1231,15 +1244,15 @@ const alertExceptionData = [
   { id: 16, severity: 'urgent', severityLabel: '紧急', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04244012345678901', shop: '潮酷服饰专营店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '2天', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'danger-row' },
 ];
 
-// 当前筛选状态
+// 当前筛选状态（platform默认temu）
 let alertCurrentFilters = {
   stage: 'all',
-  platform: 'all',
+  platform: 'Temu',
   search: ''
 };
 let alertSelectedIds = new Set();
 
-// ============ 渲染表格 ============
+// ============ 渲染表格（去掉平台列 + 异常原因截断） ============
 function alertRenderTable(data) {
   const tbody = document.getElementById('tableBody');
   const emptyState = document.getElementById('emptyState');
@@ -1282,13 +1295,7 @@ function alertRenderTable(data) {
         </div>
       </td>
       <td class="text-left">
-        <span class="text-gray-600">${item.shop}</span>
-      </td>
-      <td class="text-left">
-        <span class="status-badge bg-blue-50 text-blue-600">${item.platform}</span>
-      </td>
-      <td class="text-left">
-        <span class="text-gray-500 text-xs">${item.reason}</span>
+        <span class="reason-text text-gray-500 text-xs" title="${item.reason}">${item.reason}</span>
       </td>
       <td class="text-left">${actionBtn}</td>
     </tr>
@@ -1308,7 +1315,8 @@ function alertGetSevIcon(severity) {
 function alertGetActionBtn(item) {
   const type = item.actionType;
   const btnMap = {
-    fix_or_close: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">修改重推</button><button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20 ml-1">关闭订单</button>',
+    // 待处理："修改重推" 改为 "重推"
+    fix_or_close: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">重推</button><button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20 ml-1">关闭订单</button>',
     bind_warehouse: '<button onclick="event.stopPropagation();alertHandleAction(\'bind_warehouse\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">绑定发货仓</button>',
     seller_handle: '<span class="text-xs text-gray-400 flex items-center gap-1"><span class="pulse-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>卖家后台处理</span>',
     partial_swap_or_cancel: '<button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">部分换货</button><button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20 ml-1">部分取消</button>',
@@ -1318,14 +1326,14 @@ function alertGetActionBtn(item) {
   return btnMap[type] || '<button onclick="event.stopPropagation();alertHandleAction(\'detail\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">查看详情</button>';
 }
 
-// ============ 筛选逻辑 ============
+// ============ 筛选逻辑（platform无"all"选项） ============
 function alertApplyFilters() {
   let filtered = alertExceptionData;
 
   if (alertCurrentFilters.stage !== 'all') {
     filtered = filtered.filter(i => i.stage === alertCurrentFilters.stage);
   }
-  if (alertCurrentFilters.platform !== 'all') {
+  if (alertCurrentFilters.platform) {
     filtered = filtered.filter(i => i.platform === alertCurrentFilters.platform);
   }
   if (alertCurrentFilters.search) {
@@ -1334,6 +1342,7 @@ function alertApplyFilters() {
   }
 
   alertRenderTable(filtered);
+  alertUpdateBatchStageButtons();
 }
 
 function alertFilterStage(val) {
@@ -1358,6 +1367,47 @@ function alertUpdateFilterTabs(containerId, activeVal, dataAttr) {
   container.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset[dataAttr] === activeVal);
   });
+}
+
+// ============ 环节专属批量按钮 ============
+function alertUpdateBatchStageButtons() {
+  const container = document.getElementById('stageBatchBtns');
+  const stage = alertCurrentFilters.stage;
+  const hasSelection = alertSelectedIds.size > 0;
+  // disabled状态：灰色背景+灰色文字+禁止点击
+  // enabled状态：按类型着色（重推蓝色、关闭/部分取消红色）
+  const disabledCls = 'bg-gray-200 text-gray-400 cursor-not-allowed';
+  let html = '';
+  if (stage === 'pending') {
+    const repushCls = hasSelection ? 'bg-primary-500 text-white cursor-pointer hover:bg-primary-600' : disabledCls;
+    const closeCls = hasSelection ? 'bg-red-500 text-white cursor-pointer hover:bg-red-600' : disabledCls;
+    html = `
+      <button onclick="alertBatchRepush()" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 ${repushCls}" ${hasSelection ? '' : 'disabled'}>
+        重推
+      </button>
+      <button onclick="alertBatchClose()" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 ${closeCls}" ${hasSelection ? '' : 'disabled'}>
+        关闭
+      </button>`;
+  } else if (stage === 'review') {
+    const cancelCls = hasSelection ? 'bg-red-500 text-white cursor-pointer hover:bg-red-600' : disabledCls;
+    html = `
+      <button onclick="alertBatchPartialCancel()" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 ${cancelCls}" ${hasSelection ? '' : 'disabled'}>
+        部分取消
+      </button>`;
+  }
+  container.innerHTML = html;
+}
+
+function alertBatchRepush() {
+  showToast('已重推选中订单');
+}
+
+function alertBatchClose() {
+  showToast('已关闭选中订单');
+}
+
+function alertBatchPartialCancel() {
+  showToast('已部分取消选中订单');
 }
 
 // ============ 批量选择 ============
@@ -1385,14 +1435,25 @@ function alertToggleSelectAll() {
 
 function alertUpdateBatchUI() {
   const count = alertSelectedIds.size;
-  const batchActions = document.getElementById('batchActions');
   const selectedCountEl = document.getElementById('selectedCount');
-  if (count > 0) {
-    batchActions.style.display = 'flex';
-    selectedCountEl.textContent = count;
+  const btnBatchCopy = document.getElementById('btnBatchCopy');
+  const btnClearSel = document.getElementById('btnClearSel');
+  selectedCountEl.textContent = count;
+  const hasSelection = count > 0;
+  // 批量复制按钮：选中时可用，未选中时置灰
+  if (hasSelection) {
+    btnBatchCopy.className = 'px-3 py-1.5 text-xs font-medium bg-primary-50 text-primary-600 rounded-lg cursor-pointer hover:bg-primary-100 transition-colors flex items-center gap-1';
+    btnBatchCopy.disabled = false;
+    btnClearSel.className = 'px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors';
+    btnClearSel.disabled = false;
   } else {
-    batchActions.style.display = 'none';
+    btnBatchCopy.className = 'px-3 py-1.5 text-xs font-medium bg-gray-200 text-gray-400 rounded-lg cursor-not-allowed flex items-center gap-1 transition-colors';
+    btnBatchCopy.disabled = true;
+    btnClearSel.className = 'px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed transition-colors';
+    btnClearSel.disabled = true;
   }
+  // 同步更新环节专属按钮的disabled状态
+  alertUpdateBatchStageButtons();
 }
 
 function alertClearSelection() {
@@ -1414,7 +1475,7 @@ function alertBatchCopyOrders() {
 function alertGetFilteredData() {
   let filtered = alertExceptionData;
   if (alertCurrentFilters.stage !== 'all') filtered = filtered.filter(i => i.stage === alertCurrentFilters.stage);
-  if (alertCurrentFilters.platform !== 'all') filtered = filtered.filter(i => i.platform === alertCurrentFilters.platform);
+  if (alertCurrentFilters.platform) filtered = filtered.filter(i => i.platform === alertCurrentFilters.platform);
   if (alertCurrentFilters.search) {
     const q = alertCurrentFilters.search.toLowerCase();
     filtered = filtered.filter(i => i.orderNo.toLowerCase().includes(q));
@@ -1424,12 +1485,10 @@ function alertGetFilteredData() {
 
 // ============ 操作处理 ============
 function alertHandleAction(actionType, id) {
-  // 异常中心只做发现和定位，所有操作按钮统一跳转提示
   showToast('请前往订单详情处理');
 }
 
 function alertHandleRowClick(event, id) {
-  // 单击行：复制订单号
   if (!event.target.closest('button') && !event.target.closest('input') && !event.target.closest('label') && !event.target.closest('.dev-note')) {
     const item = alertExceptionData.find(i => i.id === id);
     if (item) alertCopyOrder(item.orderNo);
@@ -1449,7 +1508,6 @@ function alertToggleDevNote(el, typeCode) {
   alertCloseAllDevNotes();
   if (!isActive) {
     el.classList.add('active');
-    // 计算位置
     const tip = el.querySelector('.dev-note-tip');
     const rect = el.getBoundingClientRect();
     let left = rect.left + rect.width / 2;
@@ -1465,7 +1523,6 @@ function alertCloseAllDevNotes() {
   document.querySelectorAll('.dev-note.active').forEach(el => el.classList.remove('active'));
   document.getElementById('devNoteOverlay').classList.add('hidden');
 }
-
 
 
 
