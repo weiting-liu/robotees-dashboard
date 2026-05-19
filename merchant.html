@@ -260,6 +260,100 @@
       margin-left: 6px;
       letter-spacing: 0.5px;
     }
+
+    /* 店铺连接异常横幅 */
+    .token-alert-banner {
+      border: 1px solid rgba(239,68,68,0.2);
+      background: linear-gradient(135deg, #FEF2F2 0%, #FFF1F2 50%, #FFFBEB 100%);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .token-alert-banner.collapsed .token-alert-body { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+    .token-alert-body {
+      max-height: 300px;
+      opacity: 1;
+      overflow: hidden;
+      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, padding 0.25s ease;
+    }
+    .token-shop-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      background: rgba(255,255,255,0.7);
+      border: 1px solid rgba(239,68,68,0.1);
+      border-radius: 10px;
+      transition: all 0.2s ease;
+    }
+    .token-shop-item:hover {
+      box-shadow: 0 2px 8px rgba(239,68,68,0.08);
+      background: rgba(255,255,255,0.9);
+    }
+
+    /* 多选下拉 */
+    .multi-select {
+      position: relative;
+      min-width: 140px;
+    }
+    .multi-select-trigger {
+      background: #F1F5F9;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      color: #64748B;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .multi-select-trigger:hover { border-color: #CBD5E1; background: #fff; }
+    .multi-select-trigger.active { border-color: #3B82F6; background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .multi-select-dropdown {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 100%;
+      background: #fff;
+      border: 1px solid #E2E8F0;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+      z-index: 1000;
+      display: none;
+      padding: 6px;
+    }
+    .multi-select-dropdown.show { display: block; }
+    .multi-select-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #475569;
+      transition: background 0.15s ease;
+    }
+    .multi-select-option:hover { background: #F1F5F9; }
+    .multi-select-option.selected { color: #3B82F6; font-weight: 600; }
+    .multi-select-option .check-icon { width: 14px; height: 14px; border: 1.5px solid #CBD5E1; border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+    .multi-select-option.selected .check-icon { background: #3B82F6; border-color: #3B82F6; }
+
+    /* 排序列头 */
+    .sort-th { cursor: pointer; user-select: none; }
+    .sort-th:hover { color: #3B82F6; }
+    .sort-icon { display: inline-flex; flex-direction: column; gap: 1px; margin-left: 4px; vertical-align: middle; }
+    .sort-icon .arrow-up, .sort-icon .arrow-down { width: 0; height: 0; border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; }
+    .sort-icon .arrow-up { border-bottom: 4px solid #CBD5E1; }
+    .sort-icon .arrow-down { border-top: 4px solid #CBD5E1; }
+    .sort-asc .sort-icon .arrow-up { border-bottom-color: #3B82F6; }
+    .sort-desc .sort-icon .arrow-down { border-top-color: #3B82F6; }
+
+    /* 已过期的最晚发货时间 */
+    .ship-time-expired { color: #EF4444; font-weight: 600; }
   </style>
 </head>
 <body class="min-h-screen flex">
@@ -650,6 +744,24 @@
 
       <div id="alertCenterPage" style="display:none">
 
+      <!-- ========== 店铺连接异常横幅（环节Tab上方） ========== -->
+      <div id="tokenAlertBanner" class="token-alert-banner mb-5">
+        <div class="flex items-center justify-between px-5 py-3 cursor-pointer" onclick="alertToggleTokenBanner()">
+          <div class="flex items-center gap-3">
+            <span class="pulse-red w-3 h-3 bg-red-500 rounded-full inline-block flex-shrink-0"></span>
+            <span class="text-sm font-bold text-red-700">店铺连接异常</span>
+            <span id="tokenAlertCount" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-200/80 text-red-700">2</span>
+            <span class="text-xs text-red-500/80">以下店铺Token已失效或即将失效，请尽快处理</span>
+          </div>
+          <svg id="tokenBannerArrow" class="w-4 h-4 text-red-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+        </div>
+        <div class="token-alert-body px-5 pb-4">
+          <div class="space-y-2" id="tokenAlertShopList">
+            <!-- 由JS渲染 -->
+          </div>
+        </div>
+      </div>
+
       <!-- ========== 平台Tab（去掉"全部"，默认Temu） ========== -->
       <div class="flex items-center gap-4 mb-5">
         <div class="tab-capsule" id="alertPlatformFilter">
@@ -674,10 +786,41 @@
           </div>
 
           <!-- 搜索框 -->
-          <div class="search-box flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm flex-1 max-w-xs ml-auto">
+          <div class="search-box flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm max-w-xs ml-auto">
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input type="text" id="searchInput" placeholder="搜索订单号..." class="bg-transparent outline-none text-sm text-gray-600 placeholder-gray-400 flex-1" oninput="alertFilterSearch()" />
           </div>
+        </div>
+
+        <!-- 第二行：店铺筛选、异常类型筛选、只看我付款订单 -->
+        <div class="flex items-center gap-3 mt-3 flex-wrap">
+          <!-- 店铺筛选（多选） -->
+          <div class="multi-select" id="shopSelect">
+            <div class="multi-select-trigger" onclick="alertToggleMultiSelect('shopSelect')">
+              <span id="shopSelectLabel">全部店铺</span>
+              <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            <div class="multi-select-dropdown" id="shopSelectDropdown">
+              <!-- 由JS渲染 -->
+            </div>
+          </div>
+
+          <!-- 异常类型筛选（多选） -->
+          <div class="multi-select" id="typeSelect">
+            <div class="multi-select-trigger" onclick="alertToggleMultiSelect('typeSelect')">
+              <span id="typeSelectLabel">全部类型</span>
+              <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+            </div>
+            <div class="multi-select-dropdown" id="typeSelectDropdown">
+              <!-- 由JS渲染 -->
+            </div>
+          </div>
+
+          <!-- 只看我付款订单 -->
+          <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="onlyPaidCheckbox" class="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500 cursor-pointer" onchange="alertFilterPaid()" />
+            <span class="text-xs font-medium text-gray-600">只看我付款订单</span>
+          </label>
         </div>
 
         <!-- 批量操作 -->
@@ -698,16 +841,17 @@
         </div>
       </div>
 
-      <!-- ========== 异常列表表格（去掉"平台"列） ========== -->
+      <!-- ========== 异常列表表格 ========== -->
       <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
         <div class="overflow-x-auto">
           <table class="data-table" id="exceptionTable">
             <colgroup>
               <col style="width:50px;">
+              <col style="width:150px;">
               <col style="width:200px;">
-              <col style="width:220px;">
               <col style="width:auto;">
-              <col style="width:220px;">
+              <col style="width:150px;">
+              <col style="width:200px;">
             </colgroup>
             <thead>
               <tr>
@@ -720,6 +864,13 @@
                 <th class="text-left">异常类型</th>
                 <th class="text-left">订单号</th>
                 <th class="text-left">异常原因</th>
+                <th class="text-left sort-th" onclick="alertToggleSort()" id="sortThLatestShipTime">
+                  最晚发货时间
+                  <span class="sort-icon">
+                    <span class="arrow-up"></span>
+                    <span class="arrow-down"></span>
+                  </span>
+                </th>
                 <th class="text-left">操作</th>
               </tr>
             </thead>
@@ -739,7 +890,7 @@
         <!-- 分页 -->
         <div id="pagination" class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
           <div class="text-xs text-gray-400">
-            共 <strong class="text-gray-600">16</strong> 条异常
+            共 <strong class="text-gray-600" id="paginationTotal">16</strong> 条异常
           </div>
           <div class="flex items-center gap-1">
             <button class="px-3 py-1.5 text-xs text-gray-400 bg-gray-50 rounded-lg border border-gray-200 cursor-not-allowed" disabled>上一页</button>
@@ -758,7 +909,7 @@
 
       </div>
 
-  <!-- 全局点击关闭 dev-note -->
+  <!-- 全局点击关闭 dev-note + 多选下拉 -->
   <div id="devNoteOverlay" class="fixed inset-0 z-[99998] hidden" onclick="alertCloseAllDevNotes()"></div>
     </main>
   </div>
@@ -816,6 +967,14 @@ document.addEventListener('click', function(e) {
   }
   // 点击其他区域关闭
   document.querySelectorAll('.dev-note.active, .funnel-dev-note.active').forEach(n => n.classList.remove('active'));
+});
+
+// 点击空白区域关闭多选下拉
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.multi-select')) {
+    document.querySelectorAll('.multi-select-dropdown.show').forEach(d => d.classList.remove('show'));
+    document.querySelectorAll('.multi-select-trigger.active').forEach(t => t.classList.remove('active'));
+  }
 });
 
 
@@ -1219,45 +1378,204 @@ function merchant_switchPage(page) {
 }
 
 // ============ 异常中心JS ============
+// ============ 店铺Token失效数据（异常中心顶部独立区域） ============
+const tokenAlertShops = [
+  { name: '拍歐德-主店', platform: 'Temu', status: 'Token失效', statusColor: 'danger', action: '去授权' },
+  { name: '拍歐德-分店A', platform: 'Shein', status: 'Token即将失效', statusColor: 'warn', action: '去授权' },
+  { name: '潮酷服饰专营店', platform: 'Temu', status: 'Token失效', statusColor: 'danger', action: '去授权' },
+];
+
 // ============ 异常数据 ============
 const alertExceptionData = [
   // === 待处理阶段 ===
-  { id: 1, severity: 'urgent', severityLabel: '紧急', stage: 'pending', type: '库存不足', typeCode: 'PENDING_STOCK', orderNo: 'PO-211-04259049615993767', shop: '拍歐德-主店', platform: 'Temu', reason: '底衫SKU库存不足，无法推送工厂', duration: '6小时30分', needAction: true, actionType: 'fix_or_close', rowClass: 'danger-row' },
-  { id: 2, severity: 'urgent', severityLabel: '紧急', stage: 'pending', type: '库存不足', typeCode: 'PENDING_STOCK', orderNo: 'PO-211-04258012345678901', shop: '潮酷服饰专营店', platform: 'Temu', reason: '底衫SKU库存不足，无法推送工厂', duration: '4小时15分', needAction: true, actionType: 'fix_or_close', rowClass: 'danger-row' },
-  { id: 3, severity: 'warning', severityLabel: '警告', stage: 'pending', type: '库存不足', typeCode: 'PENDING_STOCK', orderNo: 'PO-211-04257098765432109', shop: '拍歐德-分店A', platform: 'Shein', reason: '底衫SKU库存不足，无法推送工厂', duration: '2小时', needAction: true, actionType: 'fix_or_close', rowClass: 'warn-row' },
-  { id: 4, severity: 'urgent', severityLabel: '紧急', stage: 'pending', type: '未绑定发货仓', typeCode: 'PENDING_NO_WAREHOUSE', orderNo: 'PO-211-04256012345678901', shop: '拍歐德-主店', platform: 'Temu', reason: '订单未绑定发货仓，需绑定后重拉订单', duration: '1天2小时', needAction: true, actionType: 'bind_warehouse', rowClass: 'danger-row' },
-  { id: 5, severity: 'warning', severityLabel: '警告', stage: 'pending', type: '未绑定发货仓', typeCode: 'PENDING_NO_WAREHOUSE', orderNo: 'PO-211-04255098765432109', shop: '拍歐德-分店A', platform: 'Qink', reason: '订单未绑定发货仓，需绑定后重拉订单', duration: '8小时', needAction: true, actionType: 'bind_warehouse', rowClass: 'warn-row' },
+  { id: 1, severity: 'urgent', severityLabel: '紧急', stage: 'pending', type: '库存不足', typeCode: 'PENDING_STOCK', orderNo: 'PO-211-04259049615993767', shop: '拍歐德-主店', platform: 'Temu', reason: '底衫SKU库存不足，无法推送工厂', duration: '6小时30分', needAction: true, actionType: 'fix_or_close', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-19 14:00' },
+  { id: 2, severity: 'urgent', severityLabel: '紧急', stage: 'pending', type: '库存不足', typeCode: 'PENDING_STOCK', orderNo: 'PO-211-04258012345678901', shop: '潮酷服饰专营店', platform: 'Temu', reason: '底衫SKU库存不足，无法推送工厂', duration: '4小时15分', needAction: true, actionType: 'fix_or_close', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-21 09:00' },
+  { id: 3, severity: 'warning', severityLabel: '警告', stage: 'pending', type: '库存不足', typeCode: 'PENDING_STOCK', orderNo: 'PO-211-04257098765432109', shop: '拍歐德-分店A', platform: 'Shein', reason: '底衫SKU库存不足，无法推送工厂', duration: '2小时', needAction: true, actionType: 'fix_or_close', rowClass: 'warn-row', paymentStatus: 'unpaid', latestShipTime: '2026-05-22 18:00' },
+  { id: 4, severity: 'urgent', severityLabel: '紧急', stage: 'pending', type: '未绑定发货仓', typeCode: 'PENDING_NO_WAREHOUSE', orderNo: 'PO-211-04256012345678901', shop: '拍歐德-主店', platform: 'Temu', reason: '订单未绑定发货仓，需绑定后重拉订单', duration: '1天2小时', needAction: true, actionType: 'bind_warehouse', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-20 18:00' },
+  { id: 5, severity: 'warning', severityLabel: '警告', stage: 'pending', type: '未绑定发货仓', typeCode: 'PENDING_NO_WAREHOUSE', orderNo: 'PO-211-04255098765432109', shop: '拍歐德-分店A', platform: 'Qink', reason: '订单未绑定发货仓，需绑定后重拉订单', duration: '8小时', needAction: true, actionType: 'bind_warehouse', rowClass: 'warn-row', paymentStatus: 'unpaid', latestShipTime: '2026-05-23 12:00' },
 
   // === 生产中阶段 ===
-  { id: 6, severity: 'urgent', severityLabel: '紧急', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04254012345678901', shop: '拍歐德-主店', platform: 'Temu', reason: '无可用物流渠道，卖家后台处理后手工上传面单', duration: '1天6小时', needAction: true, actionType: 'seller_handle', rowClass: 'danger-row' },
-  { id: 7, severity: 'warning', severityLabel: '警告', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04253098765432109', shop: '潮酷服饰专营店', platform: 'Temu', reason: '资金被冻结，卖家后台处理后重拉订单', duration: '4小时', needAction: true, actionType: 'seller_handle', rowClass: 'warn-row' },
-  { id: 8, severity: 'warning', severityLabel: '警告', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04252012345678901', shop: '拍歐德-分店A', platform: 'Shein', reason: '订单存在未处理售后，卖家后台处理后重拉订单', duration: '3小时', needAction: true, actionType: 'seller_handle', rowClass: 'warn-row' },
+  { id: 6, severity: 'urgent', severityLabel: '紧急', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04254012345678901', shop: '拍歐德-主店', platform: 'Temu', reason: '无可用物流渠道，卖家后台处理后手工上传面单', duration: '1天6小时', needAction: true, actionType: 'seller_handle', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-19 09:00' },
+  { id: 7, severity: 'warning', severityLabel: '警告', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04253098765432109', shop: '潮酷服饰专营店', platform: 'Temu', reason: '资金被冻结，卖家后台处理后重拉订单', duration: '4小时', needAction: true, actionType: 'seller_handle', rowClass: 'warn-row', paymentStatus: 'paid', latestShipTime: '2026-05-20 14:00' },
+  { id: 8, severity: 'warning', severityLabel: '警告', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04252012345678901', shop: '拍歐德-分店A', platform: 'Shein', reason: '订单存在未处理售后，卖家后台处理后重拉订单', duration: '3小时', needAction: true, actionType: 'seller_handle', rowClass: 'warn-row', paymentStatus: 'unpaid', latestShipTime: '2026-05-21 18:00' },
 
   // === 工厂反审阶段 ===
-  { id: 9, severity: 'urgent', severityLabel: '紧急', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04251098765432109', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '1天6小时', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'danger-row' },
-  { id: 10, severity: 'warning', severityLabel: '警告', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04250012345678901', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '4小时', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'warn-row' },
-  { id: 11, severity: 'warning', severityLabel: '警告', stage: 'review', type: '生产图异常', typeCode: 'REVIEW_ART', orderNo: 'PO-211-04249098765432109', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈设计图分辨率不足或格式异常', duration: '3小时', needAction: true, actionType: 'fix_art', rowClass: 'warn-row' },
-  { id: 12, severity: 'warning', severityLabel: '警告', stage: 'review', type: '生产图异常', typeCode: 'REVIEW_ART', orderNo: 'PO-211-04248012345678901', shop: '拍歐德-分店A', platform: 'Shein', reason: '工厂反馈设计图存在版权问题，请修改', duration: '2小时', needAction: true, actionType: 'fix_art', rowClass: 'warn-row' },
-  { id: 13, severity: 'warning', severityLabel: '警告', stage: 'review', type: '蒙版异常', typeCode: 'REVIEW_MASK', orderNo: 'PO-211-04247098765432109', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈蒙版文件异常，无法正常生产', duration: '5小时', needAction: true, actionType: 'fix_mask', rowClass: 'warn-row' },
-  { id: 14, severity: 'warning', severityLabel: '警告', stage: 'review', type: '蒙版异常', typeCode: 'REVIEW_MASK', orderNo: 'PO-211-04246012345678901', shop: '潮酷服饰专营店', platform: 'Temu', reason: '工厂反馈蒙版尺寸不匹配，请修改', duration: '3小时', needAction: true, actionType: 'fix_mask', rowClass: 'warn-row' },
-  { id: 15, severity: 'warning', severityLabel: '警告', stage: 'review', type: '生产图异常', typeCode: 'REVIEW_ART', orderNo: 'PO-211-04245098765432109', shop: '潮酷服饰专营店', platform: 'Shein', reason: '工厂反馈设计图内容违规，请修改', duration: '1小时', needAction: true, actionType: 'fix_art', rowClass: 'warn-row' },
-  { id: 16, severity: 'urgent', severityLabel: '紧急', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04244012345678901', shop: '潮酷服饰专营店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '2天', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'danger-row' },
+  { id: 9, severity: 'urgent', severityLabel: '紧急', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04251098765432109', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '1天6小时', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-18 18:00' },
+  { id: 10, severity: 'warning', severityLabel: '警告', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04250012345678901', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '4小时', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'warn-row', paymentStatus: 'paid', latestShipTime: '2026-05-20 09:00' },
+  { id: 11, severity: 'warning', severityLabel: '警告', stage: 'review', type: '生产图异常', typeCode: 'REVIEW_ART', orderNo: 'PO-211-04249098765432109', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈设计图分辨率不足或格式异常', duration: '3小时', needAction: true, actionType: 'fix_art', rowClass: 'warn-row', paymentStatus: 'paid', latestShipTime: '2026-05-21 14:00' },
+  { id: 12, severity: 'warning', severityLabel: '警告', stage: 'review', type: '生产图异常', typeCode: 'REVIEW_ART', orderNo: 'PO-211-04248012345678901', shop: '拍歐德-分店A', platform: 'Shein', reason: '工厂反馈设计图存在版权问题，请修改', duration: '2小时', needAction: true, actionType: 'fix_art', rowClass: 'warn-row', paymentStatus: 'unpaid', latestShipTime: '2026-05-22 09:00' },
+  { id: 13, severity: 'warning', severityLabel: '警告', stage: 'review', type: '蒙版异常', typeCode: 'REVIEW_MASK', orderNo: 'PO-211-04247098765432109', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈蒙版文件异常，无法正常生产', duration: '5小时', needAction: true, actionType: 'fix_mask', rowClass: 'warn-row', paymentStatus: 'paid', latestShipTime: '2026-05-20 18:00' },
+  { id: 14, severity: 'warning', severityLabel: '警告', stage: 'review', type: '蒙版异常', typeCode: 'REVIEW_MASK', orderNo: 'PO-211-04246012345678901', shop: '潮酷服饰专营店', platform: 'Temu', reason: '工厂反馈蒙版尺寸不匹配，请修改', duration: '3小时', needAction: true, actionType: 'fix_mask', rowClass: 'warn-row', paymentStatus: 'unpaid', latestShipTime: '2026-05-21 09:00' },
+  { id: 15, severity: 'warning', severityLabel: '警告', stage: 'review', type: '生产图异常', typeCode: 'REVIEW_ART', orderNo: 'PO-211-04245098765432109', shop: '潮酷服饰专营店', platform: 'Shein', reason: '工厂反馈设计图内容违规，请修改', duration: '1小时', needAction: true, actionType: 'fix_art', rowClass: 'warn-row', paymentStatus: 'paid', latestShipTime: '2026-05-19 14:00' },
+  { id: 16, severity: 'urgent', severityLabel: '紧急', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04244012345678901', shop: '潮酷服饰专营店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '2天', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-17 18:00' },
 ];
 
-// 当前筛选状态（platform默认temu）
+// 当前筛选状态
 let alertCurrentFilters = {
   stage: 'all',
   platform: 'Temu',
-  search: ''
+  search: '',
+  shops: [],        // 选中的店铺列表
+  alertTypes: [],   // 选中的异常类型列表
+  onlyPaid: false,
+  sortField: 'latestShipTime',
+  sortOrder: 'asc'
 };
 let alertSelectedIds = new Set();
 
-// ============ 渲染表格（去掉平台列 + 异常原因截断） ============
+// ============ 店铺连接异常横幅 ============
+function alertRenderTokenBanner() {
+  const container = document.getElementById('tokenAlertShopList');
+  const banner = document.getElementById('tokenAlertBanner');
+  const countEl = document.getElementById('tokenAlertCount');
+  if (!container || !banner) return;
+
+  if (tokenAlertShops.length === 0) {
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = '';
+  countEl.textContent = tokenAlertShops.length;
+
+  container.innerHTML = tokenAlertShops.map(shop => {
+    const isDanger = shop.statusColor === 'danger';
+    const statusBg = isDanger ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+    const dotClass = isDanger ? 'pulse-red bg-red-500' : 'bg-amber-400';
+    return `
+    <div class="token-shop-item">
+      <span class="w-2.5 h-2.5 rounded-full ${dotClass} inline-block flex-shrink-0"></span>
+      <span class="text-sm font-semibold text-gray-800">${shop.name}</span>
+      <span class="status-badge bg-blue-50 text-blue-600">${shop.platform}</span>
+      <span class="status-badge ${statusBg}">${shop.status}</span>
+      <button onclick="showToast('跳转店铺授权页面')" class="ml-auto px-3 py-1 rounded-lg text-xs font-semibold text-white bg-primary-500 hover:bg-primary-600 transition-colors shadow-sm">${shop.action}</button>
+    </div>`;
+  }).join('');
+}
+
+function alertToggleTokenBanner() {
+  const banner = document.getElementById('tokenAlertBanner');
+  const arrow = document.getElementById('tokenBannerArrow');
+  banner.classList.toggle('collapsed');
+  if (banner.classList.contains('collapsed')) {
+    arrow.style.transform = 'rotate(-90deg)';
+  } else {
+    arrow.style.transform = 'rotate(0deg)';
+  }
+}
+
+// ============ 多选下拉 ============
+function alertRenderMultiSelectOptions() {
+  // 店铺选项
+  const allShops = [...new Set(alertExceptionData.map(i => i.shop))];
+  const shopDropdown = document.getElementById('shopSelectDropdown');
+  shopDropdown.innerHTML = allShops.map(shop => {
+    const selected = alertCurrentFilters.shops.includes(shop);
+    return `
+    <div class="multi-select-option ${selected ? 'selected' : ''}" onclick="alertToggleShopFilter('${shop}')">
+      <span class="check-icon">${selected ? '<svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}</span>
+      <span>${shop}</span>
+    </div>`;
+  }).join('');
+
+  // 异常类型选项
+  const allTypes = [...new Set(alertExceptionData.map(i => i.type))];
+  const typeDropdown = document.getElementById('typeSelectDropdown');
+  typeDropdown.innerHTML = allTypes.map(type => {
+    const selected = alertCurrentFilters.alertTypes.includes(type);
+    return `
+    <div class="multi-select-option ${selected ? 'selected' : ''}" onclick="alertToggleTypeFilter('${type}')">
+      <span class="check-icon">${selected ? '<svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>' : ''}</span>
+      <span>${type}</span>
+    </div>`;
+  }).join('');
+
+  // 更新标签
+  alertUpdateSelectLabels();
+}
+
+function alertUpdateSelectLabels() {
+  const shopLabel = document.getElementById('shopSelectLabel');
+  const typeLabel = document.getElementById('typeSelectLabel');
+  if (alertCurrentFilters.shops.length === 0) {
+    shopLabel.textContent = '全部店铺';
+    shopLabel.className = '';
+  } else {
+    shopLabel.textContent = alertCurrentFilters.shops.length + ' 个店铺';
+    shopLabel.className = 'text-primary-600 font-semibold';
+  }
+  if (alertCurrentFilters.alertTypes.length === 0) {
+    typeLabel.textContent = '全部类型';
+    typeLabel.className = '';
+  } else {
+    typeLabel.textContent = alertCurrentFilters.alertTypes.length + ' 种类型';
+    typeLabel.className = 'text-primary-600 font-semibold';
+  }
+}
+
+function alertToggleMultiSelect(id) {
+  const dropdown = document.getElementById(id + 'Dropdown');
+  const trigger = document.querySelector('#' + id + ' .multi-select-trigger');
+  const isOpen = dropdown.classList.contains('show');
+  // 关闭所有
+  document.querySelectorAll('.multi-select-dropdown.show').forEach(d => d.classList.remove('show'));
+  document.querySelectorAll('.multi-select-trigger.active').forEach(t => t.classList.remove('active'));
+  if (!isOpen) {
+    dropdown.classList.add('show');
+    trigger.classList.add('active');
+  }
+}
+
+function alertToggleShopFilter(shop) {
+  const idx = alertCurrentFilters.shops.indexOf(shop);
+  if (idx >= 0) {
+    alertCurrentFilters.shops.splice(idx, 1);
+  } else {
+    alertCurrentFilters.shops.push(shop);
+  }
+  alertRenderMultiSelectOptions();
+  alertApplyFilters();
+}
+
+function alertToggleTypeFilter(type) {
+  const idx = alertCurrentFilters.alertTypes.indexOf(type);
+  if (idx >= 0) {
+    alertCurrentFilters.alertTypes.splice(idx, 1);
+  } else {
+    alertCurrentFilters.alertTypes.push(type);
+  }
+  alertRenderMultiSelectOptions();
+  alertApplyFilters();
+}
+
+function alertFilterPaid() {
+  alertCurrentFilters.onlyPaid = document.getElementById('onlyPaidCheckbox').checked;
+  alertApplyFilters();
+}
+
+// ============ 排序逻辑 ============
+function alertToggleSort() {
+  if (alertCurrentFilters.sortOrder === 'asc') {
+    alertCurrentFilters.sortOrder = 'desc';
+  } else {
+    alertCurrentFilters.sortOrder = 'asc';
+  }
+  alertUpdateSortUI();
+  alertApplyFilters();
+}
+
+function alertUpdateSortUI() {
+  const th = document.getElementById('sortThLatestShipTime');
+  th.classList.remove('sort-asc', 'sort-desc');
+  th.classList.add(alertCurrentFilters.sortOrder === 'asc' ? 'sort-asc' : 'sort-desc');
+}
+
+// ============ 渲染表格 ============
 function alertRenderTable(data) {
   const tbody = document.getElementById('tableBody');
   const emptyState = document.getElementById('emptyState');
   const pagination = document.getElementById('pagination');
   const resultCount = document.getElementById('resultCount');
+  const paginationTotal = document.getElementById('paginationTotal');
 
   if (data.length === 0) {
     tbody.innerHTML = '';
@@ -1269,11 +1587,27 @@ function alertRenderTable(data) {
   emptyState.classList.add('hidden');
   pagination.style.display = 'flex';
   resultCount.textContent = `显示 ${data.length} 条异常`;
+  if (paginationTotal) paginationTotal.textContent = data.length;
+
+  // 判断是否已过期（用当前时间对比）
+  const now = new Date();
 
   tbody.innerHTML = data.map(item => {
     const actionBtn = alertGetActionBtn(item);
     const checked = alertSelectedIds.has(item.id) ? 'checked' : '';
     const checkedStyle = alertSelectedIds.has(item.id) ? 'background:#3B82F6;border-color:#3B82F6;' : '';
+
+    // 最晚发货时间 - 判断是否过期
+    const shipTime = item.latestShipTime || '';
+    let shipTimeClass = 'text-gray-600';
+    let shipTimeHtml = shipTime;
+    if (shipTime) {
+      const shipDate = new Date(shipTime.replace(/-/g, '/'));
+      if (shipDate < now) {
+        shipTimeClass = 'ship-time-expired';
+        shipTimeHtml = shipTime + ' <span class="text-[10px]">(已过期)</span>';
+      }
+    }
 
     return `
     <tr class="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors ${item.rowClass}" data-id="${item.id}" onclick="alertHandleRowClick(event, ${item.id})">
@@ -1296,6 +1630,9 @@ function alertRenderTable(data) {
       </td>
       <td class="text-left">
         <span class="reason-text text-gray-500 text-xs" title="${item.reason}">${item.reason}</span>
+      </td>
+      <td class="text-left">
+        <span class="${shipTimeClass} text-xs font-mono">${shipTimeHtml}</span>
       </td>
       <td class="text-left">${actionBtn}</td>
     </tr>
@@ -1326,23 +1663,57 @@ function alertGetActionBtn(item) {
   return btnMap[type] || '<button onclick="event.stopPropagation();alertHandleAction(\'detail\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">查看详情</button>';
 }
 
-// ============ 筛选逻辑（platform无"all"选项） ============
+// ============ 筛选逻辑 ============
 function alertApplyFilters() {
+  let filtered = alertGetFilteredData();
+  alertRenderTable(filtered);
+  alertUpdateBatchStageButtons();
+}
+
+function alertGetFilteredData() {
   let filtered = alertExceptionData;
 
+  // 环节筛选
   if (alertCurrentFilters.stage !== 'all') {
     filtered = filtered.filter(i => i.stage === alertCurrentFilters.stage);
   }
+  // 平台筛选
   if (alertCurrentFilters.platform) {
     filtered = filtered.filter(i => i.platform === alertCurrentFilters.platform);
   }
+  // 搜索
   if (alertCurrentFilters.search) {
     const q = alertCurrentFilters.search.toLowerCase();
     filtered = filtered.filter(i => i.orderNo.toLowerCase().includes(q));
   }
+  // 店铺筛选
+  if (alertCurrentFilters.shops.length > 0) {
+    filtered = filtered.filter(i => alertCurrentFilters.shops.includes(i.shop));
+  }
+  // 异常类型筛选
+  if (alertCurrentFilters.alertTypes.length > 0) {
+    filtered = filtered.filter(i => alertCurrentFilters.alertTypes.includes(i.type));
+  }
+  // 只看我付款订单
+  if (alertCurrentFilters.onlyPaid) {
+    filtered = filtered.filter(i => i.paymentStatus === 'paid');
+  }
+  // 排序
+  if (alertCurrentFilters.sortField) {
+    const dir = alertCurrentFilters.sortOrder === 'asc' ? 1 : -1;
+    filtered.sort((a, b) => {
+      const tA = a.latestShipTime || '';
+      const tB = b.latestShipTime || '';
+      if (!tA && !tB) return 0;
+      if (!tA) return 1;
+      if (!tB) return -1;
+      const dA = new Date(tA.replace(/-/g, '/'));
+      const dB = new Date(tB.replace(/-/g, '/'));
+      return (dA - dB) * dir;
+    });
+  }
 
-  alertRenderTable(filtered);
-  alertUpdateBatchStageButtons();
+  return filtered;
 }
 
 function alertFilterStage(val) {
@@ -1374,8 +1745,6 @@ function alertUpdateBatchStageButtons() {
   const container = document.getElementById('stageBatchBtns');
   const stage = alertCurrentFilters.stage;
   const hasSelection = alertSelectedIds.size > 0;
-  // disabled状态：灰色背景+灰色文字+禁止点击
-  // enabled状态：按类型着色（重推蓝色、关闭/部分取消红色）
   const disabledCls = 'bg-gray-200 text-gray-400 cursor-not-allowed';
   let html = '';
   if (stage === 'pending') {
@@ -1440,7 +1809,6 @@ function alertUpdateBatchUI() {
   const btnClearSel = document.getElementById('btnClearSel');
   selectedCountEl.textContent = count;
   const hasSelection = count > 0;
-  // 批量复制按钮：选中时可用，未选中时置灰
   if (hasSelection) {
     btnBatchCopy.className = 'px-3 py-1.5 text-xs font-medium bg-primary-50 text-primary-600 rounded-lg cursor-pointer hover:bg-primary-100 transition-colors flex items-center gap-1';
     btnBatchCopy.disabled = false;
@@ -1452,7 +1820,6 @@ function alertUpdateBatchUI() {
     btnClearSel.className = 'px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed transition-colors';
     btnClearSel.disabled = true;
   }
-  // 同步更新环节专属按钮的disabled状态
   alertUpdateBatchStageButtons();
 }
 
@@ -1470,17 +1837,6 @@ function alertBatchCopyOrders() {
   navigator.clipboard.writeText(orderNos.join('\n')).then(() => {
     showToast(`已复制 ${orderNos.length} 个订单号到剪贴板`);
   });
-}
-
-function alertGetFilteredData() {
-  let filtered = alertExceptionData;
-  if (alertCurrentFilters.stage !== 'all') filtered = filtered.filter(i => i.stage === alertCurrentFilters.stage);
-  if (alertCurrentFilters.platform) filtered = filtered.filter(i => i.platform === alertCurrentFilters.platform);
-  if (alertCurrentFilters.search) {
-    const q = alertCurrentFilters.search.toLowerCase();
-    filtered = filtered.filter(i => i.orderNo.toLowerCase().includes(q));
-  }
-  return filtered;
 }
 
 // ============ 操作处理 ============
@@ -1529,6 +1885,9 @@ function alertCloseAllDevNotes() {
 
 // ============ 初始化渲染 ============
 renderDashboard();
+alertRenderTokenBanner();
+alertRenderMultiSelectOptions();
+alertUpdateSortUI();
 alertApplyFilters();
 
 // ============ 窗口resize时重绘ECharts ============
