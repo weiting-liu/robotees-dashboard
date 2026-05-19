@@ -79,7 +79,7 @@
       transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, padding 0.3s ease;
     }
     .drilldown-section.open {
-      max-height: 800px;
+      max-height: 1200px;
       opacity: 1;
     }
 
@@ -309,16 +309,24 @@
       gap: 8px;
     }
 
-    /* 监控卡片展开区域 */
-    .monitor-expand {
+    /* 监控卡片选中高亮 */
+    .monitor-card.selected {
+      outline: 2px solid #3B82F6;
+      outline-offset: 0;
+    }
+
+    /* 下钻面板（卡片外部全宽） */
+    .monitor-drilldown-panel {
       overflow: hidden;
       max-height: 0;
       opacity: 0;
-      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin 0.3s ease;
+      margin-top: 0;
     }
-    .monitor-expand.open {
-      max-height: 500px;
+    .monitor-drilldown-panel.open {
+      max-height: 600px;
       opacity: 1;
+      margin-top: 16px;
     }
 
     /* 运营跟进-流转状态分组标题 */
@@ -505,6 +513,12 @@
               </div>
               <div class="text-3xl font-extrabold text-emerald-700 tracking-tight" style="font-variant-numeric:tabular-nums" id="logistics_ordered">643</div>
               <div id="logistics_ordered_warn" class="mt-1.5 text-[11px] font-semibold"></div>
+              <div class="mt-2 pt-2 border-t border-emerald-200/60 flex items-center gap-1.5 cursor-pointer" onclick="event.stopPropagation();toggleDrilldown('unsyncedOmp')">
+                <span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span>
+                <span class="text-[11px] font-medium text-orange-600">未同步OMP面单</span>
+                <span class="text-[11px] font-bold text-orange-700 num-col" id="logistics_unsynced_omp">15</span>
+                <svg class="w-3 h-3 text-orange-400 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </div>
             </div>
             <!-- 下单失败 -->
             <div class="bg-red-50/60 border border-red-100 rounded-xl p-4 relative overflow-hidden cursor-pointer" onclick="toggleDrilldown('failed')">
@@ -604,6 +618,41 @@
               </div>
             </div>
           </div>
+          <!-- 下钻：未同步OMP面单 -->
+          <div id="drilldownUnsyncedOmp" class="drilldown-section border-t border-gray-100">
+            <div class="p-5 bg-gray-50/30">
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+                  <span class="w-1 h-4 bg-orange-400 rounded-full"></span>
+                  已下单未同步OMP物流面单<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">已下单但未同步OMP物流面单的订单列表，需关注同步状态</span></span>
+                </h4>
+                <div class="flex items-center gap-2">
+                  <button onclick="copyUnsyncedOmpOrderNos()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    复制订单号
+                  </button>
+                  <button onclick="toggleDrilldown('unsyncedOmp')" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
+                    收起 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-xs data-table">
+                  <colgroup><col style="width:25%"><col style="width:25%"><col style="width:15%"><col style="width:20%"><col style="width:15%"></colgroup>
+                  <thead>
+                    <tr class="border-b border-gray-200/60">
+                      <th class="text-left font-semibold">客户名称</th>
+                      <th class="text-left font-semibold">订单号</th>
+                      <th class="text-left font-semibold">物流商</th>
+                      <th class="text-left font-semibold">物流产品</th>
+                      <th class="text-left font-semibold">下单时间</th>
+                    </tr>
+                  </thead>
+                  <tbody id="unsyncedOmpTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -645,6 +694,10 @@
             <!-- Tab2: 系统监控异常 -->
             <div id="systemMonitorPanel" style="display:none">
               <div class="grid grid-cols-4 gap-4" id="sysMonitorContent"></div>
+              <!-- 下钻面板：卡片外部全宽 -->
+              <div id="monitorDrilldownPanel" class="monitor-drilldown-panel bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+                <div id="monitorDrilldownInner" class="p-5"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -1082,6 +1135,17 @@ const platformData = {
         { reason: '地址信息不完整', count: 12, pct: 28.6 },
         { reason: '面单生成失败', count: 8, pct: 19.0 },
         { reason: '其他', count: 7, pct: 16.7 },
+      ],
+      unsyncedOmpLabel: 15,
+      unsyncedOmpLabelRows: [
+        { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767', carrier: 'USPS', product: 'Ground Advantage', orderTime: '2025-01-15 09:23:45' },
+        { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-05183274608391234', carrier: 'USPS', product: 'Priority Mail', orderTime: '2025-01-15 10:05:12' },
+        { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-07251938460125478', carrier: 'UPS', product: 'Ground', orderTime: '2025-01-15 08:47:33' },
+        { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-01538472609184563', carrier: 'FedEx', product: 'Ground', orderTime: '2025-01-15 11:12:08' },
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245', carrier: 'DHL', product: 'eCommerce', orderTime: '2025-01-15 09:58:21' },
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839', carrier: 'USPS', product: 'Ground Advantage', orderTime: '2025-01-15 10:34:56' },
+        { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09481726350481923', carrier: 'UPS', product: 'Ground', orderTime: '2025-01-15 12:01:44' },
+        { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-08372619450371826', carrier: 'FedEx', product: 'Ground', orderTime: '2025-01-15 11:45:30' },
       ]
     },
     operationAlerts: {
@@ -1118,6 +1182,11 @@ const platformData = {
         status: 'danger', count: 3, lastTime: '14:32:05',
         items: [
           { type: '订单解析异常', count: 3, detail: '3个店铺拉单接口返回解析异常' },
+        ],
+        orderList: [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767', reason: '订单解析异常' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-07251938460125478', reason: '订单解析异常' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245', reason: '订单解析异常' },
         ]
       },
       confirmException: {
@@ -1125,35 +1194,64 @@ const platformData = {
         items: [
           { type: '主数据绑定超时', count: 5, detail: '5单主数据绑定超过2小时' },
           { type: '胚衣sku被禁', count: 3, detail: '3单胚衣sku被禁无法确认' },
+        ],
+        orderList: [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-05183274608391234', reason: '主数据绑定超时' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-01538472609184563', reason: '主数据绑定超时' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839', reason: '主数据绑定超时' },
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04826173958102476', reason: '胚衣sku被禁' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-08372619450371826', reason: '胚衣sku被禁' },
         ]
       },
       pushException: {
         status: 'danger', count: 46, lastTime: '13:45:22',
         items: [
           { type: '超时未推送', count: 46, detail: '46单超时未推送至工厂' },
+        ],
+        orderList: [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09481726350481923', reason: '超时未推送至工厂' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-01483629570146382', reason: '超时未推送至工厂' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-02614738592048157', reason: '超时未推送至工厂' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05930482176495013', reason: '超时未推送至工厂' },
         ]
       },
       processException: {
         status: 'warn', count: 6, lastTime: '12:30:18',
         items: [
           { type: '无可履约工厂', count: 6, detail: '6单无可履约工厂分配' },
+        ],
+        orderList: [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04826173958102476', reason: '无可履约工厂分配' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-07251938460125478', reason: '无可履约工厂分配' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839', reason: '无可履约工厂分配' },
         ]
       },
       acceptException: {
         status: 'warn', count: 5, lastTime: '12:20:15',
         items: [
           { type: '超时未接单', count: 5, detail: '5单停留待接单状态超过1小时' },
+        ],
+        orderList: [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767', reason: '超时未接单' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-01538472609184563', reason: '超时未接单' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245', reason: '超时未接单' },
         ]
       },
       productionException: {
         status: 'danger', count: 4, lastTime: '11:50:30',
         items: [
           { type: '面单未同步', count: 4, detail: '4单面单未同步至OMP' },
+        ],
+        orderList: [
+          { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-09481726350481923', reason: '面单未同步至OMP' },
+          { name: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-08372619450371826', reason: '面单未同步至OMP' },
+          { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-01593847261039284', reason: '面单未同步至OMP' },
         ]
       },
       shipException: {
         status: 'normal', count: 0, lastTime: '-',
-        items: []
+        items: [],
+        orderList: []
       }
     }
   },
@@ -1193,6 +1291,12 @@ const platformData = {
       ],
       failedRows: [
         { reason: '地址信息不完整', count: 1, pct: 100 },
+      ],
+      unsyncedOmpLabel: 3,
+      unsyncedOmpLabelRows: [
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245', carrier: 'DHL', product: 'eCommerce', orderTime: '2025-01-15 10:15:33' },
+        { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767', carrier: 'USPS', product: 'Ground Advantage', orderTime: '2025-01-15 11:22:18' },
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839', carrier: 'FedEx', product: 'Ground', orderTime: '2025-01-15 09:48:05' },
       ]
     },
     operationAlerts: {
@@ -1209,17 +1313,22 @@ const platformData = {
       maskError: []
     },
     systemMonitor: {
-      pullException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      confirmException: { status: 'normal', count: 0, lastTime: '-', items: [] },
+      pullException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      confirmException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
       pushException: { status: 'warn', count: 2, lastTime: '10:22:15', items: [
         { type: '超时未推送', count: 2, detail: '2单超时未推送至工厂' },
+      ], orderList: [
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-03751928460571839', reason: '超时未推送至工厂' },
+        { name: '拍歐德國際貿易有限公司', orderNo: 'PO-211-04259049615993767', reason: '超时未推送至工厂' },
       ] },
-      processException: { status: 'normal', count: 0, lastTime: '-', items: [] },
+      processException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
       acceptException: { status: 'warn', count: 1, lastTime: '09:15:30', items: [
         { type: '超时未接单', count: 1, detail: '1单停留待接单状态超过1小时' },
+      ], orderList: [
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-06894321753081245', reason: '超时未接单' },
       ] },
-      productionException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      shipException: { status: 'normal', count: 0, lastTime: '-', items: [] }
+      productionException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      shipException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] }
     }
   },
   qink: {
@@ -1255,6 +1364,10 @@ const platformData = {
         { carrier: 'FedEx', product: 'Ground', count: 2, fee: '$5.50', pct: 20.0, warn: false },
       ],
       failedRows: [],
+      unsyncedOmpLabel: 1,
+      unsyncedOmpLabelRows: [
+        { name: '广州尔棉贸易有限公司', orderNo: 'PO-211-05930482176495013', carrier: 'DHL', product: 'eCommerce', orderTime: '2025-01-15 14:05:22' },
+      ]
     },
     operationAlerts: {
       unpaid: [],
@@ -1266,13 +1379,13 @@ const platformData = {
       maskError: []
     },
     systemMonitor: {
-      pullException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      confirmException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      pushException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      processException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      acceptException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      productionException: { status: 'normal', count: 0, lastTime: '-', items: [] },
-      shipException: { status: 'normal', count: 0, lastTime: '-', items: [] }
+      pullException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      confirmException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      pushException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      processException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      acceptException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      productionException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] },
+      shipException: { status: 'normal', count: 0, lastTime: '-', items: [], orderList: [] }
     }
   }
 };
@@ -1318,8 +1431,8 @@ function switchPlatform(platform) {
   activeBtn.classList.add('active');
   // 收起所有下钻
   closeAllDrilldowns();
-  // 收起监控卡片展开
-  document.querySelectorAll('.monitor-expand').forEach(el => el.classList.remove('open'));
+  // 收起监控卡片下钻
+  closeMonitorDrilldown();
   // 重置客户筛选
   alertCustomerFilter = '';
   renderAll();
@@ -1330,6 +1443,7 @@ function closeAllDrilldowns() {
   document.getElementById('drilldownOrdered').classList.remove('open');
   document.getElementById('drilldownFailed').classList.remove('open');
   document.getElementById('drilldownPending').classList.remove('open');
+  document.getElementById('drilldownUnsyncedOmp').classList.remove('open');
   funnelSelectedLayer = null;
   document.querySelectorAll('.funnel-layer').forEach(el => el.classList.remove('selected'));
 }
@@ -1339,7 +1453,7 @@ function closeAllDrilldowns() {
 
 // ============ 模块2：物流下单下钻 ============
 function toggleDrilldown(type) {
-  const idMap = { ordered: 'drilldownOrdered', failed: 'drilldownFailed', pending: 'drilldownPending' };
+  const idMap = { ordered: 'drilldownOrdered', failed: 'drilldownFailed', pending: 'drilldownPending', unsyncedOmp: 'drilldownUnsyncedOmp' };
   const el = document.getElementById(idMap[type]);
   // 关闭其他
   Object.keys(idMap).forEach(k => { if (k !== type) document.getElementById(idMap[k]).classList.remove('open'); });
@@ -1348,6 +1462,7 @@ function toggleDrilldown(type) {
     if (type === 'ordered') { renderOrderedTable(); }
     else if (type === 'failed') renderFailedTable();
     else if (type === 'pending') renderPendingTable();
+    else if (type === 'unsyncedOmp') renderUnsyncedOmpTable();
   }
 }
 
@@ -1425,6 +1540,78 @@ function renderFailedTable() {
       </div>
     </td>
   </tr>`).join('');
+}
+
+// ============ 模块2：未同步OMP面单下钻 ============
+function renderUnsyncedOmpTable() {
+  const data = platformData[currentPlatform].logistics.unsyncedOmpLabelRows || [];
+  const tbody = document.getElementById('unsyncedOmpTableBody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-sm text-gray-400">暂无未同步OMP面单订单 ✅</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(row => `<tr class="hover:bg-gray-50/80 transition-colors">
+    <td class="text-left text-gray-700 font-medium">${row.name}</td>
+    <td class="text-left text-gray-600 font-mono">${row.orderNo}</td>
+    <td class="text-left text-gray-600">${row.carrier}</td>
+    <td class="text-left text-gray-600">${row.product}</td>
+    <td class="text-left text-gray-500 font-mono">${row.orderTime}</td>
+  </tr>`).join('');
+}
+
+// ============ 复制订单号功能 ============
+function copyOrderNos(orderNos, label) {
+  const text = orderNos.join('\n');
+  navigator.clipboard.writeText(text).then(() => {
+    alertShowToast('已复制' + orderNos.length + '个订单号');
+  }).catch(() => {
+    // fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alertShowToast('已复制' + orderNos.length + '个订单号');
+  });
+}
+
+function copyUnsyncedOmpOrderNos() {
+  const data = platformData[currentPlatform].logistics.unsyncedOmpLabelRows || [];
+  const orderNos = data.map(r => r.orderNo);
+  if (orderNos.length === 0) { alertShowToast('暂无可复制的订单号'); return; }
+  copyOrderNos(orderNos);
+}
+
+function copyOpAlertOrderNos(alertKey) {
+  let items = platformData[currentPlatform].operationAlerts[alertKey] || [];
+  if (alertCustomerFilter) {
+    items = items.filter(r => r.name === alertCustomerFilter);
+  }
+  const orderNos = items.map(r => r.orderNo);
+  if (orderNos.length === 0) { alertShowToast('暂无可复制的订单号'); return; }
+  copyOrderNos(orderNos);
+}
+
+function copySysMonAllOrderNos(catKey) {
+  const catData = platformData[currentPlatform].systemMonitor[catKey] || { orderList: [] };
+  const orderList = catData.orderList || [];
+  const orderNos = orderList.map(r => r.orderNo);
+  if (orderNos.length === 0) { alertShowToast('暂无可复制的订单号'); return; }
+  copyOrderNos(orderNos);
+}
+
+function toggleSysMonAllCheckboxes(catKey, checked) {
+  document.querySelectorAll('.sysmon-checkbox[data-cat="' + catKey + '"]').forEach(cb => {
+    cb.checked = checked;
+  });
+}
+
+function batchCopySysMonOrderNos(catKey) {
+  const checked = document.querySelectorAll('.sysmon-checkbox[data-cat="' + catKey + '"]:checked');
+  const orderNos = Array.from(checked).map(cb => cb.value);
+  if (orderNos.length === 0) { alertShowToast('请先勾选要复制的订单'); return; }
+  copyOrderNos(orderNos);
 }
 
 
@@ -1625,6 +1812,7 @@ function switchAlertTab(tab) {
     tabOp.classList.remove('active');
     tabSys.classList.add('active');
   }
+  closeMonitorDrilldown();
 }
 
 // ============ 运营跟进异常渲染 ============
@@ -1637,66 +1825,73 @@ const opAlertTypes = [
     btnColor: 'blue',
     actionLabel: '提醒客户',
     actionKey: 'remindCustomer',
+    showCopyBtn: true,
     devNote: '拉单后超过配置的未付款超时时长仍未付款的订单，需运营主动提醒客户付款'
   },
   {
     key: 'noLogistics',
     label: '超时未通知下物流',
     flowStatus: '生产中',
-    solution: 'OMP处理',
+    solution: '请通知OMP处理',
     btnColor: 'orange',
     actionLabel: 'OMP处理',
     actionKey: 'ompProcess',
+    showCopyBtn: true,
     devNote: '接单后超过配置的超时时长仍未通知下物流，需OMP介入处理'
   },
   {
     key: 'logisticsCallFail',
     label: '物流下call失败',
     flowStatus: '生产中',
-    solution: '客户处理&运营监控',
+    solution: '请协调客户处理',
     btnColor: 'blue',
     actionLabel: '跟进处理',
     actionKey: 'followUp',
+    showCopyBtn: false,
     devNote: '物流下单call失败，需运营主动跟进协调客户处理'
   },
   {
     key: 'noShip',
     label: '超时未发货',
     flowStatus: '生产中',
-    solution: '跟进工厂进度&主动跟客户解释',
+    solution: '请跟进工厂进度',
     btnColor: 'orange',
     actionLabel: '跟进工厂',
     actionKey: 'followFactory',
+    showCopyBtn: true,
     devNote: '付款后超过配置的超时时长仍未发货，需跟进工厂进度并主动跟客户解释'
   },
   {
     key: 'stockShortage',
     label: '库存不足',
     flowStatus: '工厂反审',
-    solution: '客户处理&运营监控',
+    solution: '请协调客户处理',
     btnColor: 'blue',
     actionLabel: '协调客户',
     actionKey: 'coordinateCustomer',
+    showCopyBtn: true,
     devNote: '工厂反审发现库存不足，需运营主动协调客户处理'
   },
   {
     key: 'prodImageError',
     label: '生产图异常',
     flowStatus: '工厂反审',
-    solution: '客户处理&运营监控',
+    solution: '请协调客户处理',
     btnColor: 'blue',
     actionLabel: '协调客户',
     actionKey: 'coordinateCustomer',
+    showCopyBtn: true,
     devNote: '工厂反审发现生产图异常，需运营主动协调客户处理'
   },
   {
     key: 'maskError',
     label: '蒙版异常',
     flowStatus: '工厂反审',
-    solution: '客户处理&运营监控',
+    solution: '请协调客户处理',
     btnColor: 'blue',
     actionLabel: '协调客户',
     actionKey: 'coordinateCustomer',
+    showCopyBtn: true,
     devNote: '工厂反审发现蒙版异常，需运营主动协调客户处理'
   }
 ];
@@ -1749,7 +1944,6 @@ function renderOperationAlerts() {
       const headerBg = isBlue ? 'bg-blue-50/80' : 'bg-orange-50/80';
       const dotColor = isBlue ? 'bg-blue-500' : 'bg-orange-400';
       const textColor = isBlue ? 'text-blue-600' : 'text-orange-600';
-      const btnBg = isBlue ? 'bg-blue-500 hover:bg-blue-600' : 'bg-orange-500 hover:bg-orange-600';
 
       if (items.length === 0) {
         html += `
@@ -1766,6 +1960,12 @@ function renderOperationAlerts() {
         return;
       }
 
+      const copyBtnHtml = alertType.showCopyBtn ? `
+        <button onclick="copyOpAlertOrderNos('${alertType.key}')" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border ${isBlue ? 'border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400' : 'border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400'} transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          复制订单号
+        </button>` : '';
+
       html += `
         <div class="op-alert-card border ${borderColor} ${bgColor}">
           <div class="op-alert-card-header ${headerBg}">
@@ -1773,17 +1973,19 @@ function renderOperationAlerts() {
             <span class="text-xs font-semibold ${textColor}">${alertType.label}</span>
             <span class="text-xs text-gray-400 ml-1">— ${alertType.solution}</span>
             <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">${alertType.devNote}</span></span>
-            <span class="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${isBlue ? 'bg-blue-200 text-blue-700' : 'bg-orange-200 text-orange-700'}">${items.length}</span>
+            <span class="ml-auto inline-flex items-center gap-2">
+              ${copyBtnHtml}
+              <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${isBlue ? 'bg-blue-200 text-blue-700' : 'bg-orange-200 text-orange-700'}">${items.length}</span>
+            </span>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full text-xs data-table">
-              <colgroup><col style="width:30%"><col style="width:35%"><col style="width:20%"><col style="width:15%"></colgroup>
+              <colgroup><col style="width:30%"><col style="width:40%"><col style="width:30%"></colgroup>
               <thead>
                 <tr class="border-b border-gray-200/60">
                   <th class="text-left font-semibold">客户名称</th>
                   <th class="text-left font-semibold">订单号</th>
                   <th class="text-right font-semibold">超时时长</th>
-                  <th class="text-center font-semibold">操作</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100/80 text-gray-700">
@@ -1791,7 +1993,6 @@ function renderOperationAlerts() {
                   <td class="text-left text-gray-700 font-medium">${r.name}</td>
                   <td class="text-left text-gray-600 font-mono">${r.orderNo}</td>
                   <td class="text-right font-bold ${textColor}">${r.overTime}</td>
-                  <td class="text-center"><button onclick="handleOpAlertAction('${alertType.actionKey}','${r.orderNo}')" class="inline-flex items-center px-2.5 py-1 rounded-lg text-[11px] font-semibold text-white ${btnBg} transition-colors shadow-sm">${alertType.actionLabel}</button></td>
                 </tr>`).join('')}
               </tbody>
             </table>
@@ -1831,6 +2032,8 @@ const sysMonitorCategories = [
   { key: 'shipException', label: '发货异常', icon: '📦', flowStatus: '已发货' },
 ];
 
+let currentMonitorKey = null;
+
 function renderSystemMonitor() {
   const data = platformData[currentPlatform].systemMonitor;
   const container = document.getElementById('sysMonitorContent');
@@ -1839,7 +2042,7 @@ function renderSystemMonitor() {
 
   let html = '';
   sysMonitorCategories.forEach(cat => {
-    const catData = data[cat.key] || { status: 'normal', count: 0, lastTime: '-', items: [] };
+    const catData = data[cat.key] || { status: 'normal', count: 0, items: [], orderList: [] };
     const status = catData.status;
     totalPoints += catData.count;
     if (status === 'danger') dangerCount += catData.count;
@@ -1850,9 +2053,10 @@ function renderSystemMonitor() {
       danger: { borderColor: 'border-red-200', bgColor: 'bg-red-50/40', dotClass: 'danger', statusText: '异常', statusColor: 'text-red-600' },
     };
     const cfg = statusConfig[status] || statusConfig.normal;
+    const isSelected = currentMonitorKey === cat.key;
 
     html += `
-      <div class="monitor-card border ${cfg.borderColor} ${cfg.bgColor} rounded-xl overflow-hidden" onclick="toggleMonitorExpand('${cat.key}')">
+      <div class="monitor-card border ${cfg.borderColor} ${cfg.bgColor} rounded-xl overflow-hidden ${isSelected ? 'selected' : ''}" onclick="toggleMonitorExpand('${cat.key}')">
         <div class="p-4">
           <div class="flex items-center justify-between mb-2">
             <div class="flex items-center gap-2">
@@ -1868,35 +2072,17 @@ function renderSystemMonitor() {
             <span class="text-2xl font-extrabold ${cfg.statusColor}" style="font-variant-numeric:tabular-nums">${catData.count}</span>
             <span class="text-xs text-gray-400">项异常</span>
           </div>
-          <div class="text-[11px] text-gray-400 flex items-center gap-1 mb-2">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            最新：${catData.lastTime}
-          </div>
           <div class="text-[10px] text-gray-400 font-medium px-1.5 py-0.5 bg-gray-100/60 rounded inline-block">${cat.flowStatus}</div>
-        </div>
-        <div id="monitorExpand_${cat.key}" class="monitor-expand border-t ${status === 'normal' ? 'border-emerald-100' : status === 'warn' ? 'border-amber-100' : 'border-red-100'}">
-          <div class="p-4 bg-white/50">
-            ${catData.items.length === 0 ? '<div class="text-center text-xs text-emerald-500 font-medium">暂无异常 ✅</div>' : `
-              <table class="w-full text-xs data-table">
-                <colgroup><col style="width:45%"><col style="width:20%"><col style="width:35%"></colgroup>
-                <thead>
-                  <tr class="border-b border-gray-200/60">
-                    <th class="text-left font-semibold">异常类型</th>
-                    <th class="text-right font-semibold">数量</th>
-                    <th class="text-left font-semibold">详情</th>
-                  </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100/80 text-gray-700">
-                  ${catData.items.map(item => '<tr class="hover:bg-gray-50/80 transition-colors"><td class="text-left font-medium text-gray-800">' + item.type + '</td><td class="text-right num-col font-bold ' + cfg.statusColor + '">' + item.count + '</td><td class="text-left text-gray-500">' + item.detail + '</td></tr>').join('')}
-                </tbody>
-              </table>
-            `}
-          </div>
         </div>
       </div>`;
   });
 
   container.innerHTML = html;
+
+  // 如果有选中的卡片，渲染下钻面板内容
+  if (currentMonitorKey) {
+    renderMonitorDrilldown(currentMonitorKey);
+  }
 
   // Update badge - show danger count
   const badge = document.getElementById('sysMonitorBadge');
@@ -1911,13 +2097,100 @@ function renderSystemMonitor() {
   badge.style.display = '';
 }
 
+function renderMonitorDrilldown(key) {
+  const data = platformData[currentPlatform].systemMonitor;
+  const cat = sysMonitorCategories.find(c => c.key === key);
+  if (!cat) return;
+  const catData = data[cat.key] || { status: 'normal', count: 0, items: [], orderList: [] };
+  const status = catData.status;
+  const orderList = catData.orderList || [];
+
+  const statusConfig = {
+    normal: { statusColor: 'text-emerald-600', borderColor: 'border-emerald-300', hoverColor: 'hover:bg-emerald-50' },
+    warn: { statusColor: 'text-amber-600', borderColor: 'border-amber-300', hoverColor: 'hover:bg-amber-50' },
+    danger: { statusColor: 'text-red-600', borderColor: 'border-red-300', hoverColor: 'hover:bg-red-50' },
+  };
+  const cfg = statusConfig[status] || statusConfig.normal;
+
+  const inner = document.getElementById('monitorDrilldownInner');
+  if (orderList.length === 0) {
+    inner.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <span class="text-lg">${cat.icon}</span>
+          ${cat.label}
+          <span class="text-xs font-normal text-gray-400">${catData.count} 项异常</span>
+        </h4>
+      </div>
+      <div class="text-center text-sm text-emerald-500 font-medium py-4">暂无异常 ✅</div>`;
+  } else {
+    inner.innerHTML = `
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <span class="text-lg">${cat.icon}</span>
+          ${cat.label}
+          <span class="text-xs font-normal text-gray-400">${catData.count} 项异常</span>
+        </h4>
+        <button onclick="copySysMonAllOrderNos('${cat.key}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border ${cfg.borderColor} ${cfg.statusColor} ${cfg.hoverColor} hover:border-opacity-80 transition-all">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          复制订单号
+        </button>
+      </div>
+      <div style="max-height:360px;overflow-y:auto">
+        <table class="w-full text-xs data-table">
+          <colgroup><col style="width:30%"><col style="width:30%"><col style="width:40%"></colgroup>
+          <thead>
+            <tr class="border-b border-gray-200/60">
+              <th class="text-left font-semibold">客户名称</th>
+              <th class="text-left font-semibold">订单号</th>
+              <th class="text-left font-semibold">异常原因</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100/80 text-gray-700">
+            ${orderList.map(item => `<tr class="hover:bg-gray-50/80 transition-colors">
+              <td class="font-medium text-gray-800">${item.name}</td>
+              <td class="text-gray-600 font-mono">${item.orderNo}</td>
+              <td class="${cfg.statusColor} font-medium">${item.reason}</td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  }
+}
+
+function closeMonitorDrilldown() {
+  currentMonitorKey = null;
+  const panel = document.getElementById('monitorDrilldownPanel');
+  if (panel) panel.classList.remove('open');
+  // 清除所有卡片的选中状态
+  document.querySelectorAll('.monitor-card.selected').forEach(el => el.classList.remove('selected'));
+}
+
 function toggleMonitorExpand(key) {
-  const el = document.getElementById('monitorExpand_' + key);
-  if (!el) return;
-  document.querySelectorAll('.monitor-expand').forEach(other => {
-    if (other.id !== 'monitorExpand_' + key) other.classList.remove('open');
-  });
-  el.classList.toggle('open');
+  const panel = document.getElementById('monitorDrilldownPanel');
+
+  if (currentMonitorKey === key) {
+    // 再次点击已选中的卡片 → 收起下钻
+    closeMonitorDrilldown();
+    return;
+  }
+
+  // 选中新卡片
+  currentMonitorKey = key;
+
+  // 更新卡片高亮
+  document.querySelectorAll('.monitor-card.selected').forEach(el => el.classList.remove('selected'));
+  const cards = document.querySelectorAll('.monitor-card');
+  const catIndex = sysMonitorCategories.findIndex(c => c.key === key);
+  if (catIndex >= 0 && cards[catIndex]) {
+    cards[catIndex].classList.add('selected');
+  }
+
+  // 渲染下钻内容
+  renderMonitorDrilldown(key);
+
+  // 展开面板
+  panel.classList.add('open');
 }
 
 // ============ 客户筛选 ============
@@ -1973,6 +2246,7 @@ function renderAll() {
   document.getElementById('logistics_pending').textContent = fmt(data.logistics.pending);
   document.getElementById('logistics_ordered').textContent = fmt(data.logistics.ordered);
   document.getElementById('logistics_failed').textContent = fmt(data.logistics.failed);
+  document.getElementById('logistics_unsynced_omp').textContent = fmt(data.logistics.unsyncedOmpLabel || 0);
   const totalOrdered = data.logistics.ordered + data.logistics.pending + data.logistics.failed;
   const failPct = totalOrdered > 0 ? (data.logistics.failed / totalOrdered * 100).toFixed(1) : '0';
   document.getElementById('logistics_failed_badge').textContent = failPct + '%';
