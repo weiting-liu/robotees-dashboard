@@ -2944,12 +2944,12 @@ function initFunnelDevNotes() {
 // ============ 初始化 ============
 renderAll();
 // ============ 异常中心 ============
-const acCustomers = ['拍歐德國際貿易有限公司', '广州天天酷衣电子贸易有限公司', '广州尔棉贸易有限公司'];
-const acShops = ['PAOUD-US', 'TTKU-EU', 'ERM-SG', 'PAOUD-UK', 'TTKU-US'];
-const acPlatforms = ['Temu', 'Shein', 'Qink'];
+var acCustomers = ['拍歐德國際貿易有限公司', '广州天天酷衣电子贸易有限公司', '广州尔棉贸易有限公司'];
+var acShops = ['PAOUD-US', 'TTKU-EU', 'ERM-SG', 'PAOUD-UK', 'TTKU-US'];
+var acPlatforms = ['Temu', 'Shein', 'Qink'];
 
 // ============ Mock数据 ============
-const acMockData = (function() {
+var acMockData = (function() {
   const data = [];
   let id = 1;
   const now = new Date();
@@ -3014,8 +3014,8 @@ const acMockData = (function() {
 })();
 
 // ============ 库存异常数据 ============
-let acInventoryLastRefresh = Date.now() - 5 * 60 * 1000; // 5分钟前
-const acInventoryAlerts = [
+var acInventoryLastRefresh = Date.now() - 5 * 60 * 1000; // 5分钟前
+var acInventoryAlerts = [
   { sku: 'TSHIRT-BLK-L', productName: 'T恤', color: '黑色', size: 'L', availableStock: -3, status: 'out_of_stock', statusText: '缺货', orderCount: 3, customers: '拍歐德、天天酷衣', orders: [
     { orderNo: 'TM20260520001', customer: '拍歐德國際貿易有限公司', orderStatus: '待处理', reason: '库存不足无法生产' },
     { orderNo: 'TM20260520005', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' },
@@ -3039,12 +3039,12 @@ const acInventoryAlerts = [
 ];
 
 // ============ 筛选状态 ============
-let acCurrentFilters = { mainTab: 'customer', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [] };
-let acSelectedIds = new Set();
-let acGroupStates = {}; // 记录各组折叠状态
+var acCurrentFilters = { mainTab: 'customer', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [] };
+var acSelectedIds = new Set();
+var acGroupStates = {}; // 记录各组折叠状态
 
 // ============ 店铺连接异常数据 ============
-const acTokenAlertShops = [
+var acTokenAlertShops = [
   { customer: '拍歐德國際貿易有限公司', name: '拍歐德-主店', platform: 'Temu', status: 'Token失效', statusColor: 'danger' },
   { customer: '拍歐德國際貿易有限公司', name: '拍歐德-分店A', platform: 'Shein', status: 'Token即将失效', statusColor: 'warn' },
   { customer: '广州天天酷衣电子贸易有限公司', name: '潮酷服饰专营店', platform: 'Temu', status: 'Token失效', statusColor: 'danger' },
@@ -3146,7 +3146,7 @@ function acUpdateTypeCount() {
 }
 
 // 订单状态多选
-const acStatusOptions = ['待确认', '待付款', '待推送', '待处理', '待工厂接单', '生产中', '工厂反审', '已发货'];
+var acStatusOptions = ['待确认', '待付款', '待推送', '待处理', '待工厂接单', '生产中', '工厂反审', '已发货'];
 
 function acToggleStatusPanel() {
   const panel = document.getElementById('acStatusPanel');
@@ -3843,23 +3843,8 @@ function acCopyShopNames() {
 }
 
 // ============ 初始化 ============
-// DEBUG: 挂载到window以便调试
-window._acMockData = acMockData;
-window._acCurrentFilters = acCurrentFilters;
-window._acInventoryAlerts = acInventoryAlerts;
-try {
-  console.log('[AC-DEBUG] acMockData.length:', acMockData.length);
-  console.log('[AC-DEBUG] acCurrentFilters:', JSON.stringify(acCurrentFilters));
-  console.log('[AC-DEBUG] Temu ops_follow:', acMockData.filter(d => d.stage === 'ops_follow' && d.platform === 'Temu').length);
-  console.log('[AC-DEBUG] Temu sys_monitor:', acMockData.filter(d => d.stage === 'sys_monitor' && d.platform === 'Temu').length);
-  console.log('[AC-DEBUG] acInventoryAlerts.length:', acInventoryAlerts.length);
-} catch(e) {
-  console.error('[AC-DEBUG] Error during init debug:', e.message, e.stack);
-}
 acRenderTokenBanner();
 acRenderCurrentTab();
-console.log('[AC-DEBUG] After render - customerCount:', document.getElementById('acTabCountCustomer').textContent);
-console.log('[AC-DEBUG] After render - customerHTML length:', document.getElementById('acCustomerAlertsContainer').innerHTML.length);
 
 // 点击外部关闭多选面板
 document.addEventListener('click', function(e) {
