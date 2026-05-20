@@ -699,15 +699,14 @@
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full text-xs data-table">
-                  <colgroup><col style="width:30%"><col style="width:15%"><col style="width:20%"><col style="width:20%"><col style="width:15%"></colgroup>
+                  <colgroup><col style="width:35%"><col style="width:15%"><col style="width:25%"><col style="width:25%"></colgroup>
                   <thead>
                     <tr class="border-b border-gray-200/60">
                       <th class="text-left font-semibold">店铺名称</th>
                       <th class="text-left font-semibold">平台</th>
                       <th class="text-left font-semibold">状态</th>
                       <th class="text-left font-semibold">时间</th>
-                      <th class="text-left font-semibold">操作</th>
-                    </tr>
+                      </tr>
                   </thead>
                   <tbody id="shopConnectionArea" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
                 </table>
@@ -1109,7 +1108,7 @@ function renderShopConnections() {
   const container = document.getElementById('shopConnectionArea');
   if (!container) return;
   if (!shops || shops.length === 0) {
-    container.innerHTML = '<tr><td colspan="5" class="text-center text-xs text-gray-400 py-4">当前平台无店铺连接</td></tr>';
+    container.innerHTML = '<tr><td colspan="4" class="text-center text-xs text-gray-400 py-4">当前平台无店铺连接</td></tr>';
     return;
   }
   container.innerHTML = shops.map(shop => {
@@ -1128,9 +1127,7 @@ function renderShopConnections() {
       <td class="text-left">
         <span class="text-xs text-gray-500">${shop.time}</span>
       </td>
-      <td class="text-left">
-      </td>
-    </tr>`;
+      </tr>`;
   }).join('');
 }
 
