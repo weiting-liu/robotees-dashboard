@@ -3843,8 +3843,23 @@ function acCopyShopNames() {
 }
 
 // ============ 初始化 ============
+// DEBUG: 挂载到window以便调试
+window._acMockData = acMockData;
+window._acCurrentFilters = acCurrentFilters;
+window._acInventoryAlerts = acInventoryAlerts;
+try {
+  console.log('[AC-DEBUG] acMockData.length:', acMockData.length);
+  console.log('[AC-DEBUG] acCurrentFilters:', JSON.stringify(acCurrentFilters));
+  console.log('[AC-DEBUG] Temu ops_follow:', acMockData.filter(d => d.stage === 'ops_follow' && d.platform === 'Temu').length);
+  console.log('[AC-DEBUG] Temu sys_monitor:', acMockData.filter(d => d.stage === 'sys_monitor' && d.platform === 'Temu').length);
+  console.log('[AC-DEBUG] acInventoryAlerts.length:', acInventoryAlerts.length);
+} catch(e) {
+  console.error('[AC-DEBUG] Error during init debug:', e.message, e.stack);
+}
 acRenderTokenBanner();
 acRenderCurrentTab();
+console.log('[AC-DEBUG] After render - customerCount:', document.getElementById('acTabCountCustomer').textContent);
+console.log('[AC-DEBUG] After render - customerHTML length:', document.getElementById('acCustomerAlertsContainer').innerHTML.length);
 
 // 点击外部关闭多选面板
 document.addEventListener('click', function(e) {
