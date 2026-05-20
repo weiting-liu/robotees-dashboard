@@ -3019,24 +3019,24 @@ var acMockData = (function() {
 var acInventoryLastRefresh = Date.now() - 5 * 60 * 1000; // 5分钟前
 var acInventoryAlerts = [
   { sku: 'TSHIRT-BLK-L', productName: 'T恤', color: '黑色', size: 'L', availableStock: -3, status: 'out_of_stock', statusText: '缺货', orderCount: 3, customers: '拍歐德、天天酷衣', orders: [
-    { orderNo: 'TM20260520001', customer: '拍歐德國際貿易有限公司', orderStatus: '待处理', reason: '库存不足无法生产' },
-    { orderNo: 'TM20260520005', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' },
-    { orderNo: 'TM20260520008', customer: '拍歐德國際貿易有限公司', orderStatus: '待付款', reason: '库存不足' }
+    { orderNo: 'PO-210-1000008641', customer: '拍歐德國際貿易有限公司', orderStatus: '待处理', reason: '库存不足无法生产', latestShipTime: '2026-05-21 18:00' },
+    { orderNo: 'PO-211-1000008645', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足', latestShipTime: '2026-05-21 06:00' },
+    { orderNo: 'PO-212-1000008648', customer: '拍歐德國際貿易有限公司', orderStatus: '待付款', reason: '库存不足', latestShipTime: '2026-05-21 22:00' }
   ]},
   { sku: 'HOODIE-GRY-M', productName: '卫衣', color: '灰色', size: 'M', availableStock: 2, status: 'low_stock', statusText: '库存紧张', orderCount: 2, customers: '尔棉贸易', orders: [
-    { orderNo: 'TM20260520003', customer: '广州尔棉贸易有限公司', orderStatus: '待处理', reason: '库存紧张可能无法满足' },
-    { orderNo: 'TM20260520010', customer: '广州尔棉贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' }
+    { orderNo: 'PO-208-1000008643', customer: '广州尔棉贸易有限公司', orderStatus: '待处理', reason: '库存紧张可能无法满足', latestShipTime: '2026-05-22 10:00' },
+    { orderNo: 'PO-209-1000008650', customer: '广州尔棉贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足', latestShipTime: '2026-05-21 14:00' }
   ]},
   { sku: 'MUG-CER-WHT', productName: '陶瓷马克杯', color: '白色', size: '-', availableStock: 0, status: 'out_of_stock', statusText: '缺货', orderCount: 2, customers: '天天酷衣', orders: [
-    { orderNo: 'TM20260520012', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '待付款', reason: '库存不足' },
-    { orderNo: 'TM20260520018', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' }
+    { orderNo: 'PO-215-1000008652', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '待付款', reason: '库存不足', latestShipTime: '2026-05-20 20:00' },
+    { orderNo: 'PO-216-1000008658', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足', latestShipTime: '2026-05-21 08:00' }
   ]},
   { sku: 'PHONECASE-BK-M', productName: '手机壳', color: '黑色', size: 'M', availableStock: 5, status: 'low_stock', statusText: '库存紧张', orderCount: 1, customers: '拍歐德', orders: [
-    { orderNo: 'TM20260520022', customer: '拍歐德國際貿易有限公司', orderStatus: '待处理', reason: '库存紧张可能无法满足' }
+    { orderNo: 'PO-203-1000008662', customer: '拍歐德國際貿易有限公司', orderStatus: '待处理', reason: '库存紧张可能无法满足', latestShipTime: '2026-05-22 16:00' }
   ]},
   { sku: 'CANVAS-ART-A3', productName: '帆布画', color: '-', size: 'A3', availableStock: -1, status: 'out_of_stock', statusText: '缺货', orderCount: 2, customers: '拍歐德、尔棉', orders: [
-    { orderNo: 'TM20260520030', customer: '拍歐德國際貿易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' },
-    { orderNo: 'TM20260520031', customer: '广州尔棉贸易有限公司', orderStatus: '待付款', reason: '库存不足' }
+    { orderNo: 'PO-207-1000008670', customer: '拍歐德國際貿易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足', latestShipTime: '2026-05-20 23:00' },
+    { orderNo: 'PO-204-1000008671', customer: '广州尔棉贸易有限公司', orderStatus: '待付款', reason: '库存不足', latestShipTime: '2026-05-21 12:00' }
   ]}
 ];
 
