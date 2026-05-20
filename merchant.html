@@ -36,19 +36,18 @@
       position: absolute;
       left: 0; top: 50%; transform: translateY(-50%);
       width: 3px; height: 0;
-      background: #60A5FA;
+      background: #94A3B8;
       border-radius: 0 3px 3px 0;
       transition: height 0.2s ease;
     }
-    .sidebar-item:hover { background: rgba(59,130,246,0.1); color: #93C5FD; }
-    .sidebar-item.active { background: rgba(59,130,246,0.15); color: #fff; }
+    .sidebar-item:hover { background: rgba(148,163,184,0.15); color: #CBD5E1; }
+    .sidebar-item.active { background: rgba(148,163,184,0.2); color: #fff; }
     .sidebar-item.active::before { height: 60%; }
 
     /* 脉冲动画 */
     .pulse-dot { animation: pulse 2s infinite; }
     @keyframes pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
-    .alert-badge { animation: alertPulse 1.5s ease-in-out infinite; }
-    @keyframes alertPulse { 0%,100%{ box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50%{ box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+    /* alert-badge pulse removed for compact style */
 
     /* 下钻展开/收起动画 */
     .drilldown-section {
@@ -71,7 +70,7 @@
       transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
     }
     .card-hover:hover {
-      box-shadow: 0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
     }
 
     /* 进度条 */
@@ -90,8 +89,8 @@
 
     /* 表格优化 - 不设text-align，对齐由Tailwind工具类控制 */
     .data-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
-    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 10px 16px; }
-    .data-table td { font-size: 12px; padding: 10px 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 8px 12px; }
+    .data-table td { font-size: 12px; padding: 8px 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .data-table .num-col { font-family: 'Inter', monospace; }
     .data-table thead tr { background: #F8FAFC; }
 
@@ -100,10 +99,10 @@
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 2px 8px;
-      border-radius: 6px;
+      padding: 1px 6px;
+      border-radius: 3px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 500;
     }
 
     /* 子项展开区域 */
@@ -155,11 +154,11 @@
 
     /* 异常卡片 */
     .exception-card {
-      transition: all 0.2s ease;
+      transition: background 0.15s ease;
       cursor: pointer;
     }
     .exception-card:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+      background: #F8FAFC;
     }
 
     /* 店铺连接状态 */
@@ -206,12 +205,12 @@
       position: relative;
     }
     .tab-btn.active {
-      background: linear-gradient(135deg, #3B82F6, #2563EB);
+      background: #1E293B;
       color: #fff;
-      box-shadow: 0 2px 12px rgba(59,130,246,0.35);
+      box-shadow: none;
     }
     .tab-btn:not(.active) { color: #64748B; }
-    .tab-btn:not(.active):hover { color: #3B82F6; background: rgba(59,130,246,0.08); }
+    .tab-btn:not(.active):hover { color: #334155; background: #F1F5F9; }
 
     .search-box {
       background: #F1F5F9;
@@ -220,8 +219,8 @@
     }
     .search-box:focus-within {
       background: #fff;
-      border-color: #3B82F6;
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+      border-color: #CBD5E1;
+      box-shadow: none;
     }
 
     .notification-bell { position: relative; transition: transform 0.2s ease; }
@@ -237,9 +236,9 @@
       50% { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
     }
 
-    .sev-icon { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; flex-shrink: 0; }
+    .sev-icon { display: inline-flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; font-weight: 600; }
 
-    .row-check:checked + label { background: #3B82F6; border-color: #3B82F6; }
+    .row-check:checked + label { background: #475569; border-color: #475569; }
     .row-check:checked + label svg { opacity: 1; }
 
     .detail-row { display: none; }
@@ -263,9 +262,10 @@
 
     /* 店铺连接异常横幅 */
     .token-alert-banner {
-      border: 1px solid rgba(239,68,68,0.2);
-      background: linear-gradient(135deg, #FEF2F2 0%, #FFF1F2 50%, #FFFBEB 100%);
-      border-radius: 16px;
+      border: 1px solid #E2E8F0;
+      border-left: 3px solid #EF4444;
+      background: #fff;
+      border-radius: 6px;
       overflow: hidden;
     }
     .token-alert-banner.collapsed .token-alert-body { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
@@ -278,16 +278,15 @@
     .token-shop-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px 16px;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(239,68,68,0.1);
-      border-radius: 10px;
+      gap: 10px;
+      padding: 6px 12px;
+      background: #FAFAFA;
+      border: 1px solid #F1F5F9;
+      border-radius: 4px;
       transition: all 0.2s ease;
     }
     .token-shop-item:hover {
-      box-shadow: 0 2px 8px rgba(239,68,68,0.08);
-      background: rgba(255,255,255,0.9);
+      background: #F8FAFC;
     }
 
     /* 多选下拉 */
@@ -311,7 +310,7 @@
       white-space: nowrap;
     }
     .multi-select-trigger:hover { border-color: #CBD5E1; background: #fff; }
-    .multi-select-trigger.active { border-color: #3B82F6; background: #fff; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+    .multi-select-trigger.active { border-color: #CBD5E1; background: #fff; box-shadow: none; }
     .multi-select-dropdown {
       position: absolute;
       top: calc(100% + 4px);
@@ -338,19 +337,19 @@
       transition: background 0.15s ease;
     }
     .multi-select-option:hover { background: #F1F5F9; }
-    .multi-select-option.selected { color: #3B82F6; font-weight: 600; }
+    .multi-select-option.selected { color: #334155; font-weight: 600; }
     .multi-select-option .check-icon { width: 14px; height: 14px; border: 1.5px solid #CBD5E1; border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
-    .multi-select-option.selected .check-icon { background: #3B82F6; border-color: #3B82F6; }
+    .multi-select-option.selected .check-icon { background: #475569; border-color: #475569; }
 
     /* 排序列头 */
     .sort-th { cursor: pointer; user-select: none; }
-    .sort-th:hover { color: #3B82F6; }
+    .sort-th:hover { color: #334155; }
     .sort-icon { display: inline-flex; flex-direction: column; gap: 1px; margin-left: 4px; vertical-align: middle; }
     .sort-icon .arrow-up, .sort-icon .arrow-down { width: 0; height: 0; border-left: 3.5px solid transparent; border-right: 3.5px solid transparent; }
     .sort-icon .arrow-up { border-bottom: 4px solid #CBD5E1; }
     .sort-icon .arrow-down { border-top: 4px solid #CBD5E1; }
-    .sort-asc .sort-icon .arrow-up { border-bottom-color: #3B82F6; }
-    .sort-desc .sort-icon .arrow-down { border-top-color: #3B82F6; }
+    .sort-asc .sort-icon .arrow-up { border-bottom-color: #334155; }
+    .sort-desc .sort-icon .arrow-down { border-top-color: #334155; }
 
     /* 已过期的最晚发货时间 */
     .ship-time-expired { color: #EF4444; font-weight: 600; }
@@ -455,7 +454,7 @@
           <h2 class="text-base font-semibold text-gray-800">订单概览</h2>
           <span class="text-xs text-gray-400 ml-1">今日数据</span>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden card-hover">
           <div class="p-6">
             <!-- 核心指标卡 x3 -->
             <div class="grid grid-cols-3 gap-4 mb-6">
@@ -513,7 +512,7 @@
           <h2 class="text-base font-semibold text-gray-800">发货与物流</h2>
           <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">与运营看板术语保持一致：待下单、已下单、下单失败</span></span>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden card-hover">
           <!-- 3个独立数据卡 -->
           <div class="p-6 grid grid-cols-3 gap-4">
             <!-- 待发货 -->
@@ -684,12 +683,12 @@
             <h2 class="text-base font-semibold text-gray-800">异常提醒</h2>
             <span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">运营看板模块3的简化版：去掉时间线形式，改为异常汇总+快捷入口。发现异常后可跳转异常中心处理</span></span>
           </div>
-          <button onclick="merchant_switchPage('alertCenter')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold bg-primary-500 text-white hover:bg-primary-600 transition-all shadow-sm shadow-primary-500/20">
+          <button onclick="merchant_switchPage('alertCenter')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-50 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
             查看全部异常
           </button>
         </div>
-        <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
+        <div class="bg-white rounded-lg border border-gray-200 overflow-hidden card-hover">
           <div class="p-6">
 
             <!-- 店铺连接状态 - 列表式 -->
@@ -726,7 +725,7 @@
                 </div>
                 <div class="flex items-center gap-2">
                   <span class="text-xs text-gray-400">待处理异常总数</span>
-                  <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-lg font-extrabold bg-red-50 text-red-600 num-col" id="totalExceptionBadge">16</span>
+                  <span class="text-lg font-bold text-red-500 num-col" id="totalExceptionBadge">16</span>
                 </div>
               </div>
 
@@ -747,9 +746,9 @@
       <!-- ========== 平台Tab - 作用于整个异常中心 ========== -->
       <div class="flex items-center gap-4 mb-5">
         <div class="tab-capsule" id="alertPlatformFilter">
-          <button class="tab-btn active px-5 py-2 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu</button>
-          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Shein" onclick="alertFilterPlatform('Shein')">Shein</button>
-          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Qink" onclick="alertFilterPlatform('Qink')">Qink</button>
+          <button class="tab-btn active px-4 py-1.5 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu(<span id="alertTemuCount">10</span>)</button>
+          <button class="tab-btn px-4 py-1.5 text-xs font-semibold" data-platform="Shein" onclick="alertFilterPlatform('Shein')">Shein(<span id="alertSheinCount">4</span>)</button>
+          <button class="tab-btn px-4 py-1.5 text-xs font-semibold" data-platform="Qink" onclick="alertFilterPlatform('Qink')">Qink(<span id="alertQinkCount">2</span>)</button>
         </div>
       </div>
 
@@ -757,21 +756,20 @@
 
       <!-- ========== 店铺连接异常横幅（平台Tab下方） ========== -->
       <div id="tokenAlertBanner" class="token-alert-banner mb-5">
-        <div class="flex items-center justify-between px-5 py-3 cursor-pointer" onclick="alertToggleTokenBanner()">
+        <div class="flex items-center justify-between px-4 py-2.5 cursor-pointer" onclick="alertToggleTokenBanner()">
           <div class="flex items-center gap-3">
-            <span class="pulse-red w-3 h-3 bg-red-500 rounded-full inline-block flex-shrink-0"></span>
-            <span class="text-sm font-bold text-red-700">店铺连接异常</span>
-            <span id="tokenAlertCount" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-200/80 text-red-700">2</span>
-            <span class="text-xs text-red-500/80">以下店铺Token已失效或即将失效，请尽快处理</span>
+            <span class="text-sm font-semibold text-red-600">店铺连接异常</span>
+            <span id="tokenAlertCount" class="text-xs text-red-500 font-medium">2</span>
+            <span class="text-xs text-gray-400">以下店铺Token已失效或即将失效，请尽快处理</span>
           </div>
-          <svg id="tokenBannerArrow" class="w-4 h-4 text-red-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+          <svg id="tokenBannerArrow" class="w-4 h-4 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
         </div>
-        <div class="token-alert-body px-5 pb-4">
+        <div class="token-alert-body px-4 pb-3">
           <div class="space-y-2" id="tokenAlertShopList">
             <!-- 由JS渲染 -->
           </div>
-          <div class="mt-3 pt-3 border-t border-red-200/40 flex items-center justify-end">
-            <button onclick="alertCopyShopNames()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all">
+          <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-end">
+            <button onclick="alertCopyShopNames()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               复制店铺名称
             </button>
@@ -780,16 +778,16 @@
       </div>
 
       <!-- ========== 筛选区 ========== -->
-      <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] p-5 mb-6">
+      <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
         <div class="flex items-center gap-6 flex-wrap">
           <!-- 环节筛选 -->
           <div class="flex items-center gap-3">
             <span class="text-xs text-gray-400 font-medium whitespace-nowrap">环节：</span>
             <div class="tab-capsule" id="stageFilter">
-              <button class="tab-btn active px-4 py-1.5 text-xs font-semibold" data-stage="all" onclick="alertFilterStage('all')">全部</button>
-              <button class="tab-btn px-4 py-1.5 text-xs font-semibold" data-stage="pending" onclick="alertFilterStage('pending')">待处理</button>
-              <button class="tab-btn px-4 py-1.5 text-xs font-semibold" data-stage="production" onclick="alertFilterStage('production')">生产中</button>
-              <button class="tab-btn px-4 py-1.5 text-xs font-semibold" data-stage="review" onclick="alertFilterStage('review')">工厂反审</button>
+              <button class="tab-btn active px-3 py-1.5 text-xs font-semibold" data-stage="all" onclick="alertFilterStage('all')">全部(<span id="alertStageAllCount">16</span>)</button>
+              <button class="tab-btn px-3 py-1.5 text-xs font-semibold" data-stage="pending" onclick="alertFilterStage('pending')">待处理(<span id="alertStagePendingCount">5</span>)</button>
+              <button class="tab-btn px-3 py-1.5 text-xs font-semibold" data-stage="production" onclick="alertFilterStage('production')">生产中(<span id="alertStageProductionCount">3</span>)</button>
+              <button class="tab-btn px-3 py-1.5 text-xs font-semibold" data-stage="review" onclick="alertFilterStage('review')">工厂反审(<span id="alertStageReviewCount">8</span>)</button>
             </div>
           </div>
 
@@ -826,19 +824,19 @@
 
           <!-- 只看我付款订单 -->
           <label class="flex items-center gap-2 cursor-pointer select-none">
-            <input type="checkbox" id="onlyPaidCheckbox" class="w-4 h-4 rounded border-gray-300 text-primary-500 focus:ring-primary-500 cursor-pointer" onchange="alertFilterPaid()" />
+            <input type="checkbox" id="onlyPaidCheckbox" class="w-4 h-4 rounded border-gray-300 text-gray-600 focus:ring-gray-400 cursor-pointer" onchange="alertFilterPaid()" />
             <span class="text-xs font-medium text-gray-600">只看我付款订单</span>
           </label>
         </div>
       </div>
 
 <!-- ========== 批量操作 ========== -->
-      <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] px-5 py-3 mb-4 flex items-center justify-between">
+      <div class="bg-white rounded-lg border border-gray-200 px-4 py-2.5 mb-3 flex items-center justify-between">
 <!-- 批量操作 -->
         <div class="flex items-center justify-between ">
           <span class="text-xs text-gray-500" id="resultCount">显示 16 条异常</span>
           <div class="flex items-center gap-2 flex-nowrap" id="batchActions">
-            <span class="text-xs text-gray-400">已选 <strong id="selectedCount" class="text-primary-500">0</strong> 条</span>
+            <span class="text-xs text-gray-400">已选 <strong id="selectedCount" class="text-gray-700">0</strong> 条</span>
             <!-- 环节专属批量按钮 - flex不换行 -->
             <span id="stageBatchBtns" class="flex items-center gap-2 flex-nowrap">
               <!-- 由JS动态渲染 -->
@@ -853,27 +851,29 @@
       </div>
 
       <!-- ========== 异常列表表格 ========== -->
-      <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden">
+      <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="data-table" id="exceptionTable">
             <colgroup>
               <col style="width:50px;">
-              <col style="width:150px;">
+              <col style="width:140px;">
               <col style="width:200px;">
+              <col style="width:130px;">
               <col style="width:auto;">
-              <col style="width:150px;">
-              <col style="width:200px;">
+              <col style="width:140px;">
+              <col style="width:160px;">
             </colgroup>
             <thead>
               <tr>
                 <th class="text-left pl-4 pr-0">
                   <input type="checkbox" id="selectAll" class="row-check hidden" onchange="alertToggleSelectAll()" />
-                  <label for="selectAll" class="w-4 h-4 border-2 border-gray-300 rounded cursor-pointer flex items-center justify-center hover:border-primary-500 transition-colors">
+                  <label for="selectAll" class="w-4 h-4 border-2 border-gray-300 rounded cursor-pointer flex items-center justify-center hover:border-gray-400 transition-colors">
                     <svg class="w-2.5 h-2.5 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
                   </label>
                 </th>
                 <th class="text-left">异常类型</th>
                 <th class="text-left">订单号</th>
+                <th class="text-left">店铺</th>
                 <th class="text-left">异常原因</th>
                 <th class="text-left sort-th" onclick="alertToggleSort()" id="sortThLatestShipTime">
                   最晚发货时间
@@ -905,7 +905,7 @@
           </div>
           <div class="flex items-center gap-1">
             <button class="px-3 py-1.5 text-xs text-gray-400 bg-gray-50 rounded-lg border border-gray-200 cursor-not-allowed" disabled>上一页</button>
-            <button class="px-3 py-1.5 text-xs bg-primary-500 text-white rounded-lg shadow-sm shadow-primary-500/30">1</button>
+            <button class="px-3 py-1.5 text-xs bg-gray-800 text-white rounded">1</button>
             <button class="px-3 py-1.5 text-xs text-gray-600 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">下一页</button>
           </div>
         </div>
@@ -914,7 +914,7 @@
       <!-- 底部说明 -->
       <div class="mt-4 text-center text-xs text-gray-400">
         异常处理中心仅展示需要您关注的异常订单，如需查看全部订单请访问
-        <a href="#" class="text-primary-500 hover:text-primary-600 font-medium">订单列表</a>
+        <a href="#" class="text-gray-600 hover:text-gray-800 font-medium">订单列表</a>
         · 数据每5分钟自动刷新
       </div>
 
@@ -1113,17 +1113,17 @@ function renderShopConnections() {
     return;
   }
   container.innerHTML = shops.map(shop => {
-    const badgeBg = shop.statusColor === 'danger' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+    const statusTextColor = shop.statusColor === 'danger' ? 'text-red-500' : 'text-amber-500';
     return `
     <tr class="hover:bg-gray-50/60 transition-colors shop-connection">
       <td class="text-left">
-        <span class="text-sm font-semibold text-gray-800">${shop.name}</span>
+        <span class="text-sm font-medium text-gray-800">${shop.name}</span>
       </td>
       <td class="text-left">
-        <span class="status-badge bg-blue-50 text-blue-600">${shop.platform}</span>
+        <span class="text-xs text-gray-500">${shop.platform}</span>
       </td>
       <td class="text-left">
-        <span class="status-badge ${badgeBg}">${shop.statusText}</span>
+        <span class="text-xs font-medium ${statusTextColor}">${shop.statusText}</span>
       </td>
       <td class="text-left">
         <span class="text-xs text-gray-500">${shop.time}</span>
@@ -1143,22 +1143,22 @@ function renderExceptionSummary() {
   const groups = [
     {
       stage: '待处理',
-      icon: '📋',
-      headerBg: 'bg-amber-50/50',
+      icon: '',
+      headerBg: '',
       stageKey: 'pending',
       types: ['库存不足', '未绑定发货仓']
     },
     {
       stage: '生产中',
-      icon: '⚙️',
-      headerBg: 'bg-blue-50/50',
+      icon: '',
+      headerBg: '',
       stageKey: 'production',
       types: ['物流下call失败']
     },
     {
       stage: '工厂反审',
-      icon: '🏭',
-      headerBg: 'bg-rose-50/50',
+      icon: '',
+      headerBg: '',
       stageKey: 'review',
       types: ['库存不足', '生产图异常', '蒙版异常']
     }
@@ -1174,23 +1174,18 @@ function renderExceptionSummary() {
     }).filter(i => i.count > 0);
 
     return `
-    <div class="bg-white rounded-xl border border-gray-100 overflow-hidden">
-      <div class="px-4 py-3 border-b border-gray-100/60 ${group.headerBg} flex items-center gap-2">
+    <div class="bg-white rounded border border-gray-200 overflow-hidden">
+      <div class="px-3 py-2 border-b border-gray-100 flex items-center gap-2">
         <span class="text-base">${group.icon}</span>
-        <span class="text-sm font-semibold text-gray-700">${group.stage}</span>
-        <span class="ml-auto inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${total > 0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}">${total}</span>
+        <span class="text-xs font-semibold text-gray-700">${group.stage}</span>
+        <span class="ml-auto text-xs font-medium ${total > 0 ? 'text-red-500' : 'text-emerald-500'}">${total}</span>
       </div>
-      <div class="p-3 space-y-1.5">
+      <div class="p-2 space-y-0.5">
         ${items.length > 0 ? items.map(item => {
-          const levelBg = 'bg-red-50';
-          const badgeBg = 'bg-red-100 text-red-600';
-          const dotColor = 'bg-red-500';
           return `
-          <div class="exception-card flex items-center gap-2 px-3 py-2 rounded-lg ${levelBg}" onclick="merchant_exceptionCardClick('${group.stageKey}')">
-            <span class="w-2 h-2 rounded-full ${dotColor} flex-shrink-0"></span>
+          <div class="exception-card flex items-center gap-2 px-3 py-1.5 rounded" onclick="merchant_exceptionCardClick('${group.stageKey}')">
             <span class="text-xs font-medium text-gray-700 flex-1">${item.name}</span>
-            <span class="text-[9px] font-semibold text-amber-600 bg-amber-100 px-1.5 py-0.5 rounded">需操作</span>
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full text-[11px] font-bold ${badgeBg}">${item.count}</span>
+            <span class="text-xs font-medium text-red-500">${item.count}</span>
           </div>`;
         }).join('') : '<div class="text-center text-xs text-gray-400 py-2">暂无异常</div>'}
       </div>
@@ -1449,15 +1444,13 @@ function alertRenderTokenBanner() {
 
   container.innerHTML = tokenAlertShops.map(shop => {
     const isDanger = shop.statusColor === 'danger';
-    const statusBg = isDanger ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
-    const dotClass = isDanger ? 'pulse-red bg-red-500' : 'bg-amber-400';
+    const statusTextColor = isDanger ? 'text-red-500' : 'text-amber-500';
     return `
     <div class="token-shop-item">
-      <span class="w-2.5 h-2.5 rounded-full ${dotClass} inline-block flex-shrink-0"></span>
-      <span class="text-sm font-semibold text-gray-800">${shop.name}</span>
-      <span class="status-badge bg-blue-50 text-blue-600">${shop.platform}</span>
-      <span class="status-badge ${statusBg}">${shop.status}</span>
-      <button onclick="showToast('跳转店铺授权页面')" class="ml-auto px-3 py-1 rounded-lg text-xs font-semibold text-white bg-primary-500 hover:bg-primary-600 transition-colors shadow-sm">去授权</button>
+      <span class="text-sm font-medium text-gray-800">${shop.name}</span>
+      <span class="text-xs text-gray-500">${shop.platform}</span>
+      <span class="text-xs font-medium ${statusTextColor}">${shop.status}</span>
+      <button onclick="showToast('跳转店铺授权页面')" class="ml-auto px-3 py-1 rounded text-xs font-medium text-gray-600 border border-gray-300 hover:bg-gray-50 transition-colors">去授权</button>
     </div>`;
   }).join('');
 }
@@ -1520,14 +1513,14 @@ function alertUpdateSelectLabels() {
     shopLabel.className = '';
   } else {
     shopLabel.textContent = alertCurrentFilters.shops.length + ' 个店铺';
-    shopLabel.className = 'text-primary-600 font-semibold';
+    shopLabel.className = 'text-gray-700 font-semibold';
   }
   if (alertCurrentFilters.alertTypes.length === 0) {
     typeLabel.textContent = '全部类型';
     typeLabel.className = '';
   } else {
     typeLabel.textContent = alertCurrentFilters.alertTypes.length + ' 种类型';
-    typeLabel.className = 'text-primary-600 font-semibold';
+    typeLabel.className = 'text-gray-700 font-semibold';
   }
 }
 
@@ -1614,7 +1607,7 @@ function alertRenderTable(data) {
   tbody.innerHTML = data.map(item => {
     const actionBtn = alertGetActionBtn(item);
     const checked = alertSelectedIds.has(item.id) ? 'checked' : '';
-    const checkedStyle = alertSelectedIds.has(item.id) ? 'background:#3B82F6;border-color:#3B82F6;' : '';
+    const checkedStyle = alertSelectedIds.has(item.id) ? 'background:#475569;border-color:#475569;' : '';
 
     // 最晚发货时间 - 判断是否过期
     const shipTime = item.latestShipTime || '';
@@ -1632,7 +1625,7 @@ function alertRenderTable(data) {
     <tr class="border-b border-gray-50 hover:bg-gray-50/50 cursor-pointer transition-colors ${item.rowClass}" data-id="${item.id}" onclick="alertHandleRowClick(event, ${item.id})">
       <td class="text-left pl-4 pr-0" onclick="event.stopPropagation()">
         <input type="checkbox" id="chk-${item.id}" class="row-check hidden" ${checked} onchange="alertToggleRowSelect(${item.id})" />
-        <label for="chk-${item.id}" class="w-4 h-4 border-2 rounded cursor-pointer flex items-center justify-center hover:border-primary-500 transition-colors" style="${checkedStyle}border-color:${alertSelectedIds.has(item.id)?'#3B82F6':'#D1D5DB'}">
+        <label for="chk-${item.id}" class="w-4 h-4 border-2 rounded cursor-pointer flex items-center justify-center hover:border-gray-400 transition-colors" style="${checkedStyle}border-color:${alertSelectedIds.has(item.id)?'#475569':'#D1D5DB'}">
           <svg class="w-2.5 h-2.5 text-white" style="opacity:${alertSelectedIds.has(item.id)?1:0}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
         </label>
       </td>
@@ -1641,11 +1634,14 @@ function alertRenderTable(data) {
       </td>
       <td class="text-left">
         <div class="flex items-center gap-2">
-          <span class="text-primary-600 font-mono text-xs cursor-pointer hover:text-primary-700 font-medium" onclick="event.stopPropagation();alertCopyOrder('${item.orderNo}')" title="点击复制">${item.orderNo}</span>
+          <span class="text-gray-700 font-mono text-xs cursor-pointer hover:text-gray-900 font-medium" onclick="event.stopPropagation();alertCopyOrder('${item.orderNo}')" title="点击复制">${item.orderNo}</span>
           <button onclick="event.stopPropagation();alertCopyOrder('${item.orderNo}')" class="text-gray-300 hover:text-gray-500 transition-colors" title="复制订单号">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           </button>
         </div>
+      </td>
+      <td class="text-left">
+        <span class="text-xs text-gray-600">${item.shop || '-'}</span>
       </td>
       <td class="text-left">
         <span class="reason-text text-gray-500 text-xs" title="${item.reason}">${item.reason}</span>
@@ -1661,9 +1657,9 @@ function alertRenderTable(data) {
 
 function alertGetSevIcon(severity) {
   const map = {
-    urgent: '<span class="sev-icon bg-red-100 text-red-500" title="紧急">🔴</span>',
-    warning: '<span class="sev-icon bg-amber-50 text-amber-500" title="警告">🟡</span>',
-    info: '<span class="sev-icon bg-gray-100 text-gray-400" title="提醒">🔵</span>'
+    urgent: '<span class="sev-icon text-red-500" title="紧急">紧急</span>',
+    warning: '<span class="sev-icon text-amber-500" title="警告">警告</span>',
+    info: '<span class="sev-icon text-gray-400" title="提醒">提醒</span>'
   };
   return map[severity] || map.info;
 }
@@ -1672,12 +1668,12 @@ function alertGetActionBtn(item) {
   const type = item.actionType;
   const btnMap = {
     // 待处理："修改重推" 改为 "重推"
-    fix_or_close: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">重推</button><button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20 ml-1">关闭订单</button>',
-    bind_warehouse: '<button onclick="event.stopPropagation();alertHandleAction(\'bind_warehouse\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">绑定发货仓</button>',
+    fix_or_close: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">重推</button><button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">关闭订单</button>',
+    bind_warehouse: '<button onclick="event.stopPropagation();alertHandleAction(\'bind_warehouse\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">绑定发货仓</button>',
     seller_handle: '<span class="text-xs text-gray-400 flex items-center gap-1"><span class="pulse-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>卖家后台处理</span>',
-    partial_swap_or_cancel: '<button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">部分换货</button><button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shadow-sm shadow-red-500/20 ml-1">部分取消</button>',
-    fix_art: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_art\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">修改图案</button>',
-    fix_mask: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_mask\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-semibold bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm shadow-blue-500/20">修改蒙版</button>',
+    partial_swap_or_cancel: '<button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">部分换货</button><button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">部分取消</button>',
+    fix_art: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_art\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">修改图案</button>',
+    fix_mask: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_mask\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">修改蒙版</button>',
   };
   return btnMap[type] || '<button onclick="event.stopPropagation();alertHandleAction(\'detail\', ' + item.id + ')" class="px-3 py-1.5 text-xs font-medium bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors">查看详情</button>';
 }
@@ -1745,6 +1741,7 @@ function alertFilterPlatform(val) {
   alertCurrentFilters.platform = val;
   alertUpdateFilterTabs('alertPlatformFilter', val, 'platform');
   alertApplyFilters();
+  alertUpdateTabCounts();
 }
 
 function alertFilterSearch() {
@@ -1767,19 +1764,19 @@ function alertUpdateBatchStageButtons() {
   const disabledCls = 'bg-gray-200 text-gray-400 cursor-not-allowed';
   let html = '';
   if (stage === 'pending') {
-    const repushCls = hasSelection ? 'bg-primary-500 text-white cursor-pointer hover:bg-primary-600' : disabledCls;
-    const closeCls = hasSelection ? 'bg-red-500 text-white cursor-pointer hover:bg-red-600' : disabledCls;
+    const repushCls = hasSelection ? 'border border-gray-300 text-gray-600 cursor-pointer hover:bg-gray-50' : disabledCls;
+    const closeCls = hasSelection ? 'border border-gray-300 text-gray-600 cursor-pointer hover:bg-gray-50' : disabledCls;
     html = `
-      <button onclick="alertBatchRepush()" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 ${repushCls}" ${hasSelection ? '' : 'disabled'}>
+      <button onclick="alertBatchRepush()" class="px-2.5 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${repushCls}" ${hasSelection ? '' : 'disabled'}>
         重推
       </button>
-      <button onclick="alertBatchClose()" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 ${closeCls}" ${hasSelection ? '' : 'disabled'}>
+      <button onclick="alertBatchClose()" class="px-2.5 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${closeCls}" ${hasSelection ? '' : 'disabled'}>
         关闭
       </button>`;
   } else if (stage === 'review') {
-    const cancelCls = hasSelection ? 'bg-red-500 text-white cursor-pointer hover:bg-red-600' : disabledCls;
+    const cancelCls = hasSelection ? 'border border-gray-300 text-gray-600 cursor-pointer hover:bg-gray-50' : disabledCls;
     html = `
-      <button onclick="alertBatchPartialCancel()" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 ${cancelCls}" ${hasSelection ? '' : 'disabled'}>
+      <button onclick="alertBatchPartialCancel()" class="px-2.5 py-1 text-xs font-medium rounded transition-colors flex items-center gap-1 ${cancelCls}" ${hasSelection ? '' : 'disabled'}>
         部分取消
       </button>`;
   }
@@ -1829,14 +1826,14 @@ function alertUpdateBatchUI() {
   selectedCountEl.textContent = count;
   const hasSelection = count > 0;
   if (hasSelection) {
-    btnBatchCopy.className = 'px-3 py-1.5 text-xs font-medium bg-primary-50 text-primary-600 rounded-lg cursor-pointer hover:bg-primary-100 transition-colors flex items-center gap-1';
+    btnBatchCopy.className = 'px-2.5 py-1 text-xs font-medium border border-gray-300 text-gray-600 rounded cursor-pointer hover:bg-gray-50 transition-colors flex items-center gap-1';
     btnBatchCopy.disabled = false;
-    btnClearSel.className = 'px-3 py-1.5 text-xs font-medium text-gray-500 bg-gray-100 rounded-lg cursor-pointer hover:bg-gray-200 transition-colors';
+    btnClearSel.className = 'px-2.5 py-1 text-xs font-medium border border-gray-300 text-gray-600 rounded cursor-pointer hover:bg-gray-50 transition-colors';
     btnClearSel.disabled = false;
   } else {
-    btnBatchCopy.className = 'px-3 py-1.5 text-xs font-medium bg-gray-200 text-gray-400 rounded-lg cursor-not-allowed flex items-center gap-1 transition-colors';
+    btnBatchCopy.className = 'px-2.5 py-1 text-xs font-medium bg-gray-50 text-gray-400 rounded cursor-not-allowed flex items-center gap-1 transition-colors';
     btnBatchCopy.disabled = true;
-    btnClearSel.className = 'px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed transition-colors';
+    btnClearSel.className = 'px-2.5 py-1 text-xs font-medium text-gray-400 bg-gray-50 rounded cursor-not-allowed transition-colors';
     btnClearSel.disabled = true;
   }
   alertUpdateBatchStageButtons();
@@ -1902,12 +1899,35 @@ function alertCloseAllDevNotes() {
 
 
 
+// ============ 异常中心Tab计数更新 ============
+function alertUpdateTabCounts() {
+  // 平台计数
+  ['Temu', 'Shein', 'Qink'].forEach(p => {
+    const count = alertExceptionData.filter(i => i.platform === p).length;
+    const elId = 'alert' + p + 'Count';
+    const el = document.getElementById(elId);
+    if (el) el.textContent = count;
+  });
+  // 环节计数
+  const stages = ['pending', 'production', 'review'];
+  const allCount = alertExceptionData.filter(i => i.platform === alertCurrentFilters.platform).length;
+  const allEl = document.getElementById('alertStageAllCount');
+  if (allEl) allEl.textContent = allCount;
+  stages.forEach(s => {
+    const count = alertExceptionData.filter(i => i.platform === alertCurrentFilters.platform && i.stage === s).length;
+    const elId = 'alertStage' + s.charAt(0).toUpperCase() + s.slice(1) + 'Count';
+    const el = document.getElementById(elId);
+    if (el) el.textContent = count;
+  });
+}
+
 // ============ 初始化渲染 ============
 renderDashboard();
 alertRenderTokenBanner();
 alertRenderMultiSelectOptions();
 alertUpdateSortUI();
 alertApplyFilters();
+alertUpdateTabCounts();
 
 // ============ 窗口resize时重绘ECharts ============
 window.addEventListener('resize', function() {
