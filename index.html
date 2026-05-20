@@ -1511,7 +1511,7 @@ const platformData = {
       { name: '待接单', orders: 23, alert: true },
       { name: '待处理', orders: 48, alert: true },
       { name: '生产中', orders: 456, alert: false },
-      { name: '待反审', orders: 15, alert: true },
+      { name: '工厂反审', orders: 15, alert: true },
       { name: '今日发货', orders: 345, alert: false },
     ],
     logistics: {
@@ -1672,7 +1672,7 @@ const platformData = {
       { name: '待接单', orders: 1, alert: true },
       { name: '待处理', orders: 2, alert: true },
       { name: '生产中', orders: 15, alert: false },
-      { name: '待反审', orders: 0, alert: false },
+      { name: '工厂反审', orders: 0, alert: false },
       { name: '今日发货', orders: 9, alert: false },
     ],
     logistics: {
@@ -1747,7 +1747,7 @@ const platformData = {
       { name: '待接单', orders: 0, alert: false },
       { name: '待处理', orders: 0, alert: false },
       { name: '生产中', orders: 5, alert: false },
-      { name: '待反审', orders: 0, alert: false },
+      { name: '工厂反审', orders: 0, alert: false },
       { name: '今日发货', orders: 4, alert: false },
     ],
     logistics: {
@@ -2094,7 +2094,7 @@ function renderFunnelDrillContent(layer) {
   const statusColors = {
     '待确认':'bg-blue-500','待付款':'bg-blue-400','待推送':'bg-amber-400',
     '待接单':'bg-orange-500','待处理':'bg-red-500','生产中':'bg-emerald-500',
-    '待反审':'bg-red-400','今日发货':'bg-purple-500'
+    '工厂反审':'bg-red-400','今日发货':'bg-purple-500'
   };
 
   const html = `
@@ -2580,6 +2580,7 @@ function closeMonitorDrilldown() {
 function renderDashInventoryAlertBadge() {
   const badge = document.getElementById('dashInvAlertBadge');
   if (!badge) return;
+  if (typeof acInventoryAlerts === 'undefined') return;
   const total = acInventoryAlerts.length;
   const outOfStock = acInventoryAlerts.filter(a => a.status === 'out_of_stock');
   badge.textContent = total;
@@ -2651,6 +2652,7 @@ function filterAlertByCustomer(value) {
 let currentDashInvKey = null;
 
 function renderDashInventoryAlerts() {
+  if (typeof acInventoryAlerts === 'undefined') return;
   const container = document.getElementById('dashInvAlertCards');
   if (!container) return;
 
@@ -2942,7 +2944,7 @@ function initFunnelDevNotes() {
 }
 
 // ============ 初始化 ============
-renderAll();
+try { renderAll(); } catch(e) { console.error("renderAll error:", e); }
 // ============ 异常中心 ============
 var acCustomers = ['拍歐德國際貿易有限公司', '广州天天酷衣电子贸易有限公司', '广州尔棉贸易有限公司'];
 var acShops = ['PAOUD-US', 'TTKU-EU', 'ERM-SG', 'PAOUD-UK', 'TTKU-US'];
