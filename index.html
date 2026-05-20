@@ -171,8 +171,8 @@
 
     /* 表格优化 - 不设 text-align，对齐100%由Tailwind工具类控制 */
     .data-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
-    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 10px 16px; }
-    .data-table td { font-size: 12px; padding: 10px 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 8px 12px; }
+    .data-table td { font-size: 12px; padding: 8px 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .data-table .num-col { font-family: 'Inter', monospace; }
     .data-table thead tr { background: #F8FAFC; }
 
@@ -297,13 +297,13 @@
     .monitor-status-dot.warn { background: #F59E0B; animation: pulse 2s infinite; }
     .monitor-status-dot.danger { background: #EF4444; animation: pulseRed 1.5s ease-in-out infinite; }
 
-    /* 运营跟进异常卡片 */
+    /* 运营跟进异常卡片 - 紧凑 */
     .op-alert-card {
-      border-radius: 12px;
+      border-radius: 4px;
       overflow: hidden;
     }
     .op-alert-card-header {
-      padding: 12px 16px;
+      padding: 8px 12px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -407,11 +407,92 @@
     .sort-arrow .sort-icon { opacity: 0.3; transition: opacity 0.15s, color 0.15s; }
     .sort-arrow.active .sort-icon { opacity: 1; color: #3B82F6; }
 
-    /* 店铺连接异常横幅 - 运营后台 */
-    .token-alert-banner {
-      border: 1px solid rgba(239,68,68,0.2);
-      background: linear-gradient(135deg, #FEF2F2 0%, #FFF1F2 50%, #FFFBEB 100%);
+    /* 库存异常SKU卡片 */
+    .sku-card {
+      background: #fff;
+      border: 1px solid #F1F5F9;
       border-radius: 16px;
+      overflow: hidden;
+      transition: box-shadow 0.2s ease;
+    }
+    .sku-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .sku-status-badge {
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .sku-status-badge.out_of_stock { color: #DC2626; }
+    .sku-status-badge.low_stock { color: #D97706; }
+
+    /* 分组折叠区域 - 紧凑风格 */
+    .ac-group-section {
+      background: #fff;
+      border-bottom: 1px solid #E2E8F0;
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+    .ac-group-section:last-child {
+      border-bottom: none;
+    }
+    .ac-group-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+    .ac-group-header:hover {
+      background: #F8FAFC;
+    }
+    .ac-group-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1E293B;
+    }
+    .ac-group-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 22px;
+      padding: 0 6px;
+      border-radius: 11px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .ac-group-arrow {
+      width: 20px;
+      height: 20px;
+      color: #94A3B8;
+      transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+      flex-shrink: 0;
+    }
+    .ac-group-arrow.collapsed {
+      transform: rotate(-90deg);
+    }
+    .ac-group-body {
+      overflow: hidden;
+      max-height: 2000px;
+      opacity: 1;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease;
+    }
+    .ac-group-body.collapsed {
+      max-height: 0;
+      opacity: 0;
+    }
+    .ac-group-actions {
+      padding: 0 12px 6px 12px;
+    }
+
+    /* 店铺连接异常横幅 - 紧凑左边框风格 */
+    .token-alert-banner {
+      border: none;
+      border-left: 4px solid #EF4444;
+      background: #FEF2F2;
+      border-radius: 0;
       overflow: hidden;
     }
     .token-alert-banner.collapsed .token-alert-body { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
@@ -424,16 +505,88 @@
     .token-shop-item {
       display: flex;
       align-items: center;
-      gap: 12px;
-      padding: 8px 16px;
-      background: rgba(255,255,255,0.7);
-      border: 1px solid rgba(239,68,68,0.1);
-      border-radius: 10px;
-      transition: box-shadow 0.2s ease, background 0.2s ease;
+      gap: 10px;
+      padding: 6px 12px;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid #F1F5F9;
+      border-radius: 4px;
+      transition: background 0.15s ease;
     }
     .token-shop-item:hover {
-      box-shadow: 0 2px 8px rgba(239,68,68,0.08);
-      background: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,1);
+    }
+
+    /* 库存异常SKU表格行展开 */
+    .sku-expand-row { cursor: pointer; }
+    .sku-expand-row:hover { background: #F8FAFC; }
+    .sku-order-expand {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
+    }
+    .sku-order-expand.open {
+      max-height: 600px;
+      opacity: 1;
+    }
+
+    /* 刷新库存按钮 */
+    .refresh-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+      font-size: 12px;
+      color: #64748B;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .refresh-btn:hover { border-color: #94A3B8; color: #475569; background: #F8FAFC; }
+
+    /* 紧凑复制按钮 - 灰色调 */
+    .compact-copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border: 1px solid #E2E8F0;
+      border-radius: 4px;
+      font-size: 11px;
+      color: #64748B;
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .compact-copy-btn:hover { border-color: #94A3B8; color: #374151; background: #F9FAFB; }
+
+    /* 紧凑灰色文字链接按钮 */
+    .gray-link-btn {
+      font-size: 12px;
+      color: #64748B;
+      cursor: pointer;
+      transition: color 0.15s ease;
+      text-decoration: none;
+    }
+    .gray-link-btn:hover { color: #374151; }
+
+    /* 看板库存异常概览卡片 */
+    .inv-alert-card {
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 16px;
+      cursor: pointer;
+      transition: box-shadow 0.2s ease;
+      background: #fff;
+    }
+    .inv-alert-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    .inv-alert-card.selected {
+      outline: 2px solid #3B82F6;
+      outline-offset: 0;
     }
 </style>
 </head>
@@ -716,8 +869,8 @@
                   已下单未同步OMP物流面单<span class="dev-note"><span class="dev-note-icon">i</span><span class="dev-note-tip">已下单但未同步OMP物流面单的订单列表，需关注同步状态</span></span>
                 </h4>
                 <div class="flex items-center gap-2">
-                  <button onclick="copyUnsyncedOmpOrderNos()" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400 transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                  <button onclick="copyUnsyncedOmpOrderNos()" class="compact-copy-btn">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
                     复制订单号
                   </button>
                   <button onclick="toggleDrilldown('unsyncedOmp')" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">
@@ -768,6 +921,11 @@
                 运营跟进
                 <span id="opAlertBadge" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white alert-badge">0</span>
               </button>
+              <button id="alertTabInventory" onclick="switchAlertTab('inventory')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                库存异常
+                <span id="dashInvAlertBadge" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white">0</span>
+              </button>
               <button id="alertTabSysMonitor" onclick="switchAlertTab('system')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
                 系统监控
@@ -780,7 +938,16 @@
               <div class="space-y-4" id="opAlertContent"></div>
             </div>
 
-            <!-- Tab2: 系统监控异常 -->
+            <!-- Tab2: 库存异常 -->
+            <div id="inventoryAlertPanel" style="display:none">
+              <div class="grid grid-cols-2 gap-4" id="dashInvAlertCards"></div>
+              <!-- 下钻面板 -->
+              <div id="dashInvDrilldownPanel" class="monitor-drilldown-panel bg-white rounded-xl border border-gray-100 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+                <div id="dashInvDrilldownInner" class="p-5"></div>
+              </div>
+            </div>
+
+            <!-- Tab3: 系统监控异常 -->
             <div id="systemMonitorPanel" style="display:none">
               <div class="grid grid-cols-4 gap-4" id="sysMonitorContent"></div>
               <!-- 下钻面板：卡片外部全宽 -->
@@ -797,22 +964,25 @@
 
     <div id="alertCenterPage" style="display:none">
       <!-- 页面标题 -->
-      
-
-      <!-- 平台Tab -->
-        <div class="flex items-center justify-between mb-4">
-          <div class="tab-capsule" id="acPlatformTab">
-            <button class="tab-btn active px-5 py-2 text-sm font-semibold" data-ac-platform="Temu" onclick="acSwitchPlatform('Temu')">Temu</button>
-            <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Shein" onclick="acSwitchPlatform('Shein')">Shein</button>
-            <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Qink" onclick="acSwitchPlatform('Qink')">Qink</button>
-          </div>
+      <div class="mb-4">
+        <div class="flex items-center gap-2">
+          <div class="w-1.5 h-6 bg-gradient-to-b from-red-500 to-red-600 rounded-full"></div>
+          <h1 class="text-lg font-bold text-gray-800">异常中心</h1>
         </div>
+      </div>
 
-        
+      <!-- 平台Tab - 作用于整个异常中心 -->
+      <div class="flex items-center justify-between mb-4">
+        <div class="tab-capsule" id="acPlatformTab">
+          <button class="tab-btn active px-5 py-2 text-sm font-semibold" data-ac-platform="Temu" onclick="acSwitchPlatform('Temu')">Temu</button>
+          <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Shein" onclick="acSwitchPlatform('Shein')">Shein</button>
+          <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Qink" onclick="acSwitchPlatform('Qink')">Qink</button>
+        </div>
+      </div>
 
       <!-- ========== 店铺连接异常横幅 ========== -->
       <div id="acTokenAlertBanner" class="token-alert-banner mb-4">
-        <div class="flex items-center justify-between px-5 py-3 cursor-pointer" onclick="acToggleTokenBanner()">
+        <div class="flex items-center justify-between px-4 py-2 cursor-pointer" onclick="acToggleTokenBanner()">
           <div class="flex items-center gap-3">
             <span class="pulse-red w-3 h-3 bg-red-500 rounded-full inline-block flex-shrink-0"></span>
             <span class="text-sm font-bold text-red-700">店铺连接异常</span>
@@ -821,12 +991,10 @@
           </div>
           <svg id="acTokenBannerArrow" class="w-4 h-4 text-red-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
         </div>
-        <div class="token-alert-body px-5 pb-4">
-          <div class="space-y-2" id="acTokenAlertShopList">
-            <!-- 由JS渲染 -->
-          </div>
-          <div class="mt-3 pt-3 border-t border-red-200/40 flex items-center justify-end">
-            <button onclick="acCopyShopNames()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-red-300 text-red-600 hover:bg-red-50 hover:border-red-400 transition-all">
+        <div class="token-alert-body px-4 pb-3">
+          <div class="space-y-2" id="acTokenAlertShopList"></div>
+          <div class="mt-2 pt-2 border-t border-red-200/40 flex items-center justify-end">
+            <button onclick="acCopyShopNames()" class="compact-copy-btn">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               复制店铺名称
             </button>
@@ -834,23 +1002,19 @@
         </div>
       </div>
 
-      <!-- 顶部筛选区域 -->
-      <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] p-5 mb-4 card-hover">
-        
+      <!-- ========== 4个主Tab ========== -->
+      <div class="flex items-center gap-1 mb-4 bg-gray-100/80 rounded-xl p-1 w-fit">
+        <button id="acMainTabCustomer" onclick="acSwitchMainTab('customer')" class="alert-tab-btn active px-4 py-2 text-sm font-semibold rounded-lg">客户异常(<span id="acTabCountCustomer">0</span>)</button>
+        <button id="acMainTabOpsFollow" onclick="acSwitchMainTab('opsFollow')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">运营跟进(<span id="acTabCountOpsFollow">0</span>)</button>
+        <button id="acMainTabInventory" onclick="acSwitchMainTab('inventory')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">库存异常(<span id="acTabCountInventory">0</span>)</button>
+        <button id="acMainTabSysMonitor" onclick="acSwitchMainTab('sysMonitor')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">系统监控(<span id="acTabCountSysMonitor">0</span>)</button>
+      </div>
 
-      
-
-      <!-- 环节Tab -->
-        <div class="flex items-center gap-1 mb-4 bg-gray-100/80 rounded-xl p-1 w-fit">
-          <button id="acStageAll" onclick="acSwitchStage('all')" class="alert-tab-btn active px-4 py-2 text-sm font-semibold rounded-lg">全部</button>
-          <button id="acStageOps" onclick="acSwitchStage('ops_follow')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">运营跟进</button>
-          <button id="acStageSys" onclick="acSwitchStage('sys_monitor')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">系统监控</button>
-        </div>
-
-        <!-- 搜索+筛选行 -->
+      <!-- ========== 筛选区域 ========== -->
+      <div class="bg-white border border-gray-200 p-3 mb-3">
         <div class="flex items-center gap-3 flex-wrap">
           <!-- 搜索订单号 -->
-          <div class="search-box flex items-center gap-2 px-3 py-2 rounded-lg text-sm flex-shrink-0">
+          <div class="search-box flex items-center gap-2 px-3 py-2 rounded-lg text-sm flex-shrink-0" id="acSearchBox">
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
             <input id="acSearchInput" type="text" placeholder="搜索订单号" class="bg-transparent outline-none text-sm text-gray-600 placeholder-gray-400 w-44" oninput="acOnSearchInput()" />
           </div>
@@ -859,8 +1023,8 @@
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <input id="acCustomerInput" type="text" placeholder="搜索客户" class="bg-transparent outline-none text-sm text-gray-600 placeholder-gray-400 w-36" oninput="acOnCustomerInput()" />
           </div>
-          <!-- 异常类型多选 -->
-          <div class="ac-multi-select relative">
+          <!-- 异常类型多选 - 只在客户异常Tab显示 -->
+          <div class="ac-multi-select relative" id="acTypeSelectWrap">
             <button id="acTypeSelectBtn" onclick="acToggleTypePanel()" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white hover:border-gray-300 transition-all text-gray-600 font-medium">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
               异常类型
@@ -869,8 +1033,8 @@
             </button>
             <div id="acTypePanel" class="ac-multi-select-panel" style="min-width:200px"></div>
           </div>
-          <!-- 订单状态多选 -->
-          <div class="ac-multi-select relative">
+          <!-- 订单状态多选 - 只在客户异常Tab显示 -->
+          <div class="ac-multi-select relative" id="acStatusSelectWrap">
             <button id="acStatusSelectBtn" onclick="acToggleStatusPanel()" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white hover:border-gray-300 transition-all text-gray-600 font-medium">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
               订单状态
@@ -880,15 +1044,14 @@
             <div id="acStatusPanel" class="ac-multi-select-panel" style="min-width:180px"></div>
           </div>
         </div>
-
         <!-- 已选筛选标签显示区 -->
         <div id="acFilterTags" class="flex items-center gap-2 flex-wrap mt-3" style="display:none"></div>
       </div>
 
-      <!-- 批量操作区域 -->
-      <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] px-5 py-3 mb-4 flex items-center gap-4 card-hover">
+      <!-- ========== 批量操作区域 - 只在客户异常Tab显示 ========== -->
+      <div id="acBatchBar" class="bg-white border border-gray-200 px-4 py-2 mb-3 flex items-center gap-4">
         <span id="acSelectedCount" class="text-sm font-semibold text-gray-700">已选 <span class="text-blue-600">0</span> 条</span>
-        <button onclick="acBatchCopy()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-all">
+        <button onclick="acBatchCopy()" class="compact-copy-btn">
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           批量复制订单号
         </button>
@@ -897,44 +1060,27 @@
         </button>
       </div>
 
-      <!-- 异常列表表格 -->
-      <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] overflow-hidden card-hover">
-        <div class="overflow-x-auto">
-          <table class="data-table">
-            <colgroup>
-              <col style="width:50px">
-              <col style="width:140px">
-              <col style="width:140px">
-              <col style="width:200px">
-              <col style="width:140px">
-              <col style="width:90px">
-              <col style="width:auto">
-              <col style="width:130px">
-            </colgroup>
-            <thead>
-              <tr class="border-b border-gray-200/60">
-                <th><input type="checkbox" id="acCheckAll" onchange="acToggleCheckAll(this.checked)" class="accent-blue-500" /></th>
-                <th class="text-left font-semibold">客户</th>
-                <th class="text-left font-semibold">异常类型</th>
-                <th class="text-left font-semibold">订单号</th>
-                <th class="text-left font-semibold">店铺名称</th>
-                                <th class="text-left font-semibold">订单状态</th>
-                <th class="text-left font-semibold">异常原因</th>
-                <th class="text-right font-semibold sort-arrow active" onclick="acToggleSort()">
-                  最晚发货时间
-                  <span class="sort-icon" id="acSortIcon">↑</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody id="acTableBody" class="divide-y divide-gray-100/80 text-gray-700"></tbody>
-          </table>
-        </div>
-        <!-- 空状态 -->
-        <div id="acEmptyState" class="py-12 text-center" style="display:none">
-          <svg class="w-16 h-16 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          <p class="text-sm text-gray-400">暂无匹配的异常订单</p>
-        </div>
+      <!-- ========== Tab内容区域 ========== -->
+      <!-- 客户异常 -->
+      <div id="acTabCustomer" class="ac-tab-content">
+        <div id="acCustomerAlertsContainer"></div>
       </div>
+
+      <!-- 运营跟进 -->
+      <div id="acTabOpsFollow" class="ac-tab-content" style="display:none">
+        <div id="acOpsFollowAlertsContainer"></div>
+      </div>
+
+      <!-- 库存异常 -->
+      <div id="acTabInventory" class="ac-tab-content" style="display:none">
+        <div id="acInventoryAlertsContainer"></div>
+      </div>
+
+      <!-- 系统监控 -->
+      <div id="acTabSysMonitor" class="ac-tab-content" style="display:none">
+        <div id="acSysMonitorAlertsContainer"></div>
+      </div>
+
     </div>
 
         <div id="alertConfigPage" style="display:none">
@@ -1186,7 +1332,7 @@ function switchPage(page) {
     if (navAlertCenter) { navAlertCenter.classList.add('active'); navAlertCenter.classList.remove('text-slate-400'); }
     headerPageName.textContent = '异常中心';
     acRenderTokenBanner();
-    acRenderTable();
+    acRenderCurrentTab();
   } else if (page === 'alertConfig') {
     hideAllPages();
     alertConfigPage.style.display = '';
@@ -2051,22 +2197,32 @@ let currentAlertTab = 'operation';
 function switchAlertTab(tab) {
   currentAlertTab = tab;
   const opPanel = document.getElementById('operationAlertPanel');
+  const invPanel = document.getElementById('inventoryAlertPanel');
   const sysPanel = document.getElementById('systemMonitorPanel');
   const tabOp = document.getElementById('alertTabOpFollow');
+  const tabInv = document.getElementById('alertTabInventory');
   const tabSys = document.getElementById('alertTabSysMonitor');
+
+  opPanel.style.display = 'none';
+  if (invPanel) invPanel.style.display = 'none';
+  sysPanel.style.display = 'none';
+  tabOp.classList.remove('active');
+  if (tabInv) tabInv.classList.remove('active');
+  tabSys.classList.remove('active');
 
   if (tab === 'operation') {
     opPanel.style.display = '';
-    sysPanel.style.display = 'none';
     tabOp.classList.add('active');
-    tabSys.classList.remove('active');
+  } else if (tab === 'inventory') {
+    if (invPanel) invPanel.style.display = '';
+    if (tabInv) tabInv.classList.add('active');
+    renderDashInventoryAlerts();
   } else {
-    opPanel.style.display = 'none';
     sysPanel.style.display = '';
-    tabOp.classList.remove('active');
     tabSys.classList.add('active');
   }
   closeMonitorDrilldown();
+  closeDashInvDrilldown();
 }
 
 // ============ 运营跟进异常渲染 ============
@@ -2215,8 +2371,8 @@ function renderOperationAlerts() {
       }
 
       const copyBtnHtml = alertType.showCopyBtn ? `
-        <button onclick="copyOpAlertOrderNos('${alertType.key}')" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium border ${isBlue ? 'border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400' : 'border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400'} transition-all">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        <button onclick="copyOpAlertOrderNos('${alertType.key}')" class="compact-copy-btn">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           复制订单号
         </button>` : '';
 
@@ -2385,8 +2541,8 @@ function renderMonitorDrilldown(key) {
           ${cat.label}
           <span class="text-xs font-normal text-gray-400">${catData.count} 项异常</span>
         </h4>
-        <button onclick="copySysMonAllOrderNos('${cat.key}')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border ${cfg.borderColor} ${cfg.statusColor} ${cfg.hoverColor} hover:border-opacity-80 transition-all">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+        <button onclick="copySysMonAllOrderNos('${cat.key}')" class="compact-copy-btn">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
           复制订单号
         </button>
       </div>
@@ -2418,6 +2574,20 @@ function closeMonitorDrilldown() {
   if (panel) panel.classList.remove('open');
   // 清除所有卡片的选中状态
   document.querySelectorAll('.monitor-card.selected').forEach(el => el.classList.remove('selected'));
+}
+
+// 仅更新看板首页库存异常badge（不触发完整渲染）
+function renderDashInventoryAlertBadge() {
+  const badge = document.getElementById('dashInvAlertBadge');
+  if (!badge) return;
+  const total = acInventoryAlerts.length;
+  const outOfStock = acInventoryAlerts.filter(a => a.status === 'out_of_stock');
+  badge.textContent = total;
+  if (outOfStock.length > 0) {
+    badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white alert-badge';
+  } else {
+    badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white';
+  }
 }
 
 function toggleMonitorExpand(key) {
@@ -2477,6 +2647,159 @@ function filterAlertByCustomer(value) {
   renderAll();
 }
 
+// ============ 看板首页-库存异常概览 ============
+let currentDashInvKey = null;
+
+function renderDashInventoryAlerts() {
+  const container = document.getElementById('dashInvAlertCards');
+  if (!container) return;
+
+  const outOfStock = acInventoryAlerts.filter(a => a.status === 'out_of_stock');
+  const lowStock = acInventoryAlerts.filter(a => a.status === 'low_stock');
+  const outOfStockOrderCount = outOfStock.reduce((s, a) => s + a.orderCount, 0);
+  const lowStockOrderCount = lowStock.reduce((s, a) => s + a.orderCount, 0);
+
+  // Update badge
+  const badge = document.getElementById('dashInvAlertBadge');
+  if (badge) {
+    const total = acInventoryAlerts.length;
+    badge.textContent = total;
+    if (outOfStock.length > 0) {
+      badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white alert-badge';
+    } else {
+      badge.className = 'inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500 text-white';
+    }
+  }
+
+  let html = '';
+  // 缺货SKU卡片
+  const outSelected = currentDashInvKey === 'out_of_stock';
+  html += '<div class="inv-alert-card ' + (outSelected ? 'selected' : '') + '" onclick="toggleDashInvDrilldown(\'out_of_stock\')">';
+  html += '<div class="flex items-center gap-2 mb-2"><span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span><span class="text-sm font-semibold text-gray-700">缺货SKU</span></div>';
+  html += '<div class="text-2xl font-extrabold text-red-600" style="font-variant-numeric:tabular-nums">' + outOfStock.length + '</div>';
+  html += '<div class="text-xs text-gray-400 mt-1">影响 <span class="font-semibold text-red-600">' + outOfStockOrderCount + '</span> 个订单</div>';
+  html += '</div>';
+
+  // 库存紧张SKU卡片
+  const lowSelected = currentDashInvKey === 'low_stock';
+  html += '<div class="inv-alert-card ' + (lowSelected ? 'selected' : '') + '" onclick="toggleDashInvDrilldown(\'low_stock\')">';
+  html += '<div class="flex items-center gap-2 mb-2"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span><span class="text-sm font-semibold text-gray-700">库存紧张SKU</span></div>';
+  html += '<div class="text-2xl font-extrabold text-amber-600" style="font-variant-numeric:tabular-nums">' + lowStock.length + '</div>';
+  html += '<div class="text-xs text-gray-400 mt-1">影响 <span class="font-semibold text-amber-600">' + lowStockOrderCount + '</span> 个订单</div>';
+  html += '</div>';
+
+  container.innerHTML = html;
+
+  // 渲染下钻面板
+  if (currentDashInvKey) {
+    renderDashInvDrilldown(currentDashInvKey);
+  }
+}
+
+function renderDashInvDrilldown(key) {
+  const inner = document.getElementById('dashInvDrilldownInner');
+  if (!inner) return;
+
+  const alerts = acInventoryAlerts.filter(a => a.status === key);
+  const label = key === 'out_of_stock' ? '缺货SKU' : '库存紧张SKU';
+
+  if (alerts.length === 0) {
+    inner.innerHTML = '<div class="text-center text-sm text-gray-400 py-4">暂无' + label + '</div>';
+    return;
+  }
+
+  let html = '<div class="flex items-center justify-between mb-3">';
+  html += '<h4 class="text-sm font-semibold text-gray-700">' + label + ' 详情</h4>';
+  html += '<button onclick="closeDashInvDrilldown()" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1 transition-colors">收起 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg></button>';
+  html += '</div>';
+
+  html += '<div class="overflow-x-auto"><table class="data-table"><colgroup>';
+  html += '<col style="width:18%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:12%"><col style="width:10%">';
+  html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+  html += '<th class="text-left font-semibold">SKU编码</th><th class="text-left font-semibold">产品名称</th>';
+  html += '<th class="text-left font-semibold">颜色</th><th class="text-left font-semibold">尺码</th>';
+  html += '<th class="text-right font-semibold">可用库存</th><th class="text-right font-semibold">关联订单数</th>';
+  html += '</tr></thead><tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+  alerts.forEach(alert => {
+    const stockColor = alert.availableStock <= 0 ? 'text-red-600 font-bold' : 'text-gray-700';
+    const stockDisplay = alert.availableStock < 0 ? alert.availableStock : alert.availableStock;
+    const groupId = 'dashInv_' + alert.sku;
+    const isExpanded = acGroupStates[groupId] === true;
+
+    html += '<tr class="sku-expand-row hover:bg-gray-50/80 transition-colors" onclick="acToggleDashInvSku(\'' + groupId + '\')">';
+    html += '<td class="text-left font-mono text-gray-600">' + alert.sku + '</td>';
+    html += '<td class="text-left font-medium text-gray-800">' + alert.productName + '</td>';
+    html += '<td class="text-left text-gray-600">' + alert.color + '</td>';
+    html += '<td class="text-left text-gray-600">' + alert.size + '</td>';
+    html += '<td class="text-right num-col ' + stockColor + '">' + stockDisplay + '</td>';
+    html += '<td class="text-right num-col font-semibold text-gray-800">' + alert.orderCount + '</td>';
+    html += '</tr>';
+
+    // 展开订单行
+    html += '<tr><td colspan="6" style="padding:0;border:none">';
+    html += '<div class="sku-order-expand ' + (isExpanded ? 'open' : '') + '" id="dashSkuExpand_' + alert.sku.replace(/-/g, '_') + '">';
+    html += '<div class="px-4 py-3 bg-gray-50/50 border-t border-gray-100">';
+    html += '<div class="flex items-center justify-between mb-2">';
+    html += '<span class="text-xs font-semibold text-gray-600">关联订单</span>';
+    html += '<button onclick="event.stopPropagation();acCopyGroupOrders(\'inventory_' + alert.sku + '\')" class="compact-copy-btn">';
+    html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+    html += '复制订单号</button></div>';
+
+    html += '<table class="data-table"><colgroup>';
+    html += '<col style="width:25%"><col style="width:30%"><col style="width:15%"><col style="width:30%">';
+    html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+    html += '<th class="text-left font-semibold">订单号</th><th class="text-left font-semibold">客户</th>';
+    html += '<th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
+    html += '</tr></thead><tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+    alert.orders.forEach(order => {
+      html += '<tr class="hover:bg-gray-50/80 transition-colors">';
+      html += '<td class="text-left font-mono text-gray-600">' + order.orderNo + '</td>';
+      html += '<td class="text-left font-medium text-gray-800">' + order.customer + '</td>';
+      html += '<td class="text-left">' + acGetStatusBadge(order.orderStatus) + '</td>';
+      html += '<td class="text-left text-gray-600">' + order.reason + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div></div>';
+    html += '</td></tr>';
+  });
+
+  html += '</tbody></table></div>';
+  inner.innerHTML = html;
+}
+
+function toggleDashInvDrilldown(key) {
+  const panel = document.getElementById('dashInvDrilldownPanel');
+  if (!panel) return;
+
+  if (currentDashInvKey === key) {
+    closeDashInvDrilldown();
+    return;
+  }
+  currentDashInvKey = key;
+  renderDashInvDrilldown(key);
+  panel.classList.add('open');
+  // 更新卡片选中状态
+  renderDashInventoryAlerts();
+}
+
+function closeDashInvDrilldown() {
+  currentDashInvKey = null;
+  const panel = document.getElementById('dashInvDrilldownPanel');
+  if (panel) panel.classList.remove('open');
+}
+
+function acToggleDashInvSku(groupId) {
+  acGroupStates[groupId] = !acGroupStates[groupId];
+  var sku = groupId.replace('dashInv_', '');
+  var expandEl = document.getElementById('dashSkuExpand_' + sku.replace(/-/g, '_'));
+  if (expandEl) {
+    expandEl.classList.toggle('open');
+  }
+}
+
 // ============ 渲染所有 ============
 function renderAll() {
   const data = platformData[currentPlatform];
@@ -2513,6 +2836,8 @@ function renderAll() {
   // 模块3 - 异常预警
   renderOperationAlerts();
   renderSystemMonitor();
+  // 库存异常概览badge
+  renderDashInventoryAlertBadge();
 }
 
 // ============ 窗口自适应 ============
@@ -2623,7 +2948,7 @@ const acCustomers = ['拍歐德國際貿易有限公司', '广州天天酷衣电
 const acShops = ['PAOUD-US', 'TTKU-EU', 'ERM-SG', 'PAOUD-UK', 'TTKU-US'];
 const acPlatforms = ['Temu', 'Shein', 'Qink'];
 
-// 生成mock数据
+// ============ Mock数据 ============
 const acMockData = (function() {
   const data = [];
   let id = 1;
@@ -2638,59 +2963,85 @@ const acMockData = (function() {
   let _orderSeq = 0;
   function randOrderNo() { _orderSeq++; return 'PO-' + (200 + Math.floor(Math.random()*20)) + '-' + (1000000000 + _orderSeq * 137 + Math.floor(Math.random()*10000)).toString().slice(-10); }
 
-  // 运营跟进异常
-  // 超时未付款 (3条)
+  // 运营跟进异常 (stage='ops_follow')
+  // 超时未付款 (3条) - followGroup='wait_payment'
   for (let i = 0; i < 3; i++) {
-    data.push({ id: id++, stage: 'ops_follow', type: '超时未付款', typeCode: 'unpaid', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '拉单后超过' + (24 + i*2) + '小时仍未付款', latestShipTime: randTime(48 + i*12), orderStatus: '待付款', paymentStatus: 'unpaid' });
+    data.push({ id: id++, stage: 'ops_follow', type: '超时未付款', typeCode: 'unpaid', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '拉单后超过' + (24 + i*2) + '小时仍未付款', latestShipTime: randTime(48 + i*12), orderStatus: '待付款', paymentStatus: 'unpaid', orderStage: 'pending', followGroup: 'wait_payment' });
   }
-  // 超时未通知下物流 (3条)
+  // 超时未通知下物流 (3条) - followGroup='notify_omp'
   for (let i = 0; i < 3; i++) {
-    data.push({ id: id++, stage: 'ops_follow', type: '超时未通知下物流', typeCode: 'noLogistics', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '接单后超过' + (8 + i*3) + '小时未通知下物流', latestShipTime: randTime(36 + i*8), orderStatus: '生产中', paymentStatus: 'paid' });
+    data.push({ id: id++, stage: 'ops_follow', type: '超时未通知下物流', typeCode: 'noLogistics', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '接单后超过' + (8 + i*3) + '小时未通知下物流', latestShipTime: randTime(36 + i*8), orderStatus: '生产中', paymentStatus: 'paid', orderStage: 'production', followGroup: 'notify_omp' });
   }
-  // 物流下call失败 (3条)
+  // 物流下call失败 (3条) - followGroup='coordinate_customer'
   for (let i = 0; i < 3; i++) {
     const reasons = ['物流商接口超时', '面单生成失败', '地址信息不完整'];
-    data.push({ id: id++, stage: 'ops_follow', type: '物流下call失败', typeCode: 'logisticsCallFail', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: reasons[i], latestShipTime: randTime(30 + i*6), orderStatus: '生产中', paymentStatus: 'paid' });
+    data.push({ id: id++, stage: 'ops_follow', type: '物流下call失败', typeCode: 'logisticsCallFail', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: reasons[i], latestShipTime: randTime(30 + i*6), orderStatus: '生产中', paymentStatus: 'paid', orderStage: 'production', followGroup: 'coordinate_customer' });
   }
-  // 超时未发货 (3条)
+  // 超时未发货 (3条) - followGroup='follow_factory'
   for (let i = 0; i < 3; i++) {
-    data.push({ id: id++, stage: 'ops_follow', type: '超时未发货', typeCode: 'noShip', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '付款后超过' + (52 + i*8) + '小时仍未发货', latestShipTime: randTime(24 + i*4), orderStatus: '生产中', paymentStatus: 'paid' });
+    data.push({ id: id++, stage: 'ops_follow', type: '超时未发货', typeCode: 'noShip', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '付款后超过' + (52 + i*8) + '小时仍未发货', latestShipTime: randTime(24 + i*4), orderStatus: '生产中', paymentStatus: 'paid', orderStage: 'production', followGroup: 'follow_factory' });
   }
-  // 工厂反审-库存不足 (1条)
-  data.push({ id: id++, stage: 'ops_follow', type: '工厂反审-库存不足', typeCode: 'stockShortage', customer: acCustomers[1], orderNo: randOrderNo(), shop: acShops[1], platform: 'Temu', reason: '工厂反审发现胚衣库存不足，无法安排生产', latestShipTime: randTime(18), orderStatus: '工厂反审', paymentStatus: 'paid' });
-  // 工厂反审-生产图异常 (1条)
-  data.push({ id: id++, stage: 'ops_follow', type: '工厂反审-生产图异常', typeCode: 'prodImageError', customer: acCustomers[0], orderNo: randOrderNo(), shop: acShops[0], platform: 'Shein', reason: '工厂反审发现生产图解析异常，无法生成生产指令', latestShipTime: randTime(22), orderStatus: '工厂反审', paymentStatus: 'paid' });
-  // 工厂反审-蒙版异常 (1条)
-  data.push({ id: id++, stage: 'ops_follow', type: '工厂反审-蒙版异常', typeCode: 'maskError', customer: acCustomers[2], orderNo: randOrderNo(), shop: acShops[2], platform: 'Qink', reason: '工厂反审发现蒙版文件损坏，无法完成裁切', latestShipTime: randTime(28), orderStatus: '工厂反审', paymentStatus: 'paid' });
+  // 工厂反审-库存不足 (1条) - followGroup='coordinate_customer'
+  data.push({ id: id++, stage: 'ops_follow', type: '工厂反审-库存不足', typeCode: 'stockShortage', customer: acCustomers[1], orderNo: randOrderNo(), shop: acShops[1], platform: 'Temu', reason: '工厂反审发现胚衣库存不足，无法安排生产', latestShipTime: randTime(18), orderStatus: '工厂反审', paymentStatus: 'paid', orderStage: 'review', followGroup: 'coordinate_customer' });
+  // 工厂反审-生产图异常 (1条) - followGroup='coordinate_customer'
+  data.push({ id: id++, stage: 'ops_follow', type: '工厂反审-生产图异常', typeCode: 'prodImageError', customer: acCustomers[0], orderNo: randOrderNo(), shop: acShops[0], platform: 'Shein', reason: '工厂反审发现生产图解析异常，无法生成生产指令', latestShipTime: randTime(22), orderStatus: '工厂反审', paymentStatus: 'paid', orderStage: 'review', followGroup: 'coordinate_customer' });
+  // 工厂反审-蒙版异常 (1条) - followGroup='coordinate_customer'
+  data.push({ id: id++, stage: 'ops_follow', type: '工厂反审-蒙版异常', typeCode: 'maskError', customer: acCustomers[2], orderNo: randOrderNo(), shop: acShops[2], platform: 'Qink', reason: '工厂反审发现蒙版文件损坏，无法完成裁切', latestShipTime: randTime(28), orderStatus: '工厂反审', paymentStatus: 'paid', orderStage: 'review', followGroup: 'coordinate_customer' });
 
-  // 系统监控异常
-  // 订单解析异常 (2条)
+  // 系统监控异常 (stage='sys_monitor')
+  // 订单解析异常 (2条) - sysReasonGroup='orderParseError'
   for (let i = 0; i < 2; i++) {
-    data.push({ id: id++, stage: 'sys_monitor', type: '订单解析异常', typeCode: 'orderParseError', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '拉单接口返回数据格式异常，解析失败', latestShipTime: randTime(42 + i*10), orderStatus: '待确认', paymentStatus: 'pending' });
+    data.push({ id: id++, stage: 'sys_monitor', type: '订单解析异常', typeCode: 'orderParseError', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '拉单接口返回数据格式异常，解析失败', latestShipTime: randTime(42 + i*10), orderStatus: '待确认', paymentStatus: 'pending', sysReasonGroup: 'orderParseError' });
   }
   // 主数据绑定超时 (2条)
   for (let i = 0; i < 2; i++) {
-    data.push({ id: id++, stage: 'sys_monitor', type: '主数据绑定超时', typeCode: 'masterDataBindTimeout', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '待确认状态超过2小时未完成主数据绑定', latestShipTime: randTime(38 + i*5), orderStatus: '待确认', paymentStatus: 'pending' });
+    data.push({ id: id++, stage: 'sys_monitor', type: '主数据绑定超时', typeCode: 'masterDataBindTimeout', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '待确认状态超过2小时未完成主数据绑定', latestShipTime: randTime(38 + i*5), orderStatus: '待确认', paymentStatus: 'pending', sysReasonGroup: 'masterDataBindTimeout' });
   }
   // 胚衣sku被禁 (1条)
-  data.push({ id: id++, stage: 'sys_monitor', type: '胚衣sku被禁', typeCode: 'skuDisabled', customer: acCustomers[0], orderNo: randOrderNo(), shop: acShops[0], platform: 'Temu', reason: '胚衣sku已被禁用，无法确认订单', latestShipTime: randTime(35), orderStatus: '待确认', paymentStatus: 'pending' });
+  data.push({ id: id++, stage: 'sys_monitor', type: '胚衣sku被禁', typeCode: 'skuDisabled', customer: acCustomers[0], orderNo: randOrderNo(), shop: acShops[0], platform: 'Temu', reason: '胚衣sku已被禁用，无法确认订单', latestShipTime: randTime(35), orderStatus: '待确认', paymentStatus: 'pending', sysReasonGroup: 'skuDisabled' });
   // 超时未推送 (1条)
-  data.push({ id: id++, stage: 'sys_monitor', type: '超时未推送', typeCode: 'pushTimeout', customer: acCustomers[1], orderNo: randOrderNo(), shop: acShops[1], platform: 'Shein', reason: '待推送状态超过1小时未推送至工厂', latestShipTime: randTime(32), orderStatus: '待推送', paymentStatus: 'paid' });
+  data.push({ id: id++, stage: 'sys_monitor', type: '超时未推送', typeCode: 'pushTimeout', customer: acCustomers[1], orderNo: randOrderNo(), shop: acShops[1], platform: 'Shein', reason: '待推送状态超过1小时未推送至工厂', latestShipTime: randTime(32), orderStatus: '待推送', paymentStatus: 'paid', sysReasonGroup: 'pushTimeout' });
   // 无可履约工厂 (1条)
-  data.push({ id: id++, stage: 'sys_monitor', type: '无可履约工厂', typeCode: 'noFactory', customer: acCustomers[2], orderNo: randOrderNo(), shop: acShops[2], platform: 'Temu', reason: '当前无可履约工厂分配', latestShipTime: randTime(44), orderStatus: '待处理', paymentStatus: 'paid' });
+  data.push({ id: id++, stage: 'sys_monitor', type: '无可履约工厂', typeCode: 'noFactory', customer: acCustomers[2], orderNo: randOrderNo(), shop: acShops[2], platform: 'Temu', reason: '当前无可履约工厂分配', latestShipTime: randTime(44), orderStatus: '待处理', paymentStatus: 'paid', sysReasonGroup: 'noFactory' });
   // 超时未接单 (1条)
-  data.push({ id: id++, stage: 'sys_monitor', type: '超时未接单', typeCode: 'acceptTimeout', customer: acCustomers[0], orderNo: randOrderNo(), shop: acShops[0], platform: 'Qink', reason: '订单停留在待接单状态超过1小时', latestShipTime: randTime(26), orderStatus: '待工厂接单', paymentStatus: 'paid' });
+  data.push({ id: id++, stage: 'sys_monitor', type: '超时未接单', typeCode: 'acceptTimeout', customer: acCustomers[0], orderNo: randOrderNo(), shop: acShops[0], platform: 'Qink', reason: '订单停留在待接单状态超过1小时', latestShipTime: randTime(26), orderStatus: '待工厂接单', paymentStatus: 'paid', sysReasonGroup: 'acceptTimeout' });
   // 面单未同步 (1条)
-  data.push({ id: id++, stage: 'sys_monitor', type: '面单未同步', typeCode: 'labelNotSynced', customer: acCustomers[1], orderNo: randOrderNo(), shop: acShops[1], platform: 'Temu', reason: '面单未同步至OMP', latestShipTime: randTime(20), orderStatus: '生产中', paymentStatus: 'paid' });
+  data.push({ id: id++, stage: 'sys_monitor', type: '面单未同步', typeCode: 'labelNotSynced', customer: acCustomers[1], orderNo: randOrderNo(), shop: acShops[1], platform: 'Temu', reason: '面单未同步至OMP', latestShipTime: randTime(20), orderStatus: '生产中', paymentStatus: 'paid', sysReasonGroup: 'labelNotSynced' });
   // 同步平台失败 (1条)
-  data.push({ id: id++, stage: 'sys_monitor', type: '同步平台失败', typeCode: 'syncPlatformFail', customer: acCustomers[2], orderNo: randOrderNo(), shop: acShops[2], platform: 'Shein', reason: '平台接口返回同步失败', latestShipTime: randTime(16), orderStatus: '已发货', paymentStatus: 'paid' });
+  data.push({ id: id++, stage: 'sys_monitor', type: '同步平台失败', typeCode: 'syncPlatformFail', customer: acCustomers[2], orderNo: randOrderNo(), shop: acShops[2], platform: 'Shein', reason: '平台接口返回同步失败', latestShipTime: randTime(16), orderStatus: '已发货', paymentStatus: 'paid', sysReasonGroup: 'syncPlatformFail' });
 
   return data;
 })();
 
-// 筛选状态
-let acCurrentFilters = { stage: 'all', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [], sortField: 'latestShipTime', sortOrder: 'asc' };
+// ============ 库存异常数据 ============
+let acInventoryLastRefresh = Date.now() - 5 * 60 * 1000; // 5分钟前
+const acInventoryAlerts = [
+  { sku: 'TSHIRT-BLK-L', productName: 'T恤', color: '黑色', size: 'L', availableStock: -3, status: 'out_of_stock', statusText: '缺货', orderCount: 3, customers: '拍歐德、天天酷衣', orders: [
+    { orderNo: 'TM20260520001', customer: '拍歐德國際貿易有限公司', orderStatus: '待处理', reason: '库存不足无法生产' },
+    { orderNo: 'TM20260520005', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' },
+    { orderNo: 'TM20260520008', customer: '拍歐德國際貿易有限公司', orderStatus: '待付款', reason: '库存不足' }
+  ]},
+  { sku: 'HOODIE-GRY-M', productName: '卫衣', color: '灰色', size: 'M', availableStock: 2, status: 'low_stock', statusText: '库存紧张', orderCount: 2, customers: '尔棉贸易', orders: [
+    { orderNo: 'TM20260520003', customer: '广州尔棉贸易有限公司', orderStatus: '待处理', reason: '库存紧张可能无法满足' },
+    { orderNo: 'TM20260520010', customer: '广州尔棉贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' }
+  ]},
+  { sku: 'MUG-CER-WHT', productName: '陶瓷马克杯', color: '白色', size: '-', availableStock: 0, status: 'out_of_stock', statusText: '缺货', orderCount: 2, customers: '天天酷衣', orders: [
+    { orderNo: 'TM20260520012', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '待付款', reason: '库存不足' },
+    { orderNo: 'TM20260520018', customer: '广州天天酷衣电子贸易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' }
+  ]},
+  { sku: 'PHONECASE-BK-M', productName: '手机壳', color: '黑色', size: 'M', availableStock: 5, status: 'low_stock', statusText: '库存紧张', orderCount: 1, customers: '拍歐德', orders: [
+    { orderNo: 'TM20260520022', customer: '拍歐德國際貿易有限公司', orderStatus: '待处理', reason: '库存紧张可能无法满足' }
+  ]},
+  { sku: 'CANVAS-ART-A3', productName: '帆布画', color: '-', size: 'A3', availableStock: -1, status: 'out_of_stock', statusText: '缺货', orderCount: 2, customers: '拍歐德、尔棉', orders: [
+    { orderNo: 'TM20260520030', customer: '拍歐德國際貿易有限公司', orderStatus: '工厂反审', reason: '工厂反审-库存不足' },
+    { orderNo: 'TM20260520031', customer: '广州尔棉贸易有限公司', orderStatus: '待付款', reason: '库存不足' }
+  ]}
+];
+
+// ============ 筛选状态 ============
+let acCurrentFilters = { mainTab: 'customer', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [] };
 let acSelectedIds = new Set();
+let acGroupStates = {}; // 记录各组折叠状态
 
 // ============ 店铺连接异常数据 ============
 const acTokenAlertShops = [
@@ -2700,41 +3051,58 @@ const acTokenAlertShops = [
   { customer: '广州尔棉贸易有限公司', name: '尔棉优品店', platform: 'Qink', status: 'Token失效', statusColor: 'danger' },
 ];
 
-// 获取所有异常类型（去重）
+// 获取所有异常类型（去重）- 只取运营跟进数据
 function acGetAllTypes() {
-  const types = [...new Set(acMockData.map(d => d.type))];
+  const types = [...new Set(acMockData.filter(d => d.stage === 'ops_follow').map(d => d.type))];
   return types.sort();
 }
 
-// 平台切换
+// ============ 平台切换 ============
 function acSwitchPlatform(platform) {
   acCurrentFilters.platform = platform;
   document.querySelectorAll('#acPlatformTab .tab-btn').forEach(b => {
     b.classList.toggle('active', b.getAttribute('data-ac-platform') === platform);
   });
-  acRenderTable();
+  acRenderCurrentTab();
+  acRenderTokenBanner();
 }
 
-// 环节切换
-function acSwitchStage(stage) {
-  acCurrentFilters.stage = stage;
-  document.getElementById('acStageAll').classList.toggle('active', stage === 'all');
-  document.getElementById('acStageOps').classList.toggle('active', stage === 'ops_follow');
-  document.getElementById('acStageSys').classList.toggle('active', stage === 'sys_monitor');
-  acRenderTable();
+// ============ 主Tab切换 ============
+function acSwitchMainTab(tab) {
+  acCurrentFilters.mainTab = tab;
+  // 更新Tab按钮样式
+  ['customer', 'opsFollow', 'inventory', 'sysMonitor'].forEach(t => {
+    const btn = document.getElementById('acMainTab' + t.charAt(0).toUpperCase() + t.slice(1));
+    if (btn) btn.classList.toggle('active', t === tab);
+  });
+  // 显示/隐藏Tab内容
+  document.getElementById('acTabCustomer').style.display = tab === 'customer' ? '' : 'none';
+  document.getElementById('acTabOpsFollow').style.display = tab === 'opsFollow' ? '' : 'none';
+  document.getElementById('acTabInventory').style.display = tab === 'inventory' ? '' : 'none';
+  document.getElementById('acTabSysMonitor').style.display = tab === 'sysMonitor' ? '' : 'none';
+  // 显示/隐藏筛选条件
+  const typeWrap = document.getElementById('acTypeSelectWrap');
+  const statusWrap = document.getElementById('acStatusSelectWrap');
+  const searchBox = document.getElementById('acSearchBox');
+  const batchBar = document.getElementById('acBatchBar');
+  if (typeWrap) typeWrap.style.display = tab === 'customer' ? '' : 'none';
+  if (statusWrap) statusWrap.style.display = tab === 'customer' ? '' : 'none';
+  if (searchBox) searchBox.style.display = (tab === 'inventory') ? 'none' : '';
+  if (batchBar) batchBar.style.display = tab === 'customer' ? '' : 'none';
+
+  acRenderCurrentTab();
 }
 
-// 搜索
+// ============ 搜索/筛选 ============
 function acOnSearchInput() {
   acCurrentFilters.search = document.getElementById('acSearchInput').value.trim();
-  acRenderTable();
+  acRenderCurrentTab();
 }
 
-// 客户搜索
 function acOnCustomerInput() {
   acCurrentFilters.customer = document.getElementById('acCustomerInput').value.trim();
   acRenderTokenBanner();
-  acRenderTable();
+  acRenderCurrentTab();
 }
 
 // 异常类型多选
@@ -2745,13 +3113,11 @@ function acToggleTypePanel() {
     panel.classList.remove('open');
     return;
   }
-  // 渲染选项
   const allTypes = acGetAllTypes();
   panel.innerHTML = allTypes.map(t => {
     const checked = acCurrentFilters.exceptionTypes.includes(t) ? 'checked' : '';
     return `<label class="ms-option"><input type="checkbox" value="${t}" ${checked} onchange="acToggleType(this.value, this.checked)" />${t}</label>`;
   }).join('');
-  // 定位
   const rect = btn.getBoundingClientRect();
   panel.style.top = (rect.bottom + 6) + 'px';
   panel.style.left = rect.left + 'px';
@@ -2766,7 +3132,7 @@ function acToggleType(type, checked) {
   }
   acUpdateTypeCount();
   acRenderFilterTags();
-  acRenderTable();
+  acRenderCurrentTab();
 }
 
 function acUpdateTypeCount() {
@@ -2781,8 +3147,6 @@ function acUpdateTypeCount() {
 
 // 订单状态多选
 const acStatusOptions = ['待确认', '待付款', '待推送', '待处理', '待工厂接单', '生产中', '工厂反审', '已发货'];
-let acStatusChecked = {};
-acStatusOptions.forEach(s => acStatusChecked[s] = false);
 
 function acToggleStatusPanel() {
   const panel = document.getElementById('acStatusPanel');
@@ -2814,7 +3178,7 @@ function acToggleStatus(status, checked) {
   }
   acUpdateStatusCount();
   acRenderFilterTags();
-  acRenderTable();
+  acRenderCurrentTab();
 }
 
 function acUpdateStatusCount() {
@@ -2865,58 +3229,37 @@ function acRemoveFilterTag(key) {
     acUpdateStatusCount();
   }
   acRenderFilterTags();
-  acRenderTable();
+  acRenderCurrentTab();
 }
 
-// 排序
-function acToggleSort() {
-  acCurrentFilters.sortOrder = acCurrentFilters.sortOrder === 'asc' ? 'desc' : 'asc';
-  const icon = document.getElementById('acSortIcon');
-  icon.textContent = acCurrentFilters.sortOrder === 'asc' ? '↑' : '↓';
-  acRenderTable();
-}
-
-// 筛选+排序数据
-function acGetFilteredData() {
-  let data = [...acMockData];
-
+// ============ 通用筛选函数 ============
+function acFilterData(dataList) {
+  let data = [...dataList];
   // 平台
   data = data.filter(d => d.platform === acCurrentFilters.platform);
-
-  // 环节
-  if (acCurrentFilters.stage !== 'all') {
-    data = data.filter(d => d.stage === acCurrentFilters.stage);
-  }
-
-  // 搜索
+  // 搜索订单号
   if (acCurrentFilters.search) {
     const kw = acCurrentFilters.search.toLowerCase();
-    data = data.filter(d => d.orderNo.toLowerCase().includes(kw));
+    data = data.filter(d => d.orderNo && d.orderNo.toLowerCase().includes(kw));
   }
-
   // 客户
   if (acCurrentFilters.customer) {
     const kw = acCurrentFilters.customer.toLowerCase();
-    data = data.filter(d => d.customer.toLowerCase().includes(kw));
+    data = data.filter(d => d.customer && d.customer.toLowerCase().includes(kw));
   }
+  return data;
+}
 
+function acFilterCustomerData(dataList) {
+  let data = acFilterData(dataList);
   // 异常类型多选
   if (acCurrentFilters.exceptionTypes.length > 0) {
     data = data.filter(d => acCurrentFilters.exceptionTypes.includes(d.type));
   }
-
   // 订单状态多选
   if (acCurrentFilters.orderStatuses.length > 0) {
     data = data.filter(d => acCurrentFilters.orderStatuses.includes(d.orderStatus));
   }
-
-  // 排序
-  data.sort((a, b) => {
-    const ta = new Date(a.latestShipTime).getTime();
-    const tb = new Date(b.latestShipTime).getTime();
-    return acCurrentFilters.sortOrder === 'asc' ? ta - tb : tb - ta;
-  });
-
   return data;
 }
 
@@ -2936,53 +3279,439 @@ function acGetStatusBadge(status) {
   return '<span class="text-[10px] font-bold ' + c.bg + ' ' + c.text + ' px-1.5 py-0.5 rounded">' + status + '</span>';
 }
 
-// 渲染表格
-function acRenderTable() {
-  const data = acGetFilteredData();
-  const tbody = document.getElementById('acTableBody');
-  const emptyState = document.getElementById('acEmptyState');
+// 最晚发货时间是否已过期
+function acIsOverdue(timeStr) {
+  if (!timeStr) return false;
+  return new Date(timeStr).getTime() < Date.now();
+}
 
-  if (data.length === 0) {
-    tbody.innerHTML = '';
-    emptyState.style.display = '';
-    return;
+// ============ 渲染当前Tab ============
+function acRenderCurrentTab() {
+  const tab = acCurrentFilters.mainTab;
+  if (tab === 'customer') acRenderCustomerAlerts();
+  else if (tab === 'opsFollow') acRenderOpsFollowAlerts();
+  else if (tab === 'inventory') acRenderInventoryAlerts();
+  else if (tab === 'sysMonitor') acRenderSysMonitorAlerts();
+  // 更新Tab计数
+  acUpdateTabCounts();
+}
+
+// 更新异常中心Tab上的数量
+function acUpdateTabCounts() {
+  // 客户异常
+  const customerData = acMockData.filter(d => d.stage === 'ops_follow');
+  const customerFiltered = acFilterCustomerData(customerData);
+  const elCustomer = document.getElementById('acTabCountCustomer');
+  if (elCustomer) elCustomer.textContent = customerFiltered.length;
+
+  // 运营跟进
+  const opsData = acMockData.filter(d => d.stage === 'ops_follow');
+  const opsFiltered = acFilterData(opsData);
+  const elOps = document.getElementById('acTabCountOpsFollow');
+  if (elOps) elOps.textContent = opsFiltered.length;
+
+  // 库存异常
+  let invAlerts = [...acInventoryAlerts];
+  if (acCurrentFilters.customer) {
+    const kw = acCurrentFilters.customer.toLowerCase();
+    invAlerts = invAlerts.filter(a => {
+      return a.customers.toLowerCase().includes(kw) || a.orders.some(o => o.customer.toLowerCase().includes(kw));
+    });
   }
-  emptyState.style.display = 'none';
+  const elInv = document.getElementById('acTabCountInventory');
+  if (elInv) elInv.textContent = invAlerts.length;
 
-  tbody.innerHTML = data.map(row => {
-    const checked = acSelectedIds.has(row.id) ? 'checked' : '';
-    const stageTag = row.stage === 'ops_follow'
-      ? '<span class="text-[10px] font-bold bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded">运营</span>'
-      : '<span class="text-[10px] font-bold bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded">系统</span>';
-    return `<tr class="hover:bg-gray-50/80 transition-colors">
-      <td><input type="checkbox" class="ac-row-check accent-blue-500" data-id="${row.id}" ${checked} onchange="acToggleRowCheck(${row.id}, this.checked)" /></td>
-      <td class="text-left font-medium text-gray-800">${row.customer}</td>
-      <td class="text-left">${stageTag} ${row.type}</td>
-      <td class="text-left font-mono text-gray-600">
-        <span class="group relative">
-          ${row.orderNo}
-          <button onclick="acCopyOrderNo('${row.orderNo}')" class="ml-1 text-gray-300 hover:text-blue-500 transition-colors" title="复制">
-            <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-          </button>
-        </span>
-      </td>
-      <td class="text-left text-gray-600">${row.shop}</td>
-      <td class="text-left">${acGetStatusBadge(row.orderStatus)}</td>
-      <td class="text-left text-gray-600" title="${row.reason}">${row.reason}</td>
-      <td class="text-right font-mono text-gray-600">${row.latestShipTime}</td>
-      
-    </tr>`;
-  }).join('');
+  // 系统监控
+  const sysData = acMockData.filter(d => d.stage === 'sys_monitor');
+  const sysFiltered = acFilterData(sysData);
+  const elSys = document.getElementById('acTabCountSysMonitor');
+  if (elSys) elSys.textContent = sysFiltered.length;
+}
 
+// ============ 客户异常Tab - 按订单状态分组 ============
+function acRenderCustomerAlerts() {
+  const container = document.getElementById('acCustomerAlertsContainer');
+  const opsData = acMockData.filter(d => d.stage === 'ops_follow');
+  const filtered = acFilterCustomerData(opsData);
+
+  // 按orderStage分组
+  const groups = [
+    { key: 'pending', label: '待处理', color: 'bg-blue-500', countBadge: 'bg-blue-100 text-blue-700' },
+    { key: 'production', label: '生产中', color: 'bg-indigo-500', countBadge: 'bg-indigo-100 text-indigo-700' },
+    { key: 'review', label: '工厂反审', color: 'bg-red-500', countBadge: 'bg-red-100 text-red-700' },
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    const items = filtered.filter(d => d.orderStage === g.key);
+    const groupId = 'customer_' + g.key;
+    const isCollapsed = acGroupStates[groupId] === true;
+
+    html += '<div class="ac-group-section">';
+    html += '<div class="ac-group-header" onclick="acToggleGroup(\'' + groupId + '\')">';
+    html += '<svg class="ac-group-arrow ' + (isCollapsed ? 'collapsed' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
+    html += '<span class="w-1.5 h-5 ' + g.color + ' rounded-full"></span>';
+    html += '<span class="ac-group-title">' + g.label + '</span>';
+    html += '<span class="ac-group-count ' + g.countBadge + '">' + items.length + '条</span>';
+    html += '</div>';
+    html += '<div class="ac-group-body ' + (isCollapsed ? 'collapsed' : '') + '">';
+
+    if (items.length > 0) {
+      html += '<div class="ac-group-actions">';
+      html += '<button onclick="acCopyGroupOrders(\'' + groupId + '\')" class="compact-copy-btn">';
+      html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+      html += '复制订单号</button></div>';
+      html += '<div class="overflow-x-auto px-3 pb-3"><table class="data-table"><colgroup>';
+      html += '<col style="width:40px"><col style="width:16%"><col style="width:13%"><col style="width:18%"><col style="width:14%"><col style="width:9%"><col style="width:auto"><col style="width:13%">';
+      html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+      html += '<th><input type="checkbox" onchange="acToggleGroupCheck(\'' + groupId + '\', this.checked)" class="accent-blue-500" /></th>';
+      html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">异常类型</th><th class="text-left font-semibold">订单号</th>';
+      html += '<th class="text-left font-semibold">店铺名称</th><th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
+      html += '<th class="text-right font-semibold">最晚发货时间</th></tr></thead>';
+      html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+      items.forEach(row => {
+        const checked = acSelectedIds.has(row.id) ? 'checked' : '';
+        const overdue = acIsOverdue(row.latestShipTime);
+        html += '<tr class="hover:bg-gray-50/80 transition-colors ' + (overdue ? 'danger-row' : '') + '">';
+        html += '<td><input type="checkbox" class="ac-row-check accent-blue-500" data-id="' + row.id + '" ' + checked + ' onchange="acToggleRowCheck(' + row.id + ', this.checked)" /></td>';
+        html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
+        html += '<td class="text-left">' + row.type + '</td>';
+        html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
+        html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
+        html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+        html += '</button></td>';
+        html += '<td class="text-left text-gray-600">' + row.shop + '</td>';
+        html += '<td class="text-left">' + acGetStatusBadge(row.orderStatus) + '</td>';
+        html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
+        html += '<td class="text-right font-mono ' + (overdue ? 'text-red-600 font-bold' : 'text-gray-600') + '">' + row.latestShipTime + '</td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table></div>';
+    } else {
+      html += '<div class="px-3 pb-3 text-sm text-gray-400 py-4 text-center">暂无该状态下的异常订单</div>';
+    }
+
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
   acUpdateSelectedCount();
 }
 
-// 复制订单号
+// ============ 运营跟进Tab - 按处理动作分组 ============
+function acRenderOpsFollowAlerts() {
+  const container = document.getElementById('acOpsFollowAlertsContainer');
+  const opsData = acMockData.filter(d => d.stage === 'ops_follow');
+  const filtered = acFilterData(opsData);
+
+  const groups = [
+    { key: 'notify_omp', label: '请通知OMP处理', desc: '复制订单号后通知OMP处理', color: 'bg-orange-500', countBadge: 'bg-orange-100 text-orange-700' },
+    { key: 'coordinate_customer', label: '请协调客户处理', desc: '复制订单号后联系客户协调处理', color: 'bg-amber-500', countBadge: 'bg-amber-100 text-amber-700' },
+    { key: 'follow_factory', label: '请跟进工厂进度', desc: '复制订单号后跟进工厂发货进度', color: 'bg-purple-500', countBadge: 'bg-purple-100 text-purple-700' },
+    { key: 'wait_payment', label: '待客户付款', desc: '复制订单号后提醒客户付款', color: 'bg-yellow-500', countBadge: 'bg-yellow-100 text-yellow-700' },
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    const items = filtered.filter(d => d.followGroup === g.key);
+    const groupId = 'opsFollow_' + g.key;
+    const isCollapsed = acGroupStates[groupId] === true;
+
+    html += '<div class="ac-group-section">';
+    html += '<div class="ac-group-header" onclick="acToggleGroup(\'' + groupId + '\')">';
+    html += '<svg class="ac-group-arrow ' + (isCollapsed ? 'collapsed' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
+    html += '<span class="w-1.5 h-5 ' + g.color + ' rounded-full"></span>';
+    html += '<span class="ac-group-title">' + g.label + '</span>';
+    html += '<span class="ac-group-count ' + g.countBadge + '">' + items.length + '条</span>';
+    html += '<span class="text-xs text-gray-400 ml-1">' + g.desc + '</span>';
+    html += '</div>';
+    html += '<div class="ac-group-body ' + (isCollapsed ? 'collapsed' : '') + '">';
+
+    if (items.length > 0) {
+      html += '<div class="ac-group-actions">';
+      html += '<button onclick="acCopyGroupOrders(\'' + groupId + '\')" class="compact-copy-btn">';
+      html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+      html += '复制订单号</button></div>';
+      html += '<div class="overflow-x-auto px-3 pb-3"><table class="data-table"><colgroup>';
+      html += '<col style="width:16%"><col style="width:13%"><col style="width:18%"><col style="width:14%"><col style="width:9%"><col style="width:auto"><col style="width:13%">';
+      html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+      html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">异常类型</th><th class="text-left font-semibold">订单号</th>';
+      html += '<th class="text-left font-semibold">店铺名称</th><th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
+      html += '<th class="text-right font-semibold">最晚发货时间</th></tr></thead>';
+      html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+      items.forEach(row => {
+        const overdue = acIsOverdue(row.latestShipTime);
+        html += '<tr class="hover:bg-gray-50/80 transition-colors ' + (overdue ? 'danger-row' : '') + '">';
+        html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
+        html += '<td class="text-left">' + row.type + '</td>';
+        html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
+        html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
+        html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+        html += '</button></td>';
+        html += '<td class="text-left text-gray-600">' + row.shop + '</td>';
+        html += '<td class="text-left">' + acGetStatusBadge(row.orderStatus) + '</td>';
+        html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
+        html += '<td class="text-right font-mono ' + (overdue ? 'text-red-600 font-bold' : 'text-gray-600') + '">' + row.latestShipTime + '</td>';
+        html += '</tr>';
+      });
+
+      html += '</tbody></table></div>';
+    } else {
+      html += '<div class="px-3 pb-3 text-sm text-gray-400 py-4 text-center">暂无该类异常</div>';
+    }
+
+    html += '</div></div>';
+  });
+
+  container.innerHTML = html;
+}
+
+// ============ 库存异常Tab - SKU列表形式 ============
+function acRenderInventoryAlerts() {
+  const container = document.getElementById('acInventoryAlertsContainer');
+  let alerts = [...acInventoryAlerts];
+
+  // 客户搜索过滤
+  if (acCurrentFilters.customer) {
+    const kw = acCurrentFilters.customer.toLowerCase();
+    alerts = alerts.filter(a => {
+      const matchCustomer = a.customers.toLowerCase().includes(kw);
+      const matchOrders = a.orders.some(o => o.customer.toLowerCase().includes(kw));
+      return matchCustomer || matchOrders;
+    });
+  }
+
+  // 计算刷新时间
+  const refreshMinutes = Math.floor((Date.now() - acInventoryLastRefresh) / 60000);
+  const refreshText = refreshMinutes < 1 ? '刚刚更新' : refreshMinutes + '分钟前更新';
+
+  let html = '';
+  // 顶部操作栏
+  html += '<div class="flex items-center justify-between mb-3">';
+  html += '<button onclick="acRefreshInventory()" class="refresh-btn">';
+  html += '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
+  html += '刷新库存</button>';
+  html += '<span class="text-xs text-gray-400">' + refreshText + '</span>';
+  html += '</div>';
+
+  // SKU表格
+  html += '<div class="bg-white border border-gray-200 rounded overflow-hidden">';
+  html += '<div class="overflow-x-auto"><table class="data-table"><colgroup>';
+  html += '<col style="width:18%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:12%"><col style="width:10%"><col style="width:10%">';
+  html += '</colgroup><thead><tr class="border-b border-gray-200/60 bg-gray-50">';
+  html += '<th class="text-left font-semibold">SKU编码</th><th class="text-left font-semibold">产品名称</th>';
+  html += '<th class="text-left font-semibold">颜色</th><th class="text-left font-semibold">尺码</th>';
+  html += '<th class="text-right font-semibold">可用库存</th><th class="text-left font-semibold">缺货状态</th>';
+  html += '<th class="text-right font-semibold">关联订单数</th>';
+  html += '</tr></thead><tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+  alerts.forEach((alert, idx) => {
+    const groupId = 'inventory_' + alert.sku;
+    const isExpanded = acGroupStates[groupId] === true;
+    const statusColor = alert.status === 'out_of_stock' ? 'text-red-600' : 'text-amber-600';
+    const stockColor = alert.availableStock <= 0 ? 'text-red-600 font-bold' : 'text-gray-700';
+    const stockDisplay = alert.availableStock < 0 ? alert.availableStock : alert.availableStock;
+
+    html += '<tr class="sku-expand-row hover:bg-gray-50/80 transition-colors" onclick="acToggleSkuRow(\'' + groupId + '\')">';
+    html += '<td class="text-left font-mono text-gray-600">' + alert.sku + '</td>';
+    html += '<td class="text-left font-medium text-gray-800">' + alert.productName + '</td>';
+    html += '<td class="text-left text-gray-600">' + alert.color + '</td>';
+    html += '<td class="text-left text-gray-600">' + alert.size + '</td>';
+    html += '<td class="text-right num-col ' + stockColor + '">' + stockDisplay + '</td>';
+    html += '<td class="text-left"><span class="sku-status-badge ' + alert.status + '">' + alert.statusText + '</span></td>';
+    html += '<td class="text-right num-col font-semibold text-gray-800">' + alert.orderCount + '</td>';
+    html += '</tr>';
+
+    // 展开区域 - 关联订单
+    html += '<tr><td colspan="7" style="padding:0;border:none">';
+    html += '<div class="sku-order-expand ' + (isExpanded ? 'open' : '') + '" id="skuExpand_' + alert.sku.replace(/-/g, '_') + '">';
+    html += '<div class="px-4 py-3 bg-gray-50/50 border-t border-gray-100">';
+    html += '<div class="flex items-center justify-between mb-2">';
+    html += '<span class="text-xs font-semibold text-gray-600">关联订单</span>';
+    html += '<button onclick="event.stopPropagation();acCopyGroupOrders(\'' + groupId + '\')" class="compact-copy-btn">';
+    html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+    html += '复制订单号</button></div>';
+
+    html += '<table class="data-table"><colgroup>';
+    html += '<col style="width:25%"><col style="width:30%"><col style="width:15%"><col style="width:30%">';
+    html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+    html += '<th class="text-left font-semibold">订单号</th><th class="text-left font-semibold">客户</th>';
+    html += '<th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
+    html += '</tr></thead><tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+    alert.orders.forEach(order => {
+      html += '<tr class="hover:bg-gray-50/80 transition-colors">';
+      html += '<td class="text-left font-mono text-gray-600">' + order.orderNo + '</td>';
+      html += '<td class="text-left font-medium text-gray-800">' + order.customer + '</td>';
+      html += '<td class="text-left">' + acGetStatusBadge(order.orderStatus) + '</td>';
+      html += '<td class="text-left text-gray-600">' + order.reason + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div></div>';
+    html += '</td></tr>';
+  });
+
+  html += '</tbody></table></div>';
+
+  if (alerts.length === 0) {
+    html = '<div class="bg-white border border-gray-200 rounded py-12 text-center">';
+    html += '<svg class="w-16 h-16 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>';
+    html += '<p class="text-sm text-gray-400">暂无库存异常</p></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+// SKU行展开/收起
+function acToggleSkuRow(groupId) {
+  acGroupStates[groupId] = !acGroupStates[groupId];
+  var sku = groupId.replace('inventory_', '');
+  var expandEl = document.getElementById('skuExpand_' + sku.replace(/-/g, '_'));
+  if (expandEl) {
+    expandEl.classList.toggle('open');
+  }
+}
+
+// 刷新库存
+function acRefreshInventory() {
+  acInventoryLastRefresh = Date.now();
+  acRenderInventoryAlerts();
+  alertShowToast('库存数据已刷新');
+}
+
+// ============ 系统监控Tab - 按异常原因分组 ============
+function acRenderSysMonitorAlerts() {
+  const container = document.getElementById('acSysMonitorAlertsContainer');
+  const sysData = acMockData.filter(d => d.stage === 'sys_monitor');
+  const filtered = acFilterData(sysData);
+
+  const groups = [
+    { key: 'orderParseError', label: '订单解析异常', color: 'bg-red-500', countBadge: 'bg-red-100 text-red-700' },
+    { key: 'masterDataBindTimeout', label: '主数据绑定超时', color: 'bg-orange-500', countBadge: 'bg-orange-100 text-orange-700' },
+    { key: 'skuDisabled', label: '胚衣sku被禁', color: 'bg-amber-500', countBadge: 'bg-amber-100 text-amber-700' },
+    { key: 'pushTimeout', label: '超时未推送', color: 'bg-yellow-500', countBadge: 'bg-yellow-100 text-yellow-700' },
+    { key: 'noFactory', label: '无可履约工厂', color: 'bg-purple-500', countBadge: 'bg-purple-100 text-purple-700' },
+    { key: 'acceptTimeout', label: '超时未接单', color: 'bg-pink-500', countBadge: 'bg-pink-100 text-pink-700' },
+    { key: 'labelNotSynced', label: '面单未同步', color: 'bg-cyan-500', countBadge: 'bg-cyan-100 text-cyan-700' },
+    { key: 'syncPlatformFail', label: '同步平台失败', color: 'bg-rose-500', countBadge: 'bg-rose-100 text-rose-700' },
+  ];
+
+  let html = '';
+  groups.forEach(g => {
+    const items = filtered.filter(d => d.sysReasonGroup === g.key);
+    if (items.length === 0) return; // 空分组不渲染
+
+    const groupId = 'sysMonitor_' + g.key;
+    const isCollapsed = acGroupStates[groupId] === true;
+
+    html += '<div class="ac-group-section">';
+    html += '<div class="ac-group-header" onclick="acToggleGroup(\'' + groupId + '\')">';
+    html += '<svg class="ac-group-arrow ' + (isCollapsed ? 'collapsed' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
+    html += '<span class="w-1.5 h-5 ' + g.color + ' rounded-full"></span>';
+    html += '<span class="ac-group-title">' + g.label + '</span>';
+    html += '<span class="ac-group-count ' + g.countBadge + '">' + items.length + '条</span>';
+    html += '</div>';
+    html += '<div class="ac-group-body ' + (isCollapsed ? 'collapsed' : '') + '">';
+
+    html += '<div class="ac-group-actions">';
+    html += '<button onclick="acCopyGroupOrders(\'' + groupId + '\')" class="compact-copy-btn">';
+    html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+    html += '复制订单号</button></div>';
+    html += '<div class="overflow-x-auto px-3 pb-3"><table class="data-table"><colgroup>';
+    html += '<col style="width:25%"><col style="width:22%"><col style="width:auto">';
+    html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+    html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">订单号</th>';
+    html += '<th class="text-left font-semibold">异常原因</th></tr></thead>';
+    html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+    items.forEach(row => {
+      html += '<tr class="hover:bg-gray-50/80 transition-colors">';
+      html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
+      html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
+      html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
+      html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+      html += '</button></td>';
+      html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div></div></div>';
+  });
+
+  if (!html) {
+    html = '<div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] py-12 text-center">';
+    html += '<svg class="w-16 h-16 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
+    html += '<p class="text-sm text-gray-400">暂无系统监控异常</p></div>';
+  }
+
+  container.innerHTML = html;
+}
+
+// ============ 分组折叠/展开 ============
+function acToggleGroup(groupId) {
+  acGroupStates[groupId] = !acGroupStates[groupId];
+  var section = document.querySelector('[onclick="acToggleGroup(\'' + groupId + '\')"]');
+  if (!section) return;
+  var arrow = section.querySelector('.ac-group-arrow');
+  var body = section.nextElementSibling;
+  if (acGroupStates[groupId]) {
+    if (arrow) arrow.classList.add('collapsed');
+    if (body) body.classList.add('collapsed');
+  } else {
+    if (arrow) arrow.classList.remove('collapsed');
+    if (body) body.classList.remove('collapsed');
+  }
+}
+
+// ============ 复制某组订单号 ============
+function acCopyGroupOrders(groupId) {
+  var orderNos = [];
+  if (groupId.startsWith('customer_')) {
+    var stageKey = groupId.replace('customer_', '');
+    var opsData = acMockData.filter(d => d.stage === 'ops_follow');
+    var filtered = acFilterCustomerData(opsData);
+    var stageMap = { pending: 'pending', production: 'production', review: 'review' };
+    orderNos = filtered.filter(d => d.orderStage === stageMap[stageKey]).map(d => d.orderNo);
+  } else if (groupId.startsWith('opsFollow_')) {
+    var fgKey = groupId.replace('opsFollow_', '');
+    var opsData2 = acMockData.filter(d => d.stage === 'ops_follow');
+    var filtered2 = acFilterData(opsData2);
+    orderNos = filtered2.filter(d => d.followGroup === fgKey).map(d => d.orderNo);
+  } else if (groupId.startsWith('inventory_')) {
+    var sku = groupId.replace('inventory_', '');
+    var alert = acInventoryAlerts.find(a => a.sku === sku);
+    if (alert) orderNos = alert.orders.map(o => o.orderNo);
+  } else if (groupId.startsWith('sysMonitor_')) {
+    var reasonKey = groupId.replace('sysMonitor_', '');
+    var sysData = acMockData.filter(d => d.stage === 'sys_monitor');
+    var filtered3 = acFilterData(sysData);
+    orderNos = filtered3.filter(d => d.sysReasonGroup === reasonKey).map(d => d.orderNo);
+  }
+
+  if (orderNos.length === 0) { alertShowToast('暂无可复制的订单号'); return; }
+  navigator.clipboard.writeText(orderNos.join('\n')).then(function() {
+    alertShowToast('已复制' + orderNos.length + '个订单号');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
+    ta.value = orderNos.join('\n');
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alertShowToast('已复制' + orderNos.length + '个订单号');
+  });
+}
+
+// ============ 复制单个订单号 ============
 function acCopyOrderNo(orderNo) {
-  navigator.clipboard.writeText(orderNo).then(() => {
+  navigator.clipboard.writeText(orderNo).then(function() {
     alertShowToast('已复制订单号');
-  }).catch(() => {
-    const ta = document.createElement('textarea');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
     ta.value = orderNo;
     document.body.appendChild(ta);
     ta.select();
@@ -2992,43 +3721,45 @@ function acCopyOrderNo(orderNo) {
   });
 }
 
-// 查看详情
-function acViewDetail(id) {
-  const row = acMockData.find(d => d.id === id);
-  if (row) alertShowToast('查看详情: ' + row.orderNo);
-}
-
-// 复选框
+// ============ 复选框(客户异常Tab) ============
 function acToggleRowCheck(id, checked) {
   if (checked) acSelectedIds.add(id);
   else acSelectedIds.delete(id);
   acUpdateSelectedCount();
 }
 
-function acToggleCheckAll(checked) {
-  const data = acGetFilteredData();
-  if (checked) {
-    data.forEach(d => acSelectedIds.add(d.id));
-  } else {
-    data.forEach(d => acSelectedIds.delete(d.id));
+function acToggleGroupCheck(groupId, checked) {
+  var items = [];
+  if (groupId.startsWith('customer_')) {
+    var stageKey = groupId.replace('customer_', '');
+    var opsData = acMockData.filter(d => d.stage === 'ops_follow');
+    var filtered = acFilterCustomerData(opsData);
+    var stageMap = { pending: 'pending', production: 'production', review: 'review' };
+    items = filtered.filter(d => d.orderStage === stageMap[stageKey]);
   }
-  acRenderTable();
+  items.forEach(function(d) {
+    if (checked) acSelectedIds.add(d.id);
+    else acSelectedIds.delete(d.id);
+  });
+  acRenderCustomerAlerts();
 }
 
 function acUpdateSelectedCount() {
-  const countEl = document.getElementById('acSelectedCount');
+  var countEl = document.getElementById('acSelectedCount');
   countEl.innerHTML = '已选 <span class="text-blue-600">' + acSelectedIds.size + '</span> 条';
 }
 
 // 批量复制
 function acBatchCopy() {
-  const data = acGetFilteredData().filter(d => acSelectedIds.has(d.id));
+  var opsData = acMockData.filter(d => d.stage === 'ops_follow');
+  var filtered = acFilterCustomerData(opsData);
+  var data = filtered.filter(function(d) { return acSelectedIds.has(d.id); });
   if (data.length === 0) { alertShowToast('请先勾选要复制的订单'); return; }
-  const orderNos = data.map(d => d.orderNo);
-  navigator.clipboard.writeText(orderNos.join('\n')).then(() => {
+  var orderNos = data.map(d => d.orderNo);
+  navigator.clipboard.writeText(orderNos.join('\n')).then(function() {
     alertShowToast('已复制' + orderNos.length + '个订单号');
-  }).catch(() => {
-    const ta = document.createElement('textarea');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
     ta.value = orderNos.join('\n');
     document.body.appendChild(ta);
     ta.select();
@@ -3041,28 +3772,26 @@ function acBatchCopy() {
 // 取消选择
 function acClearSelection() {
   acSelectedIds.clear();
-  document.getElementById('acCheckAll').checked = false;
-  acRenderTable();
+  acRenderCustomerAlerts();
 }
 
 // ============ 店铺连接异常横幅 ============
 function acGetFilteredTokenShops() {
-  let shops = [...acTokenAlertShops];
-  // 按客户筛选
+  var shops = [...acTokenAlertShops];
   if (acCurrentFilters.customer) {
-    const kw = acCurrentFilters.customer.toLowerCase();
+    var kw = acCurrentFilters.customer.toLowerCase();
     shops = shops.filter(s => s.customer.toLowerCase().includes(kw));
   }
   return shops;
 }
 
 function acRenderTokenBanner() {
-  const container = document.getElementById('acTokenAlertShopList');
-  const banner = document.getElementById('acTokenAlertBanner');
-  const countEl = document.getElementById('acTokenAlertCount');
+  var container = document.getElementById('acTokenAlertShopList');
+  var banner = document.getElementById('acTokenAlertBanner');
+  var countEl = document.getElementById('acTokenAlertCount');
   if (!container || !banner) return;
 
-  const filteredShops = acGetFilteredTokenShops();
+  var filteredShops = acGetFilteredTokenShops();
 
   if (filteredShops.length === 0) {
     container.innerHTML = '<div class="text-xs text-red-400/70 py-2">无匹配的异常店铺</div>';
@@ -3071,25 +3800,23 @@ function acRenderTokenBanner() {
   }
   countEl.textContent = filteredShops.length;
 
-  container.innerHTML = filteredShops.map(shop => {
-    const isDanger = shop.statusColor === 'danger';
-    const statusBg = isDanger ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
-    const dotClass = isDanger ? 'pulse-red bg-red-500' : 'bg-amber-400';
-    return `
-    <div class="token-shop-item">
-      <span class="w-2.5 h-2.5 rounded-full ${dotClass} inline-block flex-shrink-0"></span>
-      <span class="text-xs font-medium text-gray-500 max-w-[180px] truncate" title="${shop.customer}">${shop.customer}</span>
-      <span class="text-sm font-semibold text-gray-800">${shop.name}</span>
-      <span class="status-badge bg-blue-50 text-blue-600">${shop.platform}</span>
-      <span class="status-badge ${statusBg}">${shop.status}</span>
-      
-    </div>`;
+  container.innerHTML = filteredShops.map(function(shop) {
+    var isDanger = shop.statusColor === 'danger';
+    var statusBg = isDanger ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+    var dotClass = isDanger ? 'pulse-red bg-red-500' : 'bg-amber-400';
+    return '<div class="token-shop-item">' +
+      '<span class="w-2.5 h-2.5 rounded-full ' + dotClass + ' inline-block flex-shrink-0"></span>' +
+      '<span class="text-xs font-medium text-gray-500 max-w-[180px] truncate" title="' + shop.customer + '">' + shop.customer + '</span>' +
+      '<span class="text-sm font-semibold text-gray-800">' + shop.name + '</span>' +
+      '<span class="status-badge bg-blue-50 text-blue-600">' + shop.platform + '</span>' +
+      '<span class="status-badge ' + statusBg + '">' + shop.status + '</span>' +
+      '</div>';
   }).join('');
 }
 
 function acToggleTokenBanner() {
-  const banner = document.getElementById('acTokenAlertBanner');
-  const arrow = document.getElementById('acTokenBannerArrow');
+  var banner = document.getElementById('acTokenAlertBanner');
+  var arrow = document.getElementById('acTokenBannerArrow');
   banner.classList.toggle('collapsed');
   if (banner.classList.contains('collapsed')) {
     arrow.style.transform = 'rotate(-90deg)';
@@ -3099,13 +3826,13 @@ function acToggleTokenBanner() {
 }
 
 function acCopyShopNames() {
-  const shops = acGetFilteredTokenShops();
+  var shops = acGetFilteredTokenShops();
   if (shops.length === 0) { alertShowToast('无异常店铺可复制'); return; }
-  const names = shops.map(s => s.name).join('\n');
-  navigator.clipboard.writeText(names).then(() => {
+  var names = shops.map(s => s.name).join('\n');
+  navigator.clipboard.writeText(names).then(function() {
     alertShowToast('已复制' + shops.length + '个店铺名称');
-  }).catch(() => {
-    const ta = document.createElement('textarea');
+  }).catch(function() {
+    var ta = document.createElement('textarea');
     ta.value = names;
     document.body.appendChild(ta);
     ta.select();
@@ -3115,18 +3842,19 @@ function acCopyShopNames() {
   });
 }
 
-// 初始化渲染店铺连接异常横幅
+// ============ 初始化 ============
 acRenderTokenBanner();
+acRenderCurrentTab();
 
 // 点击外部关闭多选面板
 document.addEventListener('click', function(e) {
-  const typePanel = document.getElementById('acTypePanel');
-  const typeBtn = document.getElementById('acTypeSelectBtn');
+  var typePanel = document.getElementById('acTypePanel');
+  var typeBtn = document.getElementById('acTypeSelectBtn');
   if (typePanel && !typePanel.contains(e.target) && !typeBtn.contains(e.target)) {
     typePanel.classList.remove('open');
   }
-  const statusPanel = document.getElementById('acStatusPanel');
-  const statusBtn = document.getElementById('acStatusSelectBtn');
+  var statusPanel = document.getElementById('acStatusPanel');
+  var statusBtn = document.getElementById('acStatusSelectBtn');
   if (statusPanel && !statusPanel.contains(e.target) && !statusBtn.contains(e.target)) {
     statusPanel.classList.remove('open');
   }
