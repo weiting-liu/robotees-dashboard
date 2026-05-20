@@ -498,7 +498,7 @@
   </aside>
 
   <!-- 右侧主区域 -->
-  <div class="flex-1 ml-60 flex flex-col min-h-screen">
+  <div class="flex-1 ml-60 flex flex-col min-h-screen overflow-x-hidden">
     <!-- 顶部 Header -->
     <header class="h-16 bg-white/80 backdrop-blur-md border-b border-gray-100 flex items-center justify-between px-6 fixed top-0 right-0 left-60 z-10">
       <div class="flex items-center gap-2 text-sm">
@@ -907,11 +907,9 @@
               <col style="width:140px">
               <col style="width:200px">
               <col style="width:140px">
-              <col style="width:70px">
               <col style="width:90px">
-              <col style="width:200px">
+              <col style="width:auto">
               <col style="width:130px">
-              <col style="width:110px">
             </colgroup>
             <thead>
               <tr class="border-b border-gray-200/60">
@@ -920,8 +918,7 @@
                 <th class="text-left font-semibold">异常类型</th>
                 <th class="text-left font-semibold">订单号</th>
                 <th class="text-left font-semibold">店铺名称</th>
-                <th class="text-left font-semibold">平台</th>
-                <th class="text-left font-semibold">订单状态</th>
+                                <th class="text-left font-semibold">订单状态</th>
                 <th class="text-left font-semibold">异常原因</th>
                 <th class="text-right font-semibold sort-arrow active" onclick="acToggleSort()">
                   最晚发货时间
@@ -2970,7 +2967,6 @@ function acRenderTable() {
         </span>
       </td>
       <td class="text-left text-gray-600">${row.shop}</td>
-      <td class="text-left"><span class="text-[10px] font-bold bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">${row.platform}</span></td>
       <td class="text-left">${acGetStatusBadge(row.orderStatus)}</td>
       <td class="text-left text-gray-600" title="${row.reason}">${row.reason}</td>
       <td class="text-right font-mono text-gray-600">${row.latestShipTime}</td>
