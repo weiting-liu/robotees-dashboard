@@ -797,13 +797,18 @@
 
     <div id="alertCenterPage" style="display:none">
       <!-- 页面标题 -->
-      <div class="mb-6">
-        <div class="flex items-center gap-2">
-          <div class="w-1.5 h-6 bg-gradient-to-b from-red-500 to-red-600 rounded-full"></div>
-          <h1 class="text-lg font-bold text-gray-800">异常中心</h1>
-          <span class="text-xs text-gray-400 ml-1">运营跟进异常 + 系统监控异常订单列表</span>
+      
+
+      <!-- 平台Tab -->
+        <div class="flex items-center justify-between mb-4">
+          <div class="tab-capsule" id="acPlatformTab">
+            <button class="tab-btn active px-5 py-2 text-sm font-semibold" data-ac-platform="Temu" onclick="acSwitchPlatform('Temu')">Temu</button>
+            <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Shein" onclick="acSwitchPlatform('Shein')">Shein</button>
+            <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Qink" onclick="acSwitchPlatform('Qink')">Qink</button>
+          </div>
         </div>
-      </div>
+
+        
 
       <!-- ========== 店铺连接异常横幅 ========== -->
       <div id="acTokenAlertBanner" class="token-alert-banner mb-4">
@@ -835,16 +840,7 @@
 
       
 
-      <!-- 平台Tab -->
-        <div class="flex items-center justify-between mb-4">
-          <div class="tab-capsule" id="acPlatformTab">
-            <button class="tab-btn active px-5 py-2 text-sm font-semibold" data-ac-platform="Temu" onclick="acSwitchPlatform('Temu')">Temu</button>
-            <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Shein" onclick="acSwitchPlatform('Shein')">Shein</button>
-            <button class="tab-btn px-5 py-2 text-sm font-semibold" data-ac-platform="Qink" onclick="acSwitchPlatform('Qink')">Qink</button>
-          </div>
-        </div>
-
-        <!-- 环节Tab -->
+      <!-- 环节Tab -->
         <div class="flex items-center gap-1 mb-4 bg-gray-100/80 rounded-xl p-1 w-fit">
           <button id="acStageAll" onclick="acSwitchStage('all')" class="alert-tab-btn active px-4 py-2 text-sm font-semibold rounded-lg">全部</button>
           <button id="acStageOps" onclick="acSwitchStage('ops_follow')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">运营跟进</button>
