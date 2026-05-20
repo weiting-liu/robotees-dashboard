@@ -744,33 +744,6 @@
 
       <div id="alertCenterPage" style="display:none">
 
-      <!-- ========== 店铺连接异常横幅（环节Tab上方） ========== -->
-      <div id="tokenAlertBanner" class="token-alert-banner mb-5">
-        <div class="flex items-center justify-between px-5 py-3 cursor-pointer" onclick="alertToggleTokenBanner()">
-          <div class="flex items-center gap-3">
-            <span class="pulse-red w-3 h-3 bg-red-500 rounded-full inline-block flex-shrink-0"></span>
-            <span class="text-sm font-bold text-red-700">店铺连接异常</span>
-            <span id="tokenAlertCount" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-200/80 text-red-700">2</span>
-            <span class="text-xs text-red-500/80">以下店铺Token已失效或即将失效，请尽快处理</span>
-          </div>
-          <svg id="tokenBannerArrow" class="w-4 h-4 text-red-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-        </div>
-        <div class="token-alert-body px-5 pb-4">
-          <div class="space-y-2" id="tokenAlertShopList">
-            <!-- 由JS渲染 -->
-          </div>
-        </div>
-      </div>
-
-      <!-- ========== 平台Tab（去掉"全部"，默认Temu） ========== -->
-      <div class="flex items-center gap-4 mb-5">
-        <div class="tab-capsule" id="alertPlatformFilter">
-          <button class="tab-btn active px-5 py-2 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu</button>
-          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Shein" onclick="alertFilterPlatform('Shein')">Shein</button>
-          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Qink" onclick="alertFilterPlatform('Qink')">Qink</button>
-        </div>
-      </div>
-
       <!-- ========== 筛选区 ========== -->
       <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] p-5 mb-6">
         <div class="flex items-center gap-6 flex-wrap">
@@ -822,9 +795,40 @@
             <span class="text-xs font-medium text-gray-600">只看我付款订单</span>
           </label>
         </div>
+      </div>
 
-        <!-- 批量操作 -->
-        <div class="flex items-center justify-between mt-4 pt-4 border-t border-gray-100">
+<!-- ========== 平台Tab（去掉"全部"，默认Temu） ========== -->
+      <div class="flex items-center gap-4 mb-5">
+        <div class="tab-capsule" id="alertPlatformFilter">
+          <button class="tab-btn active px-5 py-2 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu</button>
+          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Shein" onclick="alertFilterPlatform('Shein')">Shein</button>
+          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Qink" onclick="alertFilterPlatform('Qink')">Qink</button>
+        </div>
+      </div>
+
+      <!-- ========== 店铺连接异常横幅（平台Tab下方） ========== -->
+      <div id="tokenAlertBanner" class="token-alert-banner mb-5">
+        <div class="flex items-center justify-between px-5 py-3 cursor-pointer" onclick="alertToggleTokenBanner()">
+          <div class="flex items-center gap-3">
+            <span class="pulse-red w-3 h-3 bg-red-500 rounded-full inline-block flex-shrink-0"></span>
+            <span class="text-sm font-bold text-red-700">店铺连接异常</span>
+            <span id="tokenAlertCount" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-200/80 text-red-700">2</span>
+            <span class="text-xs text-red-500/80">以下店铺Token已失效或即将失效，请尽快处理</span>
+          </div>
+          <svg id="tokenBannerArrow" class="w-4 h-4 text-red-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+        </div>
+        <div class="token-alert-body px-5 pb-4">
+          <div class="space-y-2" id="tokenAlertShopList">
+            <!-- 由JS渲染 -->
+          </div>
+        </div>
+      </div>
+
+      
+      <!-- ========== 批量操作 ========== -->
+      <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] px-5 py-3 mb-4 flex items-center justify-between">
+<!-- 批量操作 -->
+        <div class="flex items-center justify-between ">
           <span class="text-xs text-gray-500" id="resultCount">显示 16 条异常</span>
           <div class="flex items-center gap-2 flex-nowrap" id="batchActions">
             <span class="text-xs text-gray-400">已选 <strong id="selectedCount" class="text-primary-500">0</strong> 条</span>
