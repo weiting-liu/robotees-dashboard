@@ -744,6 +744,17 @@
 
       <div id="alertCenterPage" style="display:none">
 
+      <!-- ========== 平台Tab - 作用于整个异常中心 ========== -->
+      <div class="flex items-center gap-4 mb-5">
+        <div class="tab-capsule" id="alertPlatformFilter">
+          <button class="tab-btn active px-5 py-2 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu</button>
+          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Shein" onclick="alertFilterPlatform('Shein')">Shein</button>
+          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Qink" onclick="alertFilterPlatform('Qink')">Qink</button>
+        </div>
+      </div>
+
+      
+
       <!-- ========== 店铺连接异常横幅（平台Tab下方） ========== -->
       <div id="tokenAlertBanner" class="token-alert-banner mb-5">
         <div class="flex items-center justify-between px-5 py-3 cursor-pointer" onclick="alertToggleTokenBanner()">
@@ -821,16 +832,7 @@
         </div>
       </div>
 
-<!-- ========== 平台Tab（去掉"全部"，默认Temu） ========== -->
-      <div class="flex items-center gap-4 mb-5">
-        <div class="tab-capsule" id="alertPlatformFilter">
-          <button class="tab-btn active px-5 py-2 text-xs font-semibold" data-platform="Temu" onclick="alertFilterPlatform('Temu')">Temu</button>
-          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Shein" onclick="alertFilterPlatform('Shein')">Shein</button>
-          <button class="tab-btn px-5 py-2 text-xs font-semibold" data-platform="Qink" onclick="alertFilterPlatform('Qink')">Qink</button>
-        </div>
-      </div>
-
-      <!-- ========== 批量操作 ========== -->
+<!-- ========== 批量操作 ========== -->
       <div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] px-5 py-3 mb-4 flex items-center justify-between">
 <!-- 批量操作 -->
         <div class="flex items-center justify-between ">
