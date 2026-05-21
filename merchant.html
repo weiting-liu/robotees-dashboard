@@ -1673,7 +1673,7 @@ function alertGetActionBtn(item) {
     fix_or_close: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">重推</button><button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">关闭订单</button>',
     bind_warehouse: '<button onclick="event.stopPropagation();alertHandleAction(\'bind_warehouse\', ' + item.id + ')" class="px-2 py-1 text-[11px] font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors leading-tight">绑定发货仓后重拉订单</button>',
     seller_handle: '<span class="text-xs text-gray-400 flex items-center gap-1"><span class="pulse-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>卖家后台处理</span>',
-    partial_swap_or_cancel: '<button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">部分换货</button><button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">批量部分取消</button>',
+    partial_swap_or_cancel: '<button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">部分换货</button><button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">部分取消</button>',
     fix_art: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_art\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">修改图案</button>',
     fix_mask: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_mask\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">修改蒙版</button>',
   };
@@ -1794,7 +1794,7 @@ function alertBatchClose() {
 }
 
 function alertBatchPartialCancel() {
-  showToast('已批量部分取消选中订单');
+  showToast('已部分取消选中订单');
 }
 
 // ============ 批量选择 ============
