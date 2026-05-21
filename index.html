@@ -1846,28 +1846,25 @@ function toggleDrilldown(type) {
 function renderPendingTable() {
   const data = platformData[currentPlatform].logistics.pendingRows;
   const tbody = document.getElementById('pendingTableBody');
-  const totalOver2h = data.reduce((s, r) => s + r.over2h, 0);
-  const totalOver6h = data.reduce((s, r) => s + r.over6h, 0);
+  const totalOver = data.reduce((s, r) => s + r.over2h + r.over6h, 0);
 
   // 更新待下单卡片上的预警提示
   const warnEl = document.getElementById('logistics_pending_warn');
-  if (totalOver6h > 0) {
-    warnEl.innerHTML = `<span class="text-red-600">🔴 ${totalOver6h}单超6h</span>`;
-  } else if (totalOver2h > 0) {
-    warnEl.innerHTML = `<span class="text-amber-600">🟡 ${totalOver2h}单超2h</span>`;
+  if (totalOver > 0) {
+    warnEl.innerHTML = `<span class="text-red-600">🔴 ${totalOver}单超时</span>`;
   } else {
     warnEl.innerHTML = '';
   }
 
   tbody.innerHTML = data.map(row => {
-    const hasOver6h = row.over6h > 0;
-    const hasOver2h = row.over2h > 0;
-    const rowClass = hasOver6h ? 'danger-row bg-red-50/30' : hasOver2h ? 'warn-row bg-amber-50/30' : '';
+    const total = (row.over2h || 0) + (row.over6h || 0);
+    const hasOver = total > 0;
+    const rowClass = hasOver ? 'danger-row bg-red-50/30' : '';
     return `<tr class="${rowClass} hover:bg-gray-50/80 transition-colors">
       <td class="text-left font-semibold text-gray-800">${row.name}</td>
       <td class="text-right num-col font-semibold text-gray-800">${fmt(row.count)}</td>
-      <td class="text-center font-semibold font-mono ${hasOver2h ? 'text-amber-600' : 'text-gray-400'}">${row.over2h > 0 ? row.over2h : '-'}</td>
-      <td class="text-center font-semibold font-mono ${hasOver6h ? 'text-red-600' : 'text-gray-400'}">${row.over6h > 0 ? row.over6h : '-'}</td>
+      <td class="text-center font-semibold font-mono ${hasOver ? 'text-red-600' : 'text-gray-400'}">${total > 0 ? total : '-'}</td>
+      <td></td>
     </tr>`;
   }).join('');
 }
