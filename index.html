@@ -3432,7 +3432,7 @@ function acToggleAllCustomerCheck(checked) {
 function acRenderOpsFollowAlerts() {
   const container = document.getElementById('acOpsFollowAlertsContainer');
   const opsData = acMockData.filter(d => d.stage === 'ops_follow');
-  const filtered = acFilterData(opsData);
+  let filtered = acFilterData(opsData);
 
   // followGroup筛选
   if (acCurrentFilters.opsFollowGroup) {
@@ -3665,7 +3665,7 @@ function acFilterInvStatus(status) {
 function acRenderSysMonitorAlerts() {
   const container = document.getElementById('acSysMonitorAlertsContainer');
   const sysData = acMockData.filter(d => d.stage === 'sys_monitor');
-  const filtered = acFilterData(sysData);
+  let filtered = acFilterData(sysData);
 
   // sysReasonGroup筛选
   if (acCurrentFilters.sysReasonGroup) {
