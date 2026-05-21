@@ -1097,8 +1097,8 @@
           <div class="p-6 space-y-5">
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">未付款超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">拉单后超过此时长未付款，触发运营跟进提醒</div>
+                <div class="text-sm font-medium text-gray-700">超时未付款</div>
+                <div class="text-xs text-gray-400 mt-0.5">拉单后超过设定时长仍未付款，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_unpaidTimeoutHours" type="number" min="0" class="config-input" />
@@ -1108,8 +1108,8 @@
             <div class="border-t border-gray-100/60"></div>
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">接单后未通知下物流超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">接单后超过此时长未通知下物流，触发OMP处理</div>
+                <div class="text-sm font-medium text-gray-700">超时未通知下物流</div>
+                <div class="text-xs text-gray-400 mt-0.5">接单后超过设定时长未通知下物流，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_noLogisticsTimeoutHours" type="number" min="0" class="config-input" />
@@ -1119,8 +1119,8 @@
             <div class="border-t border-gray-100/60"></div>
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">付款后未发货超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">付款后超过此时长未发货，触发跟进工厂进度</div>
+                <div class="text-sm font-medium text-gray-700">超时未发货</div>
+                <div class="text-xs text-gray-400 mt-0.5">付款后超过设定时长仍未发货，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_noShipTimeoutHours" type="number" min="0" class="config-input" />
@@ -1144,8 +1144,8 @@
           <div class="p-6 space-y-5">
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">主数据绑定超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">待确认状态超过此时长未完成主数据绑定触发预警</div>
+                <div class="text-sm font-medium text-gray-700">主数据绑定超时</div>
+                <div class="text-xs text-gray-400 mt-0.5">待确认状态超过设定时长未完成主数据绑定，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_masterDataBindTimeoutHours" type="number" min="0" class="config-input" />
@@ -1155,8 +1155,8 @@
             <div class="border-t border-gray-100/60"></div>
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">待推送超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">待推送状态超过此时长未推送触发预警</div>
+                <div class="text-sm font-medium text-gray-700">超时未推送</div>
+                <div class="text-xs text-gray-400 mt-0.5">待推送状态超过设定时长未推送至工厂，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_pushTimeoutHours" type="number" min="0" class="config-input" />
@@ -1166,8 +1166,8 @@
             <div class="border-t border-gray-100/60"></div>
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">待接单超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">订单停留在"待接单"状态超过此时长触发预警</div>
+                <div class="text-sm font-medium text-gray-700">超时未接单</div>
+                <div class="text-xs text-gray-400 mt-0.5">订单停留在待接单状态超过设定时长，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_acceptStuckHours" type="number" min="0" class="config-input" />
@@ -1177,8 +1177,8 @@
             <div class="border-t border-gray-100/60"></div>
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">下call后未获取面单超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">下call后超过此时长未获取到平台面单触发预警</div>
+                <div class="text-sm font-medium text-gray-700">物流下call失败</div>
+                <div class="text-xs text-gray-400 mt-0.5">物流下单后超过设定时长未获取面单，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_callNoLabelHours" type="number" min="0" class="config-input" />
@@ -1188,8 +1188,8 @@
             <div class="border-t border-gray-100/60"></div>
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">获取面单后未推送到OMP超时时长</div>
-                <div class="text-xs text-gray-400 mt-0.5">获取面单后超过此时长未推送到OMP触发预警</div>
+                <div class="text-sm font-medium text-gray-700">面单未同步</div>
+                <div class="text-xs text-gray-400 mt-0.5">获取面单后超过设定时长未同步至OMP，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
                 <input id="cfg_labelNoOmpHours" type="number" min="0" class="config-input" />
@@ -1212,22 +1212,11 @@
           <div class="p-6 space-y-5">
             <div class="flex items-center justify-between">
               <div>
-                <div class="text-sm font-medium text-gray-700">待下单超时警告级阈值</div>
-                <div class="text-xs text-gray-400 mt-0.5">待下单超过此时长未获取面单，显示为黄色警告</div>
+                <div class="text-sm font-medium text-gray-700">待下单超时阈值</div>
+                <div class="text-xs text-gray-400 mt-0.5">待下单超过此时长未获取面单，触发预警</div>
               </div>
               <div class="flex items-center gap-2">
-                <input id="cfg_pendingOver2hHours" type="number" min="0" class="config-input" />
-                <span class="text-xs text-gray-500 font-medium">小时</span>
-              </div>
-            </div>
-            <div class="border-t border-gray-100/60"></div>
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="text-sm font-medium text-gray-700">待下单超时严重级阈值</div>
-                <div class="text-xs text-gray-400 mt-0.5">待下单超过此时长未获取面单，显示为红色严重警告</div>
-              </div>
-              <div class="flex items-center gap-2">
-                <input id="cfg_pendingOver6hHours" type="number" min="0" class="config-input" />
+                <input id="cfg_pendingOverHours" type="number" min="0" class="config-input" />
                 <span class="text-xs text-gray-500 font-medium">小时</span>
               </div>
             </div>
