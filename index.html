@@ -3049,7 +3049,7 @@ var acInventoryAlerts = [
 ];
 
 // ============ 筛选状态 ============
-var acCurrentFilters = { mainTab: 'customer', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [] };
+var acCurrentFilters = { mainTab: 'customer', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [], customerStage: '' };
 var acSelectedIds = new Set();
 var acGroupStates = {}; // 记录各组折叠状态
 
@@ -3338,76 +3338,98 @@ function acUpdateTabCounts() {
   if (elSys) elSys.textContent = sysFiltered.length;
 }
 
-// ============ 客户异常Tab - 按订单状态分组 ============
+// ============ 客户异常Tab - 扁平列表+状态筛选 ============
 function acRenderCustomerAlerts() {
   const container = document.getElementById('acCustomerAlertsContainer');
   const opsData = acMockData.filter(d => d.stage === 'ops_follow');
-  const filtered = acFilterCustomerData(opsData);
+  let filtered = acFilterCustomerData(opsData);
 
-  // 按orderStage分组
-  const groups = [
-    { key: 'pending', label: '待处理', color: 'bg-blue-500', countBadge: 'bg-blue-100 text-blue-700' },
-    { key: 'production', label: '生产中', color: 'bg-indigo-500', countBadge: 'bg-indigo-100 text-indigo-700' },
-    { key: 'review', label: '工厂反审', color: 'bg-red-500', countBadge: 'bg-red-100 text-red-700' },
+  // 按customerStage筛选
+  if (acCurrentFilters.customerStage) {
+    filtered = filtered.filter(d => d.orderStage === acCurrentFilters.customerStage);
+  }
+
+  // 计算各状态数量
+  const allCount = acFilterCustomerData(opsData).length;
+  const pendingCount = acFilterCustomerData(opsData).filter(d => d.orderStage === 'pending').length;
+  const productionCount = acFilterCustomerData(opsData).filter(d => d.orderStage === 'production').length;
+  const reviewCount = acFilterCustomerData(opsData).filter(d => d.orderStage === 'review').length;
+
+  const stages = [
+    { key: '', label: '全部', count: allCount },
+    { key: 'pending', label: '待处理', count: pendingCount },
+    { key: 'production', label: '生产中', count: productionCount },
+    { key: 'review', label: '工厂反审', count: reviewCount },
   ];
 
   let html = '';
-  groups.forEach(g => {
-    const items = filtered.filter(d => d.orderStage === g.key);
-    const groupId = 'customer_' + g.key;
-    const isCollapsed = acGroupStates[groupId] === true;
 
-    html += '<div class="ac-group-section">';
-    html += '<div class="ac-group-header" onclick="acToggleGroup(\'' + groupId + '\')">';
-    html += '<svg class="ac-group-arrow ' + (isCollapsed ? 'collapsed' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
-    html += '<span class="w-1.5 h-5 ' + g.color + ' rounded-full"></span>';
-    html += '<span class="ac-group-title">' + g.label + '</span>';
-    html += '<span class="ac-group-count ' + g.countBadge + '">' + items.length + '条</span>';
-    html += '</div>';
-    html += '<div class="ac-group-body ' + (isCollapsed ? 'collapsed' : '') + '">';
-
-    if (items.length > 0) {
-      html += '<div class="ac-group-actions">';
-      html += '<button onclick="acCopyGroupOrders(\'' + groupId + '\')" class="compact-copy-btn">';
-      html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
-      html += '复制订单号</button></div>';
-      html += '<div class="overflow-x-auto px-3 pb-3"><table class="data-table"><colgroup>';
-      html += '<col style="width:40px"><col style="width:16%"><col style="width:13%"><col style="width:18%"><col style="width:14%"><col style="width:9%"><col style="width:auto"><col style="width:13%">';
-      html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
-      html += '<th><input type="checkbox" onchange="acToggleGroupCheck(\'' + groupId + '\', this.checked)" class="accent-blue-500" /></th>';
-      html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">异常类型</th><th class="text-left font-semibold">订单号</th>';
-      html += '<th class="text-left font-semibold">店铺名称</th><th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
-      html += '<th class="text-right font-semibold">最晚发货时间</th></tr></thead>';
-      html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
-
-      items.forEach(row => {
-        const checked = acSelectedIds.has(row.id) ? 'checked' : '';
-        const overdue = acIsOverdue(row.latestShipTime);
-        html += '<tr class="hover:bg-gray-50/80 transition-colors ' + (overdue ? 'danger-row' : '') + '">';
-        html += '<td><input type="checkbox" class="ac-row-check accent-blue-500" data-id="' + row.id + '" ' + checked + ' onchange="acToggleRowCheck(' + row.id + ', this.checked)" /></td>';
-        html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
-        html += '<td class="text-left">' + row.type + '</td>';
-        html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
-        html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
-        html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
-        html += '</button></td>';
-        html += '<td class="text-left text-gray-600">' + row.shop + '</td>';
-        html += '<td class="text-left">' + acGetStatusBadge(row.orderStatus) + '</td>';
-        html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
-        html += '<td class="text-right font-mono ' + (overdue ? 'text-red-600 font-bold' : 'text-gray-600') + '">' + row.latestShipTime + '</td>';
-        html += '</tr>';
-      });
-
-      html += '</tbody></table></div>';
-    } else {
-      html += '<div class="px-3 pb-3 text-sm text-gray-400 py-4 text-center">暂无该状态下的异常订单</div>';
-    }
-
-    html += '</div></div>';
+  // 状态筛选Tag
+  html += '<div class="flex items-center gap-1 mb-3">';
+  stages.forEach(s => {
+    const isActive = acCurrentFilters.customerStage === s.key;
+    html += '<button onclick="acFilterCustomerStage(\'' + s.key + '\')" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ' + (isActive ? 'bg-slate-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200') + '">';
+    html += s.label + '(' + s.count + ')</button>';
   });
+  html += '</div>';
+
+  // 扁平表格
+  if (filtered.length > 0) {
+    html += '<div class="overflow-x-auto"><table class="data-table"><colgroup>';
+    html += '<col style="width:40px"><col style="width:16%"><col style="width:13%"><col style="width:18%"><col style="width:14%"><col style="width:9%"><col style="width:auto"><col style="width:13%">';
+    html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+    html += '<th><input type="checkbox" onchange="acToggleAllCustomerCheck(this.checked)" class="accent-blue-500" /></th>';
+    html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">异常类型</th><th class="text-left font-semibold">订单号</th>';
+    html += '<th class="text-left font-semibold">店铺名称</th><th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
+    html += '<th class="text-right font-semibold">最晚发货时间</th></tr></thead>';
+    html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+    filtered.forEach(row => {
+      const checked = acSelectedIds.has(row.id) ? 'checked' : '';
+      const overdue = acIsOverdue(row.latestShipTime);
+      html += '<tr class="hover:bg-gray-50/80 transition-colors ' + (overdue ? 'danger-row' : '') + '">';
+      html += '<td><input type="checkbox" class="ac-row-check accent-blue-500" data-id="' + row.id + '" ' + checked + ' onchange="acToggleRowCheck(' + row.id + ', this.checked)" /></td>';
+      html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
+      html += '<td class="text-left">' + row.type + '</td>';
+      html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
+      html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
+      html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+      html += '</button></td>';
+      html += '<td class="text-left text-gray-600">' + row.shop + '</td>';
+      html += '<td class="text-left">' + acGetStatusBadge(row.orderStatus) + '</td>';
+      html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
+      html += '<td class="text-right font-mono ' + (overdue ? 'text-red-600 font-bold' : 'text-gray-600') + '">' + row.latestShipTime + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div class="text-sm text-gray-400 py-8 text-center">暂无异常订单</div>';
+  }
 
   container.innerHTML = html;
   acUpdateSelectedCount();
+}
+
+// 客户异常状态筛选
+function acFilterCustomerStage(stage) {
+  acCurrentFilters.customerStage = stage;
+  acRenderCustomerAlerts();
+  acUpdateTabCounts();
+}
+
+// 客户异常全选
+function acToggleAllCustomerCheck(checked) {
+  const opsData = acMockData.filter(d => d.stage === 'ops_follow');
+  let filtered = acFilterCustomerData(opsData);
+  if (acCurrentFilters.customerStage) {
+    filtered = filtered.filter(d => d.orderStage === acCurrentFilters.customerStage);
+  }
+  filtered.forEach(row => {
+    if (checked) acSelectedIds.add(row.id);
+    else acSelectedIds.delete(row.id);
+  });
+  acRenderCustomerAlerts();
 }
 
 // ============ 运营跟进Tab - 按处理动作分组 ============
