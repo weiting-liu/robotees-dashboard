@@ -88,9 +88,9 @@
     }
 
     /* 表格优化 - 不设text-align，对齐由Tailwind工具类控制 */
-    .data-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
-    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 8px 12px; }
-    .data-table td { font-size: 12px; padding: 8px 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table { table-layout: auto; width: 100%; border-collapse: collapse; min-width: 900px; }
+    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 8px 12px; white-space: nowrap; }
+    .data-table td { font-size: 12px; padding: 8px 12px; white-space: nowrap; }
     .data-table .num-col { font-family: 'Inter', monospace; }
     .data-table thead tr { background: #F8FAFC; }
 
@@ -855,13 +855,13 @@
         <div class="overflow-x-auto">
           <table class="data-table" id="exceptionTable">
             <colgroup>
-              <col style="width:36px;">
-              <col style="width:100px;">
-              <col style="width:180px;">
-              <col style="width:110px;">
-              <col style="width:auto;">
-              <col style="width:150px;">
-              <col style="width:180px;">
+              <col style="min-width:36px;">
+              <col style="min-width:90px;">
+              <col style="min-width:170px;">
+              <col style="min-width:100px;">
+              <col style="min-width:120px;">
+              <col style="min-width:140px;">
+              <col style="min-width:160px;">
             </colgroup>
             <thead>
               <tr>
