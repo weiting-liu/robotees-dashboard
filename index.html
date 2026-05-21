@@ -3008,6 +3008,51 @@ var acMockData = (function() {
   // 同步平台失败 (1条)
   data.push({ id: id++, stage: 'sys_monitor', type: '同步平台失败', typeCode: 'syncPlatformFail', customer: acCustomers[2], orderNo: randOrderNo(), shop: acShops[2], platform: 'Shein', reason: '平台接口返回同步失败', latestShipTime: randTime(16), orderStatus: '已发货', paymentStatus: 'paid', sysReasonGroup: 'syncPlatformFail' });
 
+  // 待处理-位置解析超区域 (7条) - sysReasonGroup='locationParseError'
+  {
+    const locationErrors = [
+      { customer: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-14836124775031264', shop: 'Style Dude', reason: '推送给工厂处理失败:位置解析超区域' },
+      { customer: '广州天天酷衣电子贸易有限公司', orderNo: 'SG2-PO-211-14836124775031264', shop: 'Style Dude', reason: '推送给工厂处理失败:位置解析超区域' },
+      { customer: '广州天天酷衣电子贸易有限公司', orderNo: 'SG1-PO-211-03633249595512313', shop: 'AuraLocal', reason: '推送给工厂处理失败:位置解析超区域' },
+      { customer: '广州尔棉贸易有限公司', orderNo: 'PO-211-14748518226552810', shop: 'Fashion Frontier local', reason: '推送给工厂处理失败:位置解析超区域' },
+      { customer: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-15068585879670841', shop: 'Knitory A', reason: '推送给工厂处理失败:位置解析超区域' },
+      { customer: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-14664410314872288', shop: 'Style Dude', reason: '推送给工厂处理失败:位置解析超区域' },
+      { customer: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-14910582833271719', shop: 'Fancyne', reason: '推送给工厂处理失败:位置解析超区域' }
+    ];
+    const shipTimes = ['2026-05-22 13:06', '2026-05-22 13:06', '2026-05-22 13:30', '2026-05-23 16:05', '2026-05-23 14:05', '2026-05-23 14:30', '2026-05-23 15:06'];
+    locationErrors.forEach((e, i) => {
+      data.push({ id: id++, stage: 'sys_monitor', type: '位置解析超区域', typeCode: 'locationParseError', customer: e.customer, orderNo: e.orderNo, shop: e.shop, platform: acPlatforms[i % 3], reason: e.reason, latestShipTime: shipTimes[i], orderStatus: '待处理', paymentStatus: 'paid', sysReasonGroup: 'locationParseError' });
+    });
+  }
+  // ====== 客户异常 (stage='customer_alert') - 客户处理 ======
+  // 待处理-库存不足 (5条) - 客户处理
+  {
+    const stockErrors = [
+      { customer: '广州尔棉贸易有限公司', orderNo: 'PO-211-04122816085110611', shop: 'Fashionista warehouse local', reason: '推送给工厂处理失败:底衫可用库存不足' },
+      { customer: '广州尔棉贸易有限公司', orderNo: 'PO-211-03898007770231887', shop: 'DDBONE SHOP', reason: '推送给工厂处理失败:底衫可用库存不足' },
+      { customer: '广州尔棉贸易有限公司', orderNo: 'PO-211-03672613118072076', shop: 'POTYC', reason: '推送给工厂处理失败:底衫可用库存不足' },
+      { customer: '广州尔棉贸易有限公司', orderNo: 'PO-211-03518753723513187', shop: 'Reverie Studio', reason: '推送给工厂处理失败:底衫可用库存不足' },
+      { customer: '广州尔棉贸易有限公司', orderNo: 'PO-211-03706873603193024', shop: 'GlowWardrobe', reason: '推送给工厂处理失败:底衫可用库存不足' }
+    ];
+    const shipTimes = ['2026-05-22 12:29', '2026-05-22 12:29', '2026-05-22 14:30', '2026-05-22 15:18', '2026-05-22 14:30'];
+    stockErrors.forEach((e, i) => {
+      data.push({ id: id++, stage: 'customer_alert', type: '库存不足', typeCode: 'stockShortagePending', customer: e.customer, orderNo: e.orderNo, shop: e.shop, platform: 'Temu', reason: e.reason, latestShipTime: shipTimes[i], orderStatus: '待处理', paymentStatus: 'paid', orderStage: 'pending', customerAlertType: 'stockShortage' });
+    });
+  }
+  // 待处理-未绑定发货仓 (3条) - 客户处理
+  {
+    const warehouseErrors = [
+      { customer: '广州天天酷衣电子贸易有限公司', orderNo: 'PO-211-15068585879670841', shop: 'Knitory A', reason: '订单未绑定发货仓库，无法推送工厂' },
+      { customer: '广州尔棉贸易有限公司', orderNo: 'PO-211-14748518226552810', shop: 'Fashion Frontier local', reason: '订单未绑定发货仓库，无法推送工厂' },
+      { customer: '拍歐德國際貿易有限公司', orderNo: 'PO-211-14910582833271719', shop: 'Fancyne', reason: '订单未绑定发货仓库，无法推送工厂' }
+    ];
+    const shipTimes = ['2026-05-22 14:05', '2026-05-23 16:05', '2026-05-23 15:06'];
+    warehouseErrors.forEach((e, i) => {
+      data.push({ id: id++, stage: 'customer_alert', type: '未绑定发货仓', typeCode: 'noWarehouse', customer: e.customer, orderNo: e.orderNo, shop: e.shop, platform: acPlatforms[i % 3], reason: e.reason, latestShipTime: shipTimes[i], orderStatus: '待处理', paymentStatus: 'paid', orderStage: 'pending', customerAlertType: 'noWarehouse' });
+    });
+  }
+
+
   return data;
 })();
 
@@ -3295,7 +3340,7 @@ function acRenderCurrentTab() {
 // 更新异常中心Tab上的数量
 function acUpdateTabCounts() {
   // 客户异常
-  const customerData = acMockData.filter(d => d.stage === 'ops_follow');
+  const customerData = acMockData.filter(d => d.stage === 'customer_alert' || (d.stage === 'ops_follow' && d.followGroup === 'coordinate_customer'));
   const customerFiltered = acFilterCustomerData(customerData);
   const elCustomer = document.getElementById('acTabCountCustomer');
   if (elCustomer) elCustomer.textContent = customerFiltered.length;
@@ -3327,8 +3372,8 @@ function acUpdateTabCounts() {
 // ============ 客户异常Tab - 扁平列表+状态筛选 ============
 function acRenderCustomerAlerts() {
   const container = document.getElementById('acCustomerAlertsContainer');
-  const opsData = acMockData.filter(d => d.stage === 'ops_follow');
-  let filtered = acFilterCustomerData(opsData);
+  const alertData = acMockData.filter(d => d.stage === 'customer_alert' || (d.stage === 'ops_follow' && d.followGroup === 'coordinate_customer'));
+  let filtered = acFilterCustomerData(alertData);
 
   // 按customerStage筛选
   if (acCurrentFilters.customerStage) {
@@ -3336,10 +3381,10 @@ function acRenderCustomerAlerts() {
   }
 
   // 计算各状态数量
-  const allCount = acFilterCustomerData(opsData).length;
-  const pendingCount = acFilterCustomerData(opsData).filter(d => d.orderStage === 'pending').length;
-  const productionCount = acFilterCustomerData(opsData).filter(d => d.orderStage === 'production').length;
-  const reviewCount = acFilterCustomerData(opsData).filter(d => d.orderStage === 'review').length;
+  const allCount = acFilterCustomerData(alertData).length;
+  const pendingCount = acFilterCustomerData(alertData).filter(d => d.orderStage === 'pending').length;
+  const productionCount = acFilterCustomerData(alertData).filter(d => d.orderStage === 'production').length;
+  const reviewCount = acFilterCustomerData(alertData).filter(d => d.orderStage === 'review').length;
 
   const stages = [
     { key: '', label: '全部', count: allCount },
