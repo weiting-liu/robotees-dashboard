@@ -170,9 +170,9 @@
     }
 
     /* 表格优化 - 不设 text-align，对齐100%由Tailwind工具类控制 */
-    .data-table { table-layout: fixed; width: 100%; border-collapse: collapse; }
-    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 8px 12px; }
-    .data-table td { font-size: 12px; padding: 8px 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .data-table { table-layout: auto; width: 100%; border-collapse: collapse; min-width: 900px; }
+    .data-table th { font-size: 12px; color: #64748B; font-weight: 600; padding: 8px 12px; white-space: nowrap; }
+    .data-table td { font-size: 12px; padding: 8px 12px; white-space: nowrap; }
     .data-table .num-col { font-family: 'Inter', monospace; }
     .data-table thead tr { background: #F8FAFC; }
 
@@ -3615,7 +3615,7 @@ function acRenderInventoryAlerts() {
   html += '</div></div>';
 
   // SKU表格
-  html += '<div class="bg-white border border-gray-200 rounded overflow-hidden">';
+  html += '<div class="bg-white border border-gray-200 rounded">';
   html += '<div class="overflow-x-auto"><table class="data-table"><colgroup>';
   html += '<col style="width:18%"><col style="width:12%"><col style="width:10%"><col style="width:8%"><col style="width:12%"><col style="width:10%"><col style="width:10%">';
   html += '</colgroup><thead><tr class="border-b border-gray-200/60 bg-gray-50">';
