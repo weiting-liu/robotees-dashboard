@@ -2974,10 +2974,18 @@ var acMockData = (function() {
   for (let i = 0; i < 3; i++) {
     data.push({ id: id++, stage: 'ops_follow', type: '超时未通知下物流', typeCode: 'noLogistics', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: '接单后超过' + (8 + i*3) + '小时未通知下物流', latestShipTime: randTime(36 + i*8), orderStatus: '生产中', paymentStatus: 'paid', orderStage: 'production', followGroup: 'notify_omp' });
   }
-  // 物流下call失败 (3条) - followGroup='coordinate_customer'
-  for (let i = 0; i < 3; i++) {
-    const reasons = ['物流商接口超时', '面单生成失败', '地址信息不完整'];
-    data.push({ id: id++, stage: 'ops_follow', type: '物流下call失败', typeCode: 'logisticsCallFail', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: reasons[i], latestShipTime: randTime(30 + i*6), orderStatus: '生产中', paymentStatus: 'paid', orderStage: 'production', followGroup: 'coordinate_customer' });
+  // 物流下call失败 (5条) - followGroup='coordinate_customer'
+  {
+    const reasons = [
+      '自动创建物流失败:没有查询到默认的可用物流商',
+      '自动创建物流失败:没有查询到默认的可用物流商',
+      '自动创建物流失败:创建物流订单失败，订单存在售后申请未处理',
+      '自动创建物流失败:配送地址不支持(Remote Area)',
+      '自动创建物流失败:没有查询到默认的可用物流商'
+    ];
+    for (let i = 0; i < 5; i++) {
+      data.push({ id: id++, stage: 'ops_follow', type: '物流下call失败', typeCode: 'logisticsCallFail', customer: randCustomer(), orderNo: randOrderNo(), shop: randShop(), platform: acPlatforms[i % 3], reason: reasons[i], latestShipTime: randTime(30 + i*6), orderStatus: '生产中', paymentStatus: 'paid', orderStage: 'production', followGroup: 'coordinate_customer' });
+    }
   }
   // 超时未发货 (3条) - followGroup='follow_factory'
   for (let i = 0; i < 3; i++) {
