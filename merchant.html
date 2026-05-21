@@ -779,8 +779,8 @@
 
       <!-- ========== 筛选区 ========== -->
       <div class="bg-white rounded-lg border border-gray-200 p-4 mb-4">
-        <div class="flex items-center gap-4 flex-wrap">
-          <!-- 环节筛选 -->
+        <!-- 第一行：环节筛选 -->
+        <div class="flex items-center gap-6">
           <div class="flex items-center gap-3">
             <span class="text-xs text-gray-400 font-medium whitespace-nowrap">环节：</span>
             <div class="tab-capsule" id="stageFilter">
@@ -790,7 +790,10 @@
               <button class="tab-btn px-3 py-1.5 text-xs font-semibold" data-stage="review" onclick="alertFilterStage('review')">工厂反审(<span id="alertStageReviewCount">8</span>)</button>
             </div>
           </div>
+        </div>
 
+        <!-- 第二行：店铺、类型、复选框、搜索 -->
+        <div class="flex items-center gap-3 mt-3 flex-wrap">
           <!-- 店铺筛选（多选） -->
           <div class="multi-select" id="shopSelect">
             <div class="multi-select-trigger" onclick="alertToggleMultiSelect('shopSelect')">
