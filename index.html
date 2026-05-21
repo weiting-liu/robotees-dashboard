@@ -989,16 +989,16 @@
             <span id="acTokenAlertCount" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-200/80 text-red-700">4</span>
             <span class="text-xs text-red-500/80">以下店铺Token已失效或即将失效，请尽快处理</span>
           </div>
-          <svg id="acTokenBannerArrow" class="w-4 h-4 text-red-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-        </div>
-        <div class="token-alert-body px-4 pb-3">
-          <div class="space-y-2" id="acTokenAlertShopList"></div>
-          <div class="mt-2 pt-2 border-t border-red-200/40 flex items-center justify-end">
-            <button onclick="acCopyShopNames()" class="compact-copy-btn">
+          <div class="flex items-center gap-2">
+            <button onclick="event.stopPropagation();acCopyShopNames()" class="compact-copy-btn">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
               复制店铺名称
             </button>
+            <svg id="acTokenBannerArrow" class="w-4 h-4 text-red-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
           </div>
+        </div>
+        <div class="token-alert-body px-4 pb-3">
+          <div class="space-y-2" id="acTokenAlertShopList"></div>
         </div>
       </div>
 
@@ -1046,18 +1046,6 @@
         </div>
         <!-- 已选筛选标签显示区 -->
         <div id="acFilterTags" class="flex items-center gap-2 flex-wrap mt-3" style="display:none"></div>
-      </div>
-
-      <!-- ========== 批量操作区域 - 只在客户异常Tab显示 ========== -->
-      <div id="acBatchBar" class="bg-white border border-gray-200 px-4 py-2 mb-3 flex items-center gap-4">
-        <span id="acSelectedCount" class="text-sm font-semibold text-gray-700">已选 <span class="text-blue-600">0</span> 条</span>
-        <button onclick="acBatchCopy()" class="compact-copy-btn">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-          批量复制订单号
-        </button>
-        <button onclick="acClearSelection()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all">
-          取消选择
-        </button>
       </div>
 
       <!-- ========== Tab内容区域 ========== -->
@@ -3049,7 +3037,7 @@ var acInventoryAlerts = [
 ];
 
 // ============ 筛选状态 ============
-var acCurrentFilters = { mainTab: 'customer', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [], customerStage: '' };
+var acCurrentFilters = { mainTab: 'customer', platform: 'Temu', search: '', customer: '', exceptionTypes: [], orderStatuses: [], customerStage: '', opsFollowGroup: '', sysReasonGroup: '', invStatus: '' };
 var acSelectedIds = new Set();
 var acGroupStates = {}; // 记录各组折叠状态
 
@@ -3094,11 +3082,9 @@ function acSwitchMainTab(tab) {
   const typeWrap = document.getElementById('acTypeSelectWrap');
   const statusWrap = document.getElementById('acStatusSelectWrap');
   const searchBox = document.getElementById('acSearchBox');
-  const batchBar = document.getElementById('acBatchBar');
   if (typeWrap) typeWrap.style.display = tab === 'customer' ? '' : 'none';
   if (statusWrap) statusWrap.style.display = tab === 'customer' ? '' : 'none';
   if (searchBox) searchBox.style.display = (tab === 'inventory') ? 'none' : '';
-  if (batchBar) batchBar.style.display = tab === 'customer' ? '' : 'none';
 
   acRenderCurrentTab();
 }
@@ -3364,14 +3350,24 @@ function acRenderCustomerAlerts() {
 
   let html = '';
 
-  // 状态筛选Tag
-  html += '<div class="flex items-center gap-1 mb-3">';
+  // 状态筛选Tag + 批量操作栏
+  html += '<div class="flex items-center justify-between mb-3">';
+  html += '<div class="flex items-center gap-1">';
   stages.forEach(s => {
     const isActive = acCurrentFilters.customerStage === s.key;
     html += '<button onclick="acFilterCustomerStage(\'' + s.key + '\')" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ' + (isActive ? 'bg-slate-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200') + '">';
     html += s.label + '(' + s.count + ')</button>';
   });
   html += '</div>';
+  // 批量操作栏
+  html += '<div id="acBatchBar" class="flex items-center gap-4">';
+  html += '<span id="acSelectedCount" class="text-sm font-semibold text-gray-700">已选 <span class="text-blue-600">' + acSelectedIds.size + '</span> 条</span>';
+  html += '<button onclick="acBatchCopy()" class="compact-copy-btn">';
+  html += '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+  html += '批量复制订单号</button>';
+  html += '<button onclick="acClearSelection()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-all">';
+  html += '取消选择</button>';
+  html += '</div></div>';
 
   // 扁平表格
   if (filtered.length > 0) {
@@ -3432,76 +3428,91 @@ function acToggleAllCustomerCheck(checked) {
   acRenderCustomerAlerts();
 }
 
-// ============ 运营跟进Tab - 按处理动作分组 ============
+// ============ 运营跟进Tab - 扁平列表+筛选Tag ============
 function acRenderOpsFollowAlerts() {
   const container = document.getElementById('acOpsFollowAlertsContainer');
   const opsData = acMockData.filter(d => d.stage === 'ops_follow');
   const filtered = acFilterData(opsData);
 
+  // followGroup筛选
+  if (acCurrentFilters.opsFollowGroup) {
+    filtered = filtered.filter(d => d.followGroup === acCurrentFilters.opsFollowGroup);
+  }
+
+  // 计算各分组数量（基于平台+搜索+客户过滤后的数据）
   const groups = [
-    { key: 'notify_omp', label: '请通知OMP处理', desc: '复制订单号后通知OMP处理', color: 'bg-orange-500', countBadge: 'bg-orange-100 text-orange-700' },
-    { key: 'coordinate_customer', label: '请协调客户处理', desc: '复制订单号后联系客户协调处理', color: 'bg-amber-500', countBadge: 'bg-amber-100 text-amber-700' },
-    { key: 'follow_factory', label: '请跟进工厂进度', desc: '复制订单号后跟进工厂发货进度', color: 'bg-purple-500', countBadge: 'bg-purple-100 text-purple-700' },
-    { key: 'wait_payment', label: '待客户付款', desc: '复制订单号后提醒客户付款', color: 'bg-yellow-500', countBadge: 'bg-yellow-100 text-yellow-700' },
+    { key: '', label: '全部', filterKey: '' },
+    { key: 'notify_omp', label: '请通知OMP', filterKey: 'notify_omp' },
+    { key: 'coordinate_customer', label: '请协调客户', filterKey: 'coordinate_customer' },
+    { key: 'follow_factory', label: '请跟进工厂', filterKey: 'follow_factory' },
+    { key: 'wait_payment', label: '待客户付款', filterKey: 'wait_payment' },
   ];
 
-  let html = '';
+  const baseFiltered = acFilterData(opsData);
+  const groupCounts = {};
   groups.forEach(g => {
-    const items = filtered.filter(d => d.followGroup === g.key);
-    const groupId = 'opsFollow_' + g.key;
-    const isCollapsed = acGroupStates[groupId] === true;
-
-    html += '<div class="ac-group-section">';
-    html += '<div class="ac-group-header" onclick="acToggleGroup(\'' + groupId + '\')">';
-    html += '<svg class="ac-group-arrow ' + (isCollapsed ? 'collapsed' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
-    html += '<span class="w-1.5 h-5 ' + g.color + ' rounded-full"></span>';
-    html += '<span class="ac-group-title">' + g.label + '</span>';
-    html += '<span class="ac-group-count ' + g.countBadge + '">' + items.length + '条</span>';
-    html += '<span class="text-xs text-gray-400 ml-1">' + g.desc + '</span>';
-    html += '</div>';
-    html += '<div class="ac-group-body ' + (isCollapsed ? 'collapsed' : '') + '">';
-
-    if (items.length > 0) {
-      html += '<div class="ac-group-actions">';
-      html += '<button onclick="acCopyGroupOrders(\'' + groupId + '\')" class="compact-copy-btn">';
-      html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
-      html += '复制订单号</button></div>';
-      html += '<div class="overflow-x-auto px-3 pb-3"><table class="data-table"><colgroup>';
-      html += '<col style="width:16%"><col style="width:13%"><col style="width:18%"><col style="width:14%"><col style="width:9%"><col style="width:auto"><col style="width:13%">';
-      html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
-      html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">异常类型</th><th class="text-left font-semibold">订单号</th>';
-      html += '<th class="text-left font-semibold">店铺名称</th><th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
-      html += '<th class="text-right font-semibold">最晚发货时间</th></tr></thead>';
-      html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
-
-      items.forEach(row => {
-        const overdue = acIsOverdue(row.latestShipTime);
-        html += '<tr class="hover:bg-gray-50/80 transition-colors ' + (overdue ? 'danger-row' : '') + '">';
-        html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
-        html += '<td class="text-left">' + row.type + '</td>';
-        html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
-        html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
-        html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
-        html += '</button></td>';
-        html += '<td class="text-left text-gray-600">' + row.shop + '</td>';
-        html += '<td class="text-left">' + acGetStatusBadge(row.orderStatus) + '</td>';
-        html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
-        html += '<td class="text-right font-mono ' + (overdue ? 'text-red-600 font-bold' : 'text-gray-600') + '">' + row.latestShipTime + '</td>';
-        html += '</tr>';
-      });
-
-      html += '</tbody></table></div>';
+    if (g.key === '') {
+      groupCounts[g.key] = baseFiltered.length;
     } else {
-      html += '<div class="px-3 pb-3 text-sm text-gray-400 py-4 text-center">暂无该类异常</div>';
+      groupCounts[g.key] = baseFiltered.filter(d => d.followGroup === g.key).length;
     }
-
-    html += '</div></div>';
   });
+
+  let html = '';
+
+  // 筛选Tag
+  html += '<div class="flex items-center justify-between mb-3">';
+  html += '<div class="flex items-center gap-1">';
+  groups.forEach(g => {
+    const isActive = acCurrentFilters.opsFollowGroup === g.filterKey;
+    html += '<button onclick="acFilterOpsFollowGroup(\'' + g.filterKey + '\')" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ' + (isActive ? 'bg-slate-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200') + '">';
+    html += g.label + '(' + (groupCounts[g.key] || 0) + ')</button>';
+  });
+  html += '</div>';
+  html += '</div>';
+
+  // 扁平表格
+  if (filtered.length > 0) {
+    html += '<div class="overflow-x-auto"><table class="data-table"><colgroup>';
+    html += '<col style="width:16%"><col style="width:13%"><col style="width:18%"><col style="width:14%"><col style="width:9%"><col style="width:auto"><col style="width:13%">';
+    html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
+    html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">异常类型</th><th class="text-left font-semibold">订单号</th>';
+    html += '<th class="text-left font-semibold">店铺名称</th><th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
+    html += '<th class="text-right font-semibold">最晚发货时间</th></tr></thead>';
+    html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
+
+    filtered.forEach(row => {
+      const overdue = acIsOverdue(row.latestShipTime);
+      html += '<tr class="hover:bg-gray-50/80 transition-colors ' + (overdue ? 'danger-row' : '') + '">';
+      html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
+      html += '<td class="text-left">' + row.type + '</td>';
+      html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
+      html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
+      html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
+      html += '</button></td>';
+      html += '<td class="text-left text-gray-600">' + row.shop + '</td>';
+      html += '<td class="text-left">' + acGetStatusBadge(row.orderStatus) + '</td>';
+      html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
+      html += '<td class="text-right font-mono ' + (overdue ? 'text-red-600 font-bold' : 'text-gray-600') + '">' + row.latestShipTime + '</td>';
+      html += '</tr>';
+    });
+
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div class="text-sm text-gray-400 py-8 text-center">暂无异常订单</div>';
+  }
 
   container.innerHTML = html;
 }
 
-// ============ 库存异常Tab - SKU列表形式 ============
+// 运营跟进分组筛选
+function acFilterOpsFollowGroup(group) {
+  acCurrentFilters.opsFollowGroup = group;
+  acRenderOpsFollowAlerts();
+  acUpdateTabCounts();
+}
+
+// ============ 库存异常Tab - SKU列表形式 + 筛选Tag ============
 function acRenderInventoryAlerts() {
   const container = document.getElementById('acInventoryAlertsContainer');
   let alerts = [...acInventoryAlerts];
@@ -3516,18 +3527,47 @@ function acRenderInventoryAlerts() {
     });
   }
 
+  // 库存状态筛选
+  if (acCurrentFilters.invStatus) {
+    alerts = alerts.filter(a => a.status === acCurrentFilters.invStatus);
+  }
+
+  // 计算各状态数量（基于客户过滤后的数据）
+  const baseAlerts = acCurrentFilters.customer ? (function() {
+    let a = [...acInventoryAlerts];
+    const kw = acCurrentFilters.customer.toLowerCase();
+    a = a.filter(al => al.customers.toLowerCase().includes(kw) || al.orders.some(o => o.customer.toLowerCase().includes(kw)));
+    return a;
+  })() : [...acInventoryAlerts];
+  const allCount = baseAlerts.length;
+  const outCount = baseAlerts.filter(a => a.status === 'out_of_stock').length;
+  const lowCount = baseAlerts.filter(a => a.status === 'low_stock').length;
+
   // 计算刷新时间
   const refreshMinutes = Math.floor((Date.now() - acInventoryLastRefresh) / 60000);
   const refreshText = refreshMinutes < 1 ? '刚刚更新' : refreshMinutes + '分钟前更新';
 
   let html = '';
-  // 顶部操作栏
+  // 顶部操作栏：左边筛选Tag，右边刷新按钮+时间
   html += '<div class="flex items-center justify-between mb-3">';
+  html += '<div class="flex items-center gap-1">';
+  const invTags = [
+    { key: '', label: '全部', count: allCount },
+    { key: 'out_of_stock', label: '缺货', count: outCount },
+    { key: 'low_stock', label: '库存紧张', count: lowCount },
+  ];
+  invTags.forEach(t => {
+    const isActive = acCurrentFilters.invStatus === t.key;
+    html += '<button onclick="acFilterInvStatus(\'' + t.key + '\')" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ' + (isActive ? 'bg-slate-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200') + '">';
+    html += t.label + '(' + t.count + ')</button>';
+  });
+  html += '</div>';
+  html += '<div class="flex items-center gap-3">';
   html += '<button onclick="acRefreshInventory()" class="refresh-btn">';
   html += '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>';
   html += '刷新库存</button>';
   html += '<span class="text-xs text-gray-400">' + refreshText + '</span>';
-  html += '</div>';
+  html += '</div></div>';
 
   // SKU表格
   html += '<div class="bg-white border border-gray-200 rounded overflow-hidden">';
@@ -3615,67 +3655,77 @@ function acRefreshInventory() {
   alertShowToast('库存数据已刷新');
 }
 
-// ============ 系统监控Tab - 按异常原因分组 ============
+// 库存状态筛选
+function acFilterInvStatus(status) {
+  acCurrentFilters.invStatus = status;
+  acRenderInventoryAlerts();
+}
+
+// ============ 系统监控Tab - 扁平列表+筛选Tag ============
 function acRenderSysMonitorAlerts() {
   const container = document.getElementById('acSysMonitorAlertsContainer');
   const sysData = acMockData.filter(d => d.stage === 'sys_monitor');
   const filtered = acFilterData(sysData);
 
-  const groups = [
-    { key: 'orderParseError', label: '订单解析异常', color: 'bg-red-500', countBadge: 'bg-red-100 text-red-700' },
-    { key: 'masterDataBindTimeout', label: '主数据绑定超时', color: 'bg-orange-500', countBadge: 'bg-orange-100 text-orange-700' },
-    { key: 'skuDisabled', label: '胚衣sku被禁', color: 'bg-amber-500', countBadge: 'bg-amber-100 text-amber-700' },
-    { key: 'pushTimeout', label: '超时未推送', color: 'bg-yellow-500', countBadge: 'bg-yellow-100 text-yellow-700' },
-    { key: 'noFactory', label: '无可履约工厂', color: 'bg-purple-500', countBadge: 'bg-purple-100 text-purple-700' },
-    { key: 'acceptTimeout', label: '超时未接单', color: 'bg-pink-500', countBadge: 'bg-pink-100 text-pink-700' },
-    { key: 'labelNotSynced', label: '面单未同步', color: 'bg-cyan-500', countBadge: 'bg-cyan-100 text-cyan-700' },
-    { key: 'syncPlatformFail', label: '同步平台失败', color: 'bg-rose-500', countBadge: 'bg-rose-100 text-rose-700' },
-  ];
+  // sysReasonGroup筛选
+  if (acCurrentFilters.sysReasonGroup) {
+    filtered = filtered.filter(d => d.sysReasonGroup === acCurrentFilters.sysReasonGroup);
+  }
+
+  // 从数据动态生成去重的type
+  const baseFiltered = acFilterData(sysData);
+  const typeMap = {};
+  baseFiltered.forEach(d => {
+    if (!typeMap[d.type]) {
+      typeMap[d.type] = { key: d.sysReasonGroup, label: d.type, count: 0 };
+    }
+    typeMap[d.type].count++;
+  });
+  const allCount = baseFiltered.length;
+  const typeList = Object.values(typeMap);
 
   let html = '';
-  groups.forEach(g => {
-    const items = filtered.filter(d => d.sysReasonGroup === g.key);
-    if (items.length === 0) return; // 空分组不渲染
 
-    const groupId = 'sysMonitor_' + g.key;
-    const isCollapsed = acGroupStates[groupId] === true;
+  // 筛选Tag
+  html += '<div class="flex items-center justify-between mb-3">';
+  html += '<div class="flex items-center gap-1 flex-wrap">';
+  html += '<button onclick="acFilterSysReasonGroup(\'\')" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ' + (acCurrentFilters.sysReasonGroup === '' ? 'bg-slate-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200') + '">';
+  html += '全部(' + allCount + ')</button>';
+  typeList.forEach(t => {
+    const isActive = acCurrentFilters.sysReasonGroup === t.key;
+    html += '<button onclick="acFilterSysReasonGroup(\'' + t.key + '\')" class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ' + (isActive ? 'bg-slate-700 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200') + '">';
+    html += t.label + '(' + t.count + ')</button>';
+  });
+  html += '</div>';
+  html += '</div>';
 
-    html += '<div class="ac-group-section">';
-    html += '<div class="ac-group-header" onclick="acToggleGroup(\'' + groupId + '\')">';
-    html += '<svg class="ac-group-arrow ' + (isCollapsed ? 'collapsed' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
-    html += '<span class="w-1.5 h-5 ' + g.color + ' rounded-full"></span>';
-    html += '<span class="ac-group-title">' + g.label + '</span>';
-    html += '<span class="ac-group-count ' + g.countBadge + '">' + items.length + '条</span>';
-    html += '</div>';
-    html += '<div class="ac-group-body ' + (isCollapsed ? 'collapsed' : '') + '">';
-
-    html += '<div class="ac-group-actions">';
-    html += '<button onclick="acCopyGroupOrders(\'' + groupId + '\')" class="compact-copy-btn">';
-    html += '<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
-    html += '复制订单号</button></div>';
-    html += '<div class="overflow-x-auto px-3 pb-3"><table class="data-table"><colgroup>';
-    html += '<col style="width:25%"><col style="width:22%"><col style="width:auto">';
+  // 扁平表格
+  if (filtered.length > 0) {
+    html += '<div class="overflow-x-auto"><table class="data-table"><colgroup>';
+    html += '<col style="width:18%"><col style="width:20%"><col style="width:14%"><col style="width:auto"><col style="width:18%">';
     html += '</colgroup><thead><tr class="border-b border-gray-200/60">';
     html += '<th class="text-left font-semibold">客户</th><th class="text-left font-semibold">订单号</th>';
-    html += '<th class="text-left font-semibold">异常原因</th></tr></thead>';
+    html += '<th class="text-left font-semibold">订单状态</th><th class="text-left font-semibold">异常原因</th>';
+    html += '<th class="text-right font-semibold">最晚发货时间</th></tr></thead>';
     html += '<tbody class="divide-y divide-gray-100/80 text-gray-700">';
 
-    items.forEach(row => {
-      html += '<tr class="hover:bg-gray-50/80 transition-colors">';
+    filtered.forEach(row => {
+      const overdue = acIsOverdue(row.latestShipTime);
+      html += '<tr class="hover:bg-gray-50/80 transition-colors ' + (overdue ? 'danger-row' : '') + '">';
       html += '<td class="text-left font-medium text-gray-800">' + row.customer + '</td>';
       html += '<td class="text-left font-mono text-gray-600">' + row.orderNo;
       html += ' <button onclick="acCopyOrderNo(\'' + row.orderNo + '\')" class="ml-1 text-gray-300 hover:text-gray-500 transition-colors" title="复制">';
       html += '<svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>';
       html += '</button></td>';
+      html += '<td class="text-left">' + acGetStatusBadge(row.orderStatus) + '</td>';
       html += '<td class="text-left text-gray-600" title="' + row.reason + '">' + row.reason + '</td>';
+      html += '<td class="text-right font-mono ' + (overdue ? 'text-red-600 font-bold' : 'text-gray-600') + '">' + row.latestShipTime + '</td>';
       html += '</tr>';
     });
 
-    html += '</tbody></table></div></div></div>';
-  });
-
-  if (!html) {
-    html = '<div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] py-12 text-center">';
+    html += '</tbody></table></div>';
+  } else {
+    html += '<div class="bg-white rounded-2xl border border-gray-100/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] py-12 text-center">';
     html += '<svg class="w-16 h-16 text-gray-200 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>';
     html += '<p class="text-sm text-gray-400">暂无系统监控异常</p></div>';
   }
@@ -3683,45 +3733,20 @@ function acRenderSysMonitorAlerts() {
   container.innerHTML = html;
 }
 
-// ============ 分组折叠/展开 ============
-function acToggleGroup(groupId) {
-  acGroupStates[groupId] = !acGroupStates[groupId];
-  var section = document.querySelector('[onclick="acToggleGroup(\'' + groupId + '\')"]');
-  if (!section) return;
-  var arrow = section.querySelector('.ac-group-arrow');
-  var body = section.nextElementSibling;
-  if (acGroupStates[groupId]) {
-    if (arrow) arrow.classList.add('collapsed');
-    if (body) body.classList.add('collapsed');
-  } else {
-    if (arrow) arrow.classList.remove('collapsed');
-    if (body) body.classList.remove('collapsed');
-  }
+// 系统监控分组筛选
+function acFilterSysReasonGroup(group) {
+  acCurrentFilters.sysReasonGroup = group;
+  acRenderSysMonitorAlerts();
+  acUpdateTabCounts();
 }
 
-// ============ 复制某组订单号 ============
+// ============ 复制某组订单号（仅库存异常关联订单） ============
 function acCopyGroupOrders(groupId) {
   var orderNos = [];
-  if (groupId.startsWith('customer_')) {
-    var stageKey = groupId.replace('customer_', '');
-    var opsData = acMockData.filter(d => d.stage === 'ops_follow');
-    var filtered = acFilterCustomerData(opsData);
-    var stageMap = { pending: 'pending', production: 'production', review: 'review' };
-    orderNos = filtered.filter(d => d.orderStage === stageMap[stageKey]).map(d => d.orderNo);
-  } else if (groupId.startsWith('opsFollow_')) {
-    var fgKey = groupId.replace('opsFollow_', '');
-    var opsData2 = acMockData.filter(d => d.stage === 'ops_follow');
-    var filtered2 = acFilterData(opsData2);
-    orderNos = filtered2.filter(d => d.followGroup === fgKey).map(d => d.orderNo);
-  } else if (groupId.startsWith('inventory_')) {
+  if (groupId.startsWith('inventory_')) {
     var sku = groupId.replace('inventory_', '');
     var alert = acInventoryAlerts.find(a => a.sku === sku);
     if (alert) orderNos = alert.orders.map(o => o.orderNo);
-  } else if (groupId.startsWith('sysMonitor_')) {
-    var reasonKey = groupId.replace('sysMonitor_', '');
-    var sysData = acMockData.filter(d => d.stage === 'sys_monitor');
-    var filtered3 = acFilterData(sysData);
-    orderNos = filtered3.filter(d => d.sysReasonGroup === reasonKey).map(d => d.orderNo);
   }
 
   if (orderNos.length === 0) { alertShowToast('暂无可复制的订单号'); return; }
@@ -3760,25 +3785,9 @@ function acToggleRowCheck(id, checked) {
   acUpdateSelectedCount();
 }
 
-function acToggleGroupCheck(groupId, checked) {
-  var items = [];
-  if (groupId.startsWith('customer_')) {
-    var stageKey = groupId.replace('customer_', '');
-    var opsData = acMockData.filter(d => d.stage === 'ops_follow');
-    var filtered = acFilterCustomerData(opsData);
-    var stageMap = { pending: 'pending', production: 'production', review: 'review' };
-    items = filtered.filter(d => d.orderStage === stageMap[stageKey]);
-  }
-  items.forEach(function(d) {
-    if (checked) acSelectedIds.add(d.id);
-    else acSelectedIds.delete(d.id);
-  });
-  acRenderCustomerAlerts();
-}
-
 function acUpdateSelectedCount() {
   var countEl = document.getElementById('acSelectedCount');
-  countEl.innerHTML = '已选 <span class="text-blue-600">' + acSelectedIds.size + '</span> 条';
+  if (countEl) countEl.innerHTML = '已选 <span class="text-blue-600">' + acSelectedIds.size + '</span> 条';
 }
 
 // 批量复制
