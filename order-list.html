@@ -61,16 +61,6 @@
   .btn-reset:hover { border-color: #9CA3AF; color: #374151; }
   .btn-expand { background: none; border: none; color: #3B82F6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
-  /* 异常中心快捷入口 */
-  .alert-quick-entry { background: linear-gradient(135deg, #FEF3C7 0%, #FEE2E2 100%); border: 1px solid #FCD34D; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; margin: 12px 20px 0; cursor: pointer; transition: all 0.2s; }
-  .alert-quick-entry:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: #F59E0B; }
-  .alert-quick-entry .left { display: flex; align-items: center; gap: 10px; }
-  .alert-quick-entry .icon { width: 32px; height: 32px; background: #F59E0B; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-  .alert-quick-entry .title { font-size: 13px; font-weight: 600; color: #92400E; }
-  .alert-quick-entry .desc { font-size: 11px; color: #B45309; margin-top: 2px; }
-  .alert-quick-entry .badge { background: #EF4444; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; min-width: 24px; text-align: center; }
-  .alert-quick-entry .arrow { color: #B45309; font-size: 14px; }
-
   /* 状态标签栏 */
   .status-tabs { display: flex; align-items: center; gap: 0; padding: 0 20px; margin-top: 12px; border-bottom: 1px solid #E5E7EB; background: #fff; margin-left: 0; margin-right: 0; }
   .status-tab { padding: 10px 14px; font-size: 12px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; position: relative; }
@@ -141,98 +131,19 @@
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="4" fill="#3B82F6"/><path d="M8 8h8v3H11v2h4v3H8V8z" fill="#fff"/></svg>
     <span>Robotees</span>
   </div>
-  <div class="nav-group">
-    <div class="nav-item">📊 趋势热点</div>
-    <div class="nav-item">🎨 图案管理</div>
-    <div class="nav-item">🖼️ 款式贴图</div>
-    <div class="nav-item">📦 商品管理</div>
-    <div class="nav-item">
-      📋 订单管理
-      <span class="nav-new">new</span>
-    </div>
-    <div class="nav-sub">
-      <div class="nav-item">Temu全托备货单</div>
-      <div class="nav-item">Temu全托发货单提...</div>
-      <div class="nav-item">售后管理</div>
-      <div class="nav-item">Temu全托发货台</div>
-      <div class="nav-item">Temu全托发货单</div>
-      <div class="nav-item active">半托订单列表</div>
-      <div class="nav-item">Temu半托在线下单</div>
-    </div>
-    <div class="nav-item">💡 行业商机</div>
-    <div class="nav-item">📈 平台报表数据</div>
-  </div>
-</div>
-
-<!-- 主内容 -->
-<div class="main-content">
-  <!-- QA Banner -->
-  <div class="qa-banner">【当前环境为qa1，请勿用于正式作业】</div>
-
-  <!-- 顶部Header -->
-  <div class="top-header">
-    <div class="breadcrumb">
-      <a href="#">首页</a>
-      <span>/</span>
-      <a href="#">订单管理</a>
-      <span>/</span>
-      <span class="current">半托订单列表</span>
-    </div>
-    <div class="user-info">
-      <span style="cursor:pointer" title="搜索">🔍</span>
-      <span style="cursor:pointer;position:relative" title="消息通知">🔔<span style="position:absolute;top:-4px;right:-4px;width:6px;height:6px;background:#EF4444;border-radius:50%;"></span></span>
-      <div class="user-avatar">刘</div>
-      <div>
-        <div style="font-weight:500;color:#1F2937;">刘炜婷</div>
-        <div style="font-size:10px;color:#9CA3AF;">广州鑫景信息科技公司</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 筛选区 -->
-  <div class="filter-section">
-    <!-- 平台Tab -->
-    <div class="platform-tabs">
-      <div class="platform-tab active">Temu</div>
-      <div class="platform-tab">Tiktok</div>
-      <div class="platform-tab">Shein</div>
-      <div class="platform-tab">Qink</div>
-      <div class="platform-tab">其他</div>
-    </div>
-
-    <!-- 查询条件 -->
-    <div class="filter-row">
-      <span class="filter-label">订单编号</span>
-      <input class="filter-input" style="width:240px" placeholder="每次最多100，以空格/逗号隔开" />
-      <span class="filter-label">创建时间</span>
-      <input class="filter-date" type="date" style="width:140px" />
-      <span style="color:#9CA3AF;font-size:12px;">至</span>
-      <input class="filter-date" type="date" style="width:140px" />
-      <span class="filter-label">店铺</span>
-      <select class="filter-select"><option>请选择</option></select>
-      <span class="filter-label">来源单号</span>
-      <input class="filter-input" style="width:180px" placeholder="每次最多100，以空格/逗号隔开" />
-      <span class="filter-label">订单异常</span>
-      <select class="filter-select"><option>请选择</option><option>库存不足</option><option>位置解析超区域</option><option>未绑定发货仓</option><option>物流下call失败</option><option>面单未同步</option></select>
-    </div>
-    <div class="filter-row">
-      <button class="btn-search" onclick="showToast('查询中...')">查询</button>
-      <button class="btn-reset">重置</button>
-      <button class="btn-expand">展开 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></button>
       <span style="width:1px;height:16px;background:#E5E7EB;margin:0 4px;"></span>
       <button class="quick-filter-tag" onclick="toggleQuickFilter(this)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
         未上传面单
       </button>
+      <span style="width:1px;height:16px;background:#E5E7EB;margin:0 4px;"></span>
+      <span style="cursor:pointer;display:inline-flex;align-items:center;gap:4px;" onclick="showToast('跳转至异常中心')">
+        <span style="font-size:13px;">⚠️</span>
+        <span style="font-size:12px;color:#92400E;font-weight:600;">异常中心</span>
+        <span style="background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;">133</span>
+        <span style="color:#B45309;font-size:11px;">›</span>
+      </span>
     </div>
-  </div>
-
-  <!-- 异常中心快捷入口（紧凑） -->
-  <div style="margin:8px 20px 0;display:flex;align-items:center;gap:8px;" onclick="showToast('跳转至异常中心')" class="cursor-pointer">
-    <span style="font-size:13px;">⚠️</span>
-    <span style="font-size:12px;color:#92400E;font-weight:600;">异常中心</span>
-    <span style="background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;">133</span>
-    <span style="color:#B45309;font-size:11px;">点击查看 ›</span>
   </div>
 
   <!-- 状态标签栏 -->
