@@ -1151,7 +1151,7 @@ function renderExceptionSummary() {
       icon: '',
       headerBg: '',
       stageKey: 'production',
-      types: ['物流下call失败']
+      types: ['物流下call失败', '超时未上传面单']
     },
     {
       stage: '工厂反审',
@@ -1407,6 +1407,11 @@ const alertExceptionData = [
   { id: 6, severity: 'urgent', severityLabel: '紧急', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04254012345678901', shop: '拍歐德-主店', platform: 'Temu', reason: '无可用物流渠道，卖家后台处理后手工上传面单', duration: '1天6小时', needAction: true, actionType: 'seller_handle', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-19 09:00' },
   { id: 7, severity: 'warning', severityLabel: '警告', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04253098765432109', shop: '潮酷服饰专营店', platform: 'Temu', reason: '资金被冻结，卖家后台处理后重拉订单', duration: '4小时', needAction: true, actionType: 'seller_handle', rowClass: 'warn-row', paymentStatus: 'paid', latestShipTime: '2026-05-20 14:00' },
   { id: 8, severity: 'warning', severityLabel: '警告', stage: 'production', type: '物流下call失败', typeCode: 'PROD_CALL_FAIL', orderNo: 'PO-211-04252012345678901', shop: '拍歐德-分店A', platform: 'Shein', reason: '订单存在未处理售后，卖家后台处理后重拉订单', duration: '3小时', needAction: true, actionType: 'seller_handle', rowClass: 'warn-row', paymentStatus: 'unpaid', latestShipTime: '2026-05-21 18:00' },
+
+  // === 生产中阶段 - 超时未上传面单（客户处理）===
+  { id: 100, severity: 'urgent', severityLabel: '紧急', stage: 'production', type: '超时未上传面单', typeCode: 'PROD_NO_LABEL_UPLOAD', orderNo: 'PO-211-04251098765001', shop: '拍歐德-主店', platform: 'Temu', reason: '自有面单订单超时未上传面单，请尽快上传', duration: '1天3小时', needAction: true, actionType: 'upload_label', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-20 18:00' },
+  { id: 101, severity: 'warning', severityLabel: '警告', stage: 'production', type: '超时未上传面单', typeCode: 'PROD_NO_LABEL_UPLOAD', orderNo: 'PO-211-04251098765002', shop: '潮酷服饰专营店', platform: 'Temu', reason: '非在线下单订单，需客户自行上传面单，已超时', duration: '6小时', needAction: true, actionType: 'upload_label', rowClass: 'warn-row', paymentStatus: 'paid', latestShipTime: '2026-05-21 14:00' },
+  { id: 102, severity: 'warning', severityLabel: '警告', stage: 'production', type: '超时未上传面单', typeCode: 'PROD_NO_LABEL_UPLOAD', orderNo: 'PO-211-04251098765003', shop: '拍歐德-分店A', platform: 'Shein', reason: '自有面单订单需上传面单后才能发货，请及时处理', duration: '3小时', needAction: true, actionType: 'upload_label', rowClass: 'warn-row', paymentStatus: 'unpaid', latestShipTime: '2026-05-22 12:00' },
 
   // === 工厂反审阶段 ===
   { id: 9, severity: 'urgent', severityLabel: '紧急', stage: 'review', type: '库存不足', typeCode: 'REVIEW_STOCK', orderNo: 'PO-211-04251098765432109', shop: '拍歐德-主店', platform: 'Temu', reason: '工厂反馈部分SKU库存异常，需部分换货或取消', duration: '1天6小时', needAction: true, actionType: 'partial_swap_or_cancel', rowClass: 'danger-row', paymentStatus: 'paid', latestShipTime: '2026-05-18 18:00' },
@@ -1672,6 +1677,7 @@ function alertGetActionBtn(item) {
     // 待处理："修改重推" 改为 "重推"
     fix_or_close: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">重推</button><button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">关闭订单</button>',
     bind_warehouse: '<button onclick="event.stopPropagation();alertHandleAction(\'bind_warehouse\', ' + item.id + ')" class="px-2 py-1 text-[11px] font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors leading-tight">绑定发货仓后重拉订单</button>',
+    upload_label: '<button onclick="event.stopPropagation();showToast(\'请前往上传面单\')" class="px-2.5 py-1 text-xs font-medium text-blue-600 border border-blue-300 rounded hover:bg-blue-50 transition-colors">上传面单</button>',
     seller_handle: '<span class="text-xs text-gray-400 flex items-center gap-1"><span class="pulse-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>卖家后台处理</span>',
     partial_swap_or_cancel: '<button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">部分换货</button><button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">部分取消</button>',
     fix_art: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_art\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">修改图案</button>',
