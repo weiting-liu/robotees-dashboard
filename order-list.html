@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Robotees - 半托订单列表</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif; background: #F0F2F5; color: #1F2937; }
+
+  /* 左侧导航 */
+  .sidebar { width: 220px; background: #1E293B; min-height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; }
+  .sidebar-logo { padding: 16px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .sidebar-logo span { color: #fff; font-weight: 700; font-size: 16px; letter-spacing: 0.5px; }
+  .nav-group { padding: 8px 0; }
+  .nav-group-title { padding: 8px 20px 4px; font-size: 11px; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-item { display: flex; align-items: center; padding: 8px 20px; color: #94A3B8; font-size: 13px; cursor: pointer; transition: all 0.15s; gap: 10px; }
+  .nav-item:hover { color: #E2E8F0; background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: #fff; background: rgba(59,130,246,0.15); border-right: 2px solid #3B82F6; }
+  .nav-sub { padding-left: 36px; }
+  .nav-sub .nav-item { font-size: 12px; padding: 6px 20px; }
+  .nav-new { background: #EF4444; color: #fff; font-size: 9px; padding: 1px 5px; border-radius: 3px; font-weight: 700; margin-left: 6px; }
+
+  /* 主内容区 */
+  .main-content { margin-left: 220px; min-height: 100vh; }
+
+  /* 顶部警告 */
+  .qa-banner { background: #FEE2E2; color: #DC2626; text-align: center; padding: 6px; font-size: 12px; font-weight: 600; }
+
+  /* 顶部导航 */
+  .top-header { background: #fff; border-bottom: 1px solid #E5E7EB; padding: 0 24px; height: 48px; display: flex; align-items: center; justify-content: space-between; }
+  .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B7280; }
+  .breadcrumb a { color: #6B7280; text-decoration: none; }
+  .breadcrumb a:hover { color: #3B82F6; }
+  .breadcrumb .current { color: #1F2937; font-weight: 600; }
+
+  /* 用户信息 */
+  .user-info { display: flex; align-items: center; gap: 16px; font-size: 12px; color: #6B7280; }
+  .user-avatar { width: 28px; height: 28px; background: #3B82F6; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
+
+  /* 筛选区 */
+  .filter-section { background: #fff; padding: 16px 20px; margin: 16px 20px 0; border-radius: 8px; border: 1px solid #E5E7EB; }
+  .platform-tabs { display: flex; gap: 0; margin-bottom: 12px; border-bottom: 1px solid #E5E7EB; }
+  .platform-tab { padding: 8px 16px; font-size: 13px; font-weight: 500; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .platform-tab:hover { color: #374151; }
+  .platform-tab.active { color: #3B82F6; border-bottom-color: #3B82F6; font-weight: 600; }
+
+  .filter-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+  .filter-row:last-child { margin-bottom: 0; }
+  .filter-label { font-size: 12px; color: #6B7280; white-space: nowrap; min-width: 50px; }
+  .filter-input { border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; transition: border-color 0.15s; }
+  .filter-input:focus { border-color: #3B82F6; }
+  .filter-select { border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 28px 6px 10px; font-size: 12px; outline: none; appearance: none; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239CA3AF' stroke-width='2'%3E%3Cpath d='M19 9l-7 7-7-7'/%3E%3C/svg%3E") no-repeat right 8px center; cursor: pointer; min-width: 120px; }
+  .filter-select:focus { border-color: #3B82F6; }
+  .filter-date { border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 10px; font-size: 12px; outline: none; }
+  .filter-date:focus { border-color: #3B82F6; }
+  .btn-search { background: #3B82F6; color: #fff; border: none; border-radius: 6px; padding: 6px 16px; font-size: 12px; font-weight: 500; cursor: pointer; transition: background 0.15s; }
+  .btn-search:hover { background: #2563EB; }
+  .btn-reset { background: #fff; color: #6B7280; border: 1px solid #D1D5DB; border-radius: 6px; padding: 6px 16px; font-size: 12px; cursor: pointer; transition: all 0.15s; }
+  .btn-reset:hover { border-color: #9CA3AF; color: #374151; }
+  .btn-expand { background: none; border: none; color: #3B82F6; font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+
+  /* 异常中心快捷入口 */
+  .alert-quick-entry { background: linear-gradient(135deg, #FEF3C7 0%, #FEE2E2 100%); border: 1px solid #FCD34D; border-radius: 8px; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; margin: 12px 20px 0; cursor: pointer; transition: all 0.2s; }
+  .alert-quick-entry:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-color: #F59E0B; }
+  .alert-quick-entry .left { display: flex; align-items: center; gap: 10px; }
+  .alert-quick-entry .icon { width: 32px; height: 32px; background: #F59E0B; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .alert-quick-entry .title { font-size: 13px; font-weight: 600; color: #92400E; }
+  .alert-quick-entry .desc { font-size: 11px; color: #B45309; margin-top: 2px; }
+  .alert-quick-entry .badge { background: #EF4444; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; min-width: 24px; text-align: center; }
+  .alert-quick-entry .arrow { color: #B45309; font-size: 14px; }
+
+  /* 状态标签栏 */
+  .status-tabs { display: flex; align-items: center; gap: 0; padding: 0 20px; margin-top: 12px; border-bottom: 1px solid #E5E7EB; background: #fff; margin-left: 0; margin-right: 0; }
+  .status-tab { padding: 10px 14px; font-size: 12px; color: #6B7280; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: all 0.15s; position: relative; }
+  .status-tab:hover { color: #374151; }
+  .status-tab.active { color: #3B82F6; border-bottom-color: #3B82F6; font-weight: 600; }
+  .status-tab .count { font-weight: 600; margin-left: 2px; }
+  .status-tab.alert-tab { color: #EF4444; }
+  .status-tab.alert-tab.active { color: #EF4444; border-bottom-color: #EF4444; }
+
+  /* 批量操作栏 */
+  .batch-bar { background: #fff; padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #F3F4F6; }
+  .batch-left { display: flex; align-items: center; gap: 8px; }
+  .batch-btn { padding: 5px 12px; font-size: 12px; border: 1px solid #D1D5DB; border-radius: 6px; background: #fff; color: #374151; cursor: pointer; transition: all 0.15s; }
+  .batch-btn:hover { border-color: #9CA3AF; background: #F9FAFB; }
+  .batch-btn.primary { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+  .batch-btn.primary:hover { background: #2563EB; }
+  .batch-btn .num { background: #DBEAFE; color: #2563EB; padding: 1px 6px; border-radius: 10px; font-size: 11px; font-weight: 600; margin-left: 2px; }
+  .batch-right { display: flex; align-items: center; gap: 8px; }
+  .batch-count { font-size: 12px; color: #9CA3AF; }
+
+  /* 表格 */
+  .order-table { width: 100%; border-collapse: collapse; table-layout: auto; min-width: 1200px; }
+  .order-table th { background: #F8FAFC; padding: 8px 12px; font-size: 11px; color: #64748B; font-weight: 600; text-align: left; white-space: nowrap; border-bottom: 1px solid #E5E7EB; }
+  .order-table td { padding: 10px 12px; font-size: 12px; border-bottom: 1px solid #F3F4F6; white-space: nowrap; }
+  .order-table tr:hover { background: #F8FAFC; }
+  .order-table .order-no { color: #3B82F6; cursor: pointer; font-weight: 500; }
+  .order-table .order-no:hover { text-decoration: underline; }
+
+  /* 状态徽章 */
+  .status-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+  .status-badge.pending { background: #FEF3C7; color: #92400E; }
+  .status-badge.processing { background: #DBEAFE; color: #1E40AF; }
+  .status-badge.shipped { background: #D1FAE5; color: #065F46; }
+  .status-badge.error { background: #FEE2E2; color: #991B1B; }
+  .status-badge.closed { background: #F3F4F6; color: #6B7280; }
+
+  /* 异常标签 */
+  .error-tag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: 600; background: #FEE2E2; color: #DC2626; }
+  .error-tag .dot { width: 4px; height: 4px; border-radius: 50%; background: #EF4444; animation: pulse-dot 2s infinite; }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+  /* 操作按钮 */
+  .action-link { color: #3B82F6; font-size: 12px; cursor: pointer; background: none; border: none; padding: 0; }
+  .action-link:hover { text-decoration: underline; }
+
+  /* Toast */
+  .toast { position: fixed; top: 60px; right: 24px; background: #1F2937; color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 13px; z-index: 9999; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+  .toast.show { display: block; animation: fadeInOut 2s ease; }
+  @keyframes fadeInOut { 0% { opacity: 0; transform: translateY(-10px); } 15% { opacity: 1; transform: translateY(0); } 85% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* 分页 */
+  .pagination { display: flex; align-items: center; justify-content: space-between; padding: 12px 20px; background: #fff; border-top: 1px solid #E5E7EB; }
+  .pagination-info { font-size: 12px; color: #9CA3AF; }
+  .pagination-btns { display: flex; align-items: center; gap: 4px; }
+  .page-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 12px; color: #374151; cursor: pointer; background: #fff; }
+  .page-btn:hover { border-color: #3B82F6; color: #3B82F6; }
+  .page-btn.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
+</style>
+</head>
+<body>
+
+<!-- 左侧导航 -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="2" y="2" width="20" height="20" rx="4" fill="#3B82F6"/><path d="M8 8h8v3H11v2h4v3H8V8z" fill="#fff"/></svg>
+    <span>Robotees</span>
+  </div>
+  <div class="nav-group">
+    <div class="nav-item">📊 趋势热点</div>
+    <div class="nav-item">🎨 图案管理</div>
+    <div class="nav-item">🖼️ 款式贴图</div>
+    <div class="nav-item">📦 商品管理</div>
+    <div class="nav-item">
+      📋 订单管理
+      <span class="nav-new">new</span>
+    </div>
+    <div class="nav-sub">
+      <div class="nav-item">Temu全托备货单</div>
+      <div class="nav-item">Temu全托发货单提...</div>
+      <div class="nav-item">售后管理</div>
+      <div class="nav-item">Temu全托发货台</div>
+      <div class="nav-item">Temu全托发货单</div>
+      <div class="nav-item active">半托订单列表</div>
+      <div class="nav-item">Temu半托在线下单</div>
+    </div>
+    <div class="nav-item">💡 行业商机</div>
+    <div class="nav-item">📈 平台报表数据</div>
+  </div>
+</div>
+
+<!-- 主内容 -->
+<div class="main-content">
+  <!-- QA Banner -->
+  <div class="qa-banner">【当前环境为qa1，请勿用于正式作业】</div>
+
+  <!-- 顶部Header -->
+  <div class="top-header">
+    <div class="breadcrumb">
+      <a href="#">首页</a>
+      <span>/</span>
+      <a href="#">订单管理</a>
+      <span>/</span>
+      <span class="current">半托订单列表</span>
+    </div>
+    <div class="user-info">
+      <span style="cursor:pointer" title="搜索">🔍</span>
+      <span style="cursor:pointer;position:relative" title="消息通知">🔔<span style="position:absolute;top:-4px;right:-4px;width:6px;height:6px;background:#EF4444;border-radius:50%;"></span></span>
+      <div class="user-avatar">刘</div>
+      <div>
+        <div style="font-weight:500;color:#1F2937;">刘炜婷</div>
+        <div style="font-size:10px;color:#9CA3AF;">广州鑫景信息科技公司</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 筛选区 -->
+  <div class="filter-section">
+    <!-- 平台Tab -->
+    <div class="platform-tabs">
+      <div class="platform-tab active">Temu</div>
+      <div class="platform-tab">Tiktok</div>
+      <div class="platform-tab">Shein</div>
+      <div class="platform-tab">Qink</div>
+      <div class="platform-tab">其他</div>
+    </div>
+
+    <!-- 查询条件 -->
+    <div class="filter-row">
+      <span class="filter-label">订单编号</span>
+      <input class="filter-input" style="width:240px" placeholder="每次最多100，以空格/逗号隔开" />
+      <span class="filter-label">创建时间</span>
+      <input class="filter-date" type="date" style="width:140px" />
+      <span style="color:#9CA3AF;font-size:12px;">至</span>
+      <input class="filter-date" type="date" style="width:140px" />
+      <span class="filter-label">店铺</span>
+      <select class="filter-select"><option>请选择</option></select>
+      <span class="filter-label">来源单号</span>
+      <input class="filter-input" style="width:180px" placeholder="每次最多100，以空格/逗号隔开" />
+      <span class="filter-label">订单异常</span>
+      <select class="filter-select"><option>请选择</option><option>库存不足</option><option>位置解析超区域</option><option>未绑定发货仓</option><option>物流下call失败</option><option>面单未同步</option></select>
+    </div>
+    <div class="filter-row">
+      <button class="btn-search" onclick="showToast('查询中...')">查询</button>
+      <button class="btn-reset">重置</button>
+      <button class="btn-expand">展开 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></button>
+    </div>
+  </div>
+
+  <!-- 异常中心快捷入口 -->
+  <div class="alert-quick-entry" onclick="showToast('跳转至异常中心')">
+    <div class="left">
+      <div class="icon">⚠️</div>
+      <div>
+        <div class="title">异常中心</div>
+        <div class="desc">您有订单异常需要处理，点击前往异常中心查看详情</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <span class="badge">133</span>
+      <span class="arrow">›</span>
+    </div>
+  </div>
+
+  <!-- 状态标签栏 -->
+  <div class="status-tabs" id="statusTabs">
+    <div class="status-tab active" onclick="switchStatusTab(this)">全部<span class="count">51,702</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">待确认<span class="count">2,669</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">待付款<span class="count">259</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">待推送<span class="count">395</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">待接单<span class="count">141</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">今天生产中<span class="count">0</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">昨天生产中<span class="count">3</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">前天生产中<span class="count">0</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">3天以上生产中<span class="count">876</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">已发货<span class="count">12,124</span></div>
+    <div class="status-tab alert-tab" onclick="switchStatusTab(this)">订单异常<span class="count">133</span></div>
+    <div class="status-tab" onclick="switchStatusTab(this)">已关闭<span class="count">37,802</span></div>
+  </div>
+
+  <!-- 批量操作栏 -->
+  <div class="batch-bar">
+    <div class="batch-left">
+      <button class="batch-btn">订单同步</button>
+      <button class="batch-btn primary">批量确认发货 <span class="num">283</span></button>
+      <button class="batch-btn">关闭订单</button>
+      <button class="batch-btn">批量付款</button>
+      <button class="batch-btn">批量退款</button>
+      <button class="batch-btn">批量复制来源单号</button>
+      <button class="batch-btn">复制运单号</button>
+      <button class="batch-btn">手动同步平台发货</button>
+      <button class="batch-btn">批量部分取消</button>
+    </div>
+    <div class="batch-right">
+      <button class="batch-btn" onclick="showToast('刷新产品')">🔄 刷新产品</button>
+      <button class="batch-btn primary" onclick="showToast('创建订单')">+ 创建订单</button>
+      <button class="batch-btn">📥 批量导出</button>
+    </div>
+  </div>
+
+  <!-- 订单列表 -->
+  <div style="background:#fff;margin:0;overflow-x:auto;">
+    <table class="order-table">
+      <thead>
+        <tr>
+          <th><input type="checkbox" /></th>
+          <th>订单编号</th>
+          <th>来源单号</th>
+          <th>平台</th>
+          <th>店铺</th>
+          <th>客户</th>
+          <th>产品/SKU</th>
+          <th>数量</th>
+          <th>订单状态</th>
+          <th>异常</th>
+          <th>创建时间</th>
+          <th>最晚发货</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="orderTableBody"></tbody>
+    </table>
+  </div>
+
+  <!-- 分页 -->
+  <div class="pagination">
+    <div class="pagination-info">共 51,702 条</div>
+    <div class="pagination-btns">
+      <div class="page-btn">‹</div>
+      <div class="page-btn active">1</div>
+      <div class="page-btn">2</div>
+      <div class="page-btn">3</div>
+      <div class="page-btn">...</div>
+      <div class="page-btn">5171</div>
+      <div class="page-btn">›</div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show';
+  setTimeout(() => t.className = 'toast', 2000);
+}
+
+function switchStatusTab(el) {
+  document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  showToast('切换至：' + el.textContent.trim().split(/\d/)[0]);
+}
+
+// Mock order data
+const mockOrders = [
+  { id: 'RO20260519174984542', sourceId: 'SG-12342134213909', platform: 'Temu', shop: '拍歐德-主店', customer: '拍歐德國際貿易有限公司', product: '定制T恤 / S-白', qty: 2, status: '3天以上生产中', statusClass: 'processing', error: null, created: '2026-05-19 17:49', deadline: '2026-05-21 18:00' },
+  { id: 'RO20260519163215678', sourceId: 'PO-211-04254012345678', platform: 'Temu', shop: '潮酷服饰专营店', customer: '广州天天酷衣电子贸易有限公司', product: '连帽卫衣 / L-黑', qty: 1, status: '订单异常', statusClass: 'error', error: '库存不足', created: '2026-05-19 16:32', deadline: '2026-05-20 18:00' },
+  { id: 'RO20260519142589123', sourceId: 'PO-211-04256012345678', platform: 'Temu', shop: '拍歐德-主店', customer: '拍歐德國際貿易有限公司', product: 'POD帆布鞋 / 42', qty: 3, status: '订单异常', statusClass: 'error', error: '未绑定发货仓', created: '2026-05-19 14:25', deadline: '2026-05-20 18:00' },
+  { id: 'RO20260519093847256', sourceId: 'PO-211-04247098765432', platform: 'Temu', shop: '潮酷服饰专营店', customer: '广州天天酷衣电子贸易有限公司', product: '马克杯 / 11oz', qty: 5, status: '待确认', statusClass: 'pending', error: null, created: '2026-05-19 09:38', deadline: '-' },
+  { id: 'RO20260518215678345', sourceId: 'SG-98765432109876', platform: 'Temu', shop: '拍歐德-分店A', customer: '拍歐德國際貿易有限公司', product: '手机壳 / iPhone15', qty: 1, status: '已发货', statusClass: 'shipped', error: null, created: '2026-05-18 21:56', deadline: '2026-05-20 18:00' },
+  { id: 'RO20260518182345678', sourceId: 'PO-211-04246012345678', platform: 'Temu', shop: '潮酷服饰专营店', customer: '广州天天酷衣电子贸易有限公司', product: '抱枕 / 45x45cm', qty: 2, status: '订单异常', statusClass: 'error', error: '蒙版异常', created: '2026-05-18 18:23', deadline: '2026-05-21 18:00' },
+  { id: 'RO20260518141234567', sourceId: 'PO-211-04244012345678', platform: 'Temu', shop: '拍歐德-主店', customer: '拍歐德國際貿易有限公司', product: '定制T恤 / M-白', qty: 1, status: '3天以上生产中', statusClass: 'processing', error: null, created: '2026-05-18 14:12', deadline: '2026-05-19 18:00' },
+  { id: 'RO20260517194567890', sourceId: 'PO-211-03672613118072', platform: 'Temu', shop: 'Fashion Frontier', customer: '广州尔棉贸易有限公司', product: '连帽卫衣 / XL-灰', qty: 4, status: '已关闭', statusClass: 'closed', error: null, created: '2026-05-17 19:45', deadline: '-' },
+];
+
+function renderOrders() {
+  const tbody = document.getElementById('orderTableBody');
+  tbody.innerHTML = mockOrders.map(o => {
+    const errorHtml = o.error ? `<span class="error-tag"><span class="dot"></span>${o.error}</span>` : '<span style="color:#D1D5DB">-</span>';
+    return `<tr>
+      <td><input type="checkbox" /></td>
+      <td><span class="order-no">${o.id}</span></td>
+      <td style="color:#6B7280">${o.sourceId}</td>
+      <td>${o.platform}</td>
+      <td>${o.shop}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;" title="${o.customer}">${o.customer}</td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;" title="${o.product}">${o.product}</td>
+      <td style="text-align:center">${o.qty}</td>
+      <td><span class="status-badge ${o.statusClass}">${o.status}</span></td>
+      <td>${errorHtml}</td>
+      <td style="color:#6B7280">${o.created}</td>
+      <td style="color:${o.deadline === '-' ? '#D1D5DB' : '#6B7280'}">${o.deadline}</td>
+      <td><span class="action-link" onclick="showToast('查看订单详情')">详情</span></td>
+    </tr>`;
+  }).join('');
+}
+
+renderOrders();
+</script>
+</body>
+</html>
