@@ -1004,7 +1004,7 @@
 
       <!-- ========== 4个主Tab ========== -->
       <div class="flex items-center gap-1 mb-4 bg-gray-100/80 rounded-xl p-1 w-fit">
-        <button id="acMainTabCustomer" onclick="acSwitchMainTab('customer')" class="alert-tab-btn active px-4 py-2 text-sm font-semibold rounded-lg">客户异常(<span id="acTabCountCustomer">0</span>)</button>
+        <button id="acMainTabCustomer" onclick="acSwitchMainTab('customer')" class="alert-tab-btn active px-4 py-2 text-sm font-semibold rounded-lg">客户处理(<span id="acTabCountCustomer">0</span>)</button>
         <button id="acMainTabOpsFollow" onclick="acSwitchMainTab('opsFollow')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">运营跟进(<span id="acTabCountOpsFollow">0</span>)</button>
         <button id="acMainTabInventory" onclick="acSwitchMainTab('inventory')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">库存异常(<span id="acTabCountInventory">0</span>)</button>
         <button id="acMainTabSysMonitor" onclick="acSwitchMainTab('sysMonitor')" class="alert-tab-btn px-4 py-2 text-sm font-semibold rounded-lg">系统监控(<span id="acTabCountSysMonitor">0</span>)</button>
@@ -1023,7 +1023,7 @@
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
             <input id="acCustomerInput" type="text" placeholder="搜索客户" class="bg-transparent outline-none text-sm text-gray-600 placeholder-gray-400 w-36" oninput="acOnCustomerInput()" />
           </div>
-          <!-- 异常类型多选 - 只在客户异常Tab显示 -->
+          <!-- 异常类型多选 - 只在客户处理Tab显示 -->
           <div class="ac-multi-select relative" id="acTypeSelectWrap">
             <button id="acTypeSelectBtn" onclick="acToggleTypePanel()" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white hover:border-gray-300 transition-all text-gray-600 font-medium">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
@@ -1033,7 +1033,7 @@
             </button>
             <div id="acTypePanel" class="ac-multi-select-panel" style="min-width:200px"></div>
           </div>
-          <!-- 订单状态多选 - 只在客户异常Tab显示 -->
+          <!-- 订单状态多选 - 只在客户处理Tab显示 -->
           <div class="ac-multi-select relative" id="acStatusSelectWrap">
             <button id="acStatusSelectBtn" onclick="acToggleStatusPanel()" class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm border border-gray-200 bg-white hover:border-gray-300 transition-all text-gray-600 font-medium">
               <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
@@ -1049,7 +1049,7 @@
       </div>
 
       <!-- ========== Tab内容区域 ========== -->
-      <!-- 客户异常 -->
+      <!-- 客户处理 -->
       <div id="acTabCustomer" class="ac-tab-content">
         <div id="acCustomerAlertsContainer"></div>
       </div>
@@ -3021,7 +3021,7 @@ var acMockData = (function() {
       data.push({ id: id++, stage: 'sys_monitor', type: '位置解析超区域', typeCode: 'locationParseError', customer: e.customer, orderNo: e.orderNo, shop: e.shop, platform: acPlatforms[i % 3], reason: e.reason, latestShipTime: shipTimes[i], orderStatus: '待处理', paymentStatus: 'paid', sysReasonGroup: 'locationParseError' });
     });
   }
-  // ====== 客户异常 (stage='customer_alert') - 客户处理 ======
+  // ====== 客户处理 (stage='customer_alert') - 客户处理 ======
   // 待处理-库存不足 (5条) - 客户处理
   {
     const stockErrors = [
@@ -3050,7 +3050,34 @@ var acMockData = (function() {
   }
 
 
-  return data;
+  
+
+  // 超时未上传面单 (3条) - customer_alert, 客户处理, 生产中
+  var noLabelUploadReasons = [
+    '自有面单订单超时未上传面单，请尽快上传',
+    '非在线下单订单，需客户自行上传面单，已超时',
+    '自有面单订单需上传面单后才能发货，请及时处理'
+  ];
+  for (var i = 0; i < 3; i++) {
+    data.push({
+      id: id++,
+      stage: 'customer_alert',
+      type: '超时未上传面单',
+      typeCode: 'noLabelUpload',
+      customer: acCustomers[i % acCustomers.length],
+      orderNo: randOrderNo(),
+      shop: acShops[i % acShops.length],
+      platform: acPlatforms[i % 3],
+      reason: noLabelUploadReasons[i],
+      latestShipTime: shipTimes[i],
+      orderStatus: '生产中',
+      paymentStatus: 'paid',
+      orderStage: 'production',
+      customerAlertType: 'noLabelUpload',
+      followGroup: 'coordinate_customer'
+    });
+  }
+return data;
 })();
 
 // ============ 库存异常数据 ============
@@ -3336,7 +3363,7 @@ function acRenderCurrentTab() {
 
 // 更新异常中心Tab上的数量
 function acUpdateTabCounts() {
-  // 客户异常
+  // 客户处理
   const customerData = acMockData.filter(d => d.stage === 'customer_alert' || (d.stage === 'ops_follow' && d.followGroup === 'coordinate_customer'));
   const customerFiltered = acFilterCustomerData(customerData);
   const elCustomer = document.getElementById('acTabCountCustomer');
@@ -3366,7 +3393,7 @@ function acUpdateTabCounts() {
   if (elSys) elSys.textContent = sysFiltered.length;
 }
 
-// ============ 客户异常Tab - 扁平列表+状态筛选 ============
+// ============ 客户处理Tab - 扁平列表+状态筛选 ============
 function acRenderCustomerAlerts() {
   const container = document.getElementById('acCustomerAlertsContainer');
   const alertData = acMockData.filter(d => d.stage === 'customer_alert' || (d.stage === 'ops_follow' && d.followGroup === 'coordinate_customer'));
@@ -3449,14 +3476,14 @@ function acRenderCustomerAlerts() {
   acUpdateSelectedCount();
 }
 
-// 客户异常状态筛选
+// 客户处理状态筛选
 function acFilterCustomerStage(stage) {
   acCurrentFilters.customerStage = stage;
   acRenderCustomerAlerts();
   acUpdateTabCounts();
 }
 
-// 客户异常全选
+// 客户处理全选
 function acToggleAllCustomerCheck(checked) {
   const opsData = acMockData.filter(d => d.stage === 'ops_follow');
   let filtered = acFilterCustomerData(opsData);
@@ -3820,7 +3847,7 @@ function acCopyOrderNo(orderNo) {
   });
 }
 
-// ============ 复选框(客户异常Tab) ============
+// ============ 复选框(客户处理Tab) ============
 function acToggleRowCheck(id, checked) {
   if (checked) acSelectedIds.add(id);
   else acSelectedIds.delete(id);
