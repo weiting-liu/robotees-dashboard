@@ -227,19 +227,12 @@
     </div>
   </div>
 
-  <!-- 异常中心快捷入口 -->
-  <div class="alert-quick-entry" onclick="showToast('跳转至异常中心')">
-    <div class="left">
-      <div class="icon">⚠️</div>
-      <div>
-        <div class="title">异常中心</div>
-        <div class="desc">您有订单异常需要处理，点击前往异常中心查看详情</div>
-      </div>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <span class="badge">133</span>
-      <span class="arrow">›</span>
-    </div>
+  <!-- 异常中心快捷入口（紧凑） -->
+  <div style="margin:8px 20px 0;display:flex;align-items:center;gap:8px;" onclick="showToast('跳转至异常中心')" class="cursor-pointer">
+    <span style="font-size:13px;">⚠️</span>
+    <span style="font-size:12px;color:#92400E;font-weight:600;">异常中心</span>
+    <span style="background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:8px;">133</span>
+    <span style="color:#B45309;font-size:11px;">点击查看 ›</span>
   </div>
 
   <!-- 状态标签栏 -->
