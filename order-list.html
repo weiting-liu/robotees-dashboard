@@ -128,7 +128,10 @@
   .page-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border: 1px solid #D1D5DB; border-radius: 4px; font-size: 12px; color: #374151; cursor: pointer; background: #fff; }
   .page-btn:hover { border-color: #3B82F6; color: #3B82F6; }
   .page-btn.active { background: #3B82F6; color: #fff; border-color: #3B82F6; }
-</style>
+  .quick-filter-tag { display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #D1D5DB;border-radius:6px;background:#fff;color:#374151;font-size:12px;cursor:pointer;transition:all 0.15s; }
+    .quick-filter-tag:hover { border-color:#3B82F6;color:#3B82F6;background:#EFF6FF; }
+    .quick-filter-tag.active { border-color:#3B82F6;color:#fff;background:#3B82F6; }
+  </style>
 </head>
 <body>
 
@@ -216,22 +219,13 @@
       <button class="btn-search" onclick="showToast('查询中...')">查询</button>
       <button class="btn-reset">重置</button>
       <button class="btn-expand">展开 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 9l-7 7-7-7"/></svg></button>
+      <span style="width:1px;height:16px;background:#E5E7EB;margin:0 4px;"></span>
+      <button class="quick-filter-tag" onclick="toggleQuickFilter(this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        未上传面单
+      </button>
     </div>
   </div>
-
-  <!-- 快捷筛选 -->
-  <div style="margin:12px 20px 0;display:flex;align-items:center;gap:8px;">
-    <span style="font-size:12px;color:#6B7280;font-weight:500;">快捷筛选：</span>
-    <button class="quick-filter-tag" onclick="toggleQuickFilter(this)">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      未上传面单
-    </button>
-  </div>
-  <style>
-    .quick-filter-tag { display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border:1px solid #D1D5DB;border-radius:6px;background:#fff;color:#374151;font-size:12px;cursor:pointer;transition:all 0.15s; }
-    .quick-filter-tag:hover { border-color:#3B82F6;color:#3B82F6;background:#EFF6FF; }
-    .quick-filter-tag.active { border-color:#3B82F6;color:#fff;background:#3B82F6; }
-  </style>
 
   <!-- 异常中心快捷入口 -->
   <div class="alert-quick-entry" onclick="showToast('跳转至异常中心')">
