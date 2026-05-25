@@ -374,7 +374,10 @@
       </div>
       <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
         <span class="text-xs text-gray-400">Token已失效或即将失效，请尽快处理</span>
-        <button onclick="alertCopyShopNames();alertCloseTokenAlertModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">复制店铺名称</button>
+        <div class="flex items-center gap-2">
+          <button onclick="alertCopyShopNames()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">复制店铺名称</button>
+          <button onclick="showToast('即将跳转到授权页面');alertCloseTokenAlertModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500 hover:bg-red-600 text-white transition-colors">去授权</button>
+        </div>
       </div>
     </div>
   </div>
@@ -1689,7 +1692,7 @@ function alertGetActionBtn(item) {
   const btnMap = {
     // 待处理："修改重推" 改为 "重推"
     fix_or_close: '<button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">重推</button><button onclick="event.stopPropagation();alertHandleAction(\'fix_or_close\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">关闭订单</button>',
-    bind_warehouse: '<button onclick="event.stopPropagation();alertHandleAction(\'bind_warehouse\', ' + item.id + ')" class="px-2 py-1 text-[11px] font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors leading-tight">绑定发货仓后重拉订单</button>',
+    bind_warehouse: '<span class="text-[11px] text-gray-500 italic">绑定发货仓后重拉订单</span>',
     upload_label: '<button onclick="event.stopPropagation();showToast(\'请前往上传面单\')" class="px-2.5 py-1 text-xs font-medium text-blue-600 border border-blue-300 rounded hover:bg-blue-50 transition-colors">上传面单</button>',
     seller_handle: '<span class="text-xs text-gray-400 flex items-center gap-1"><span class="pulse-dot w-1.5 h-1.5 bg-gray-400 rounded-full inline-block"></span>卖家后台处理</span>',
     partial_swap_or_cancel: '<button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors">部分换货</button><button onclick="event.stopPropagation();alertHandleAction(\'partial_swap_or_cancel\', ' + item.id + ')" class="px-2.5 py-1 text-xs font-medium text-gray-600 border border-gray-300 rounded hover:bg-gray-50 transition-colors ml-1">部分取消</button>',
