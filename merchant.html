@@ -374,10 +374,7 @@
       </div>
       <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
         <span class="text-xs text-gray-400">Token已失效或即将失效，请尽快处理</span>
-        <div class="flex items-center gap-2">
-          <button onclick="alertCopyShopNames()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">复制店铺名称</button>
-          <button onclick="showToast('即将跳转到授权页面');alertCloseTokenAlertModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-red-500 hover:bg-red-600 text-white transition-colors">去授权</button>
-        </div>
+        <button onclick="alertCopyShopNames()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">复制店铺名称</button>
       </div>
     </div>
   </div>
@@ -1478,6 +1475,7 @@ function alertOpenTokenAlertModal() {
         <span class="w-2 h-2 rounded-full ${isDanger ? 'bg-red-500' : 'bg-amber-400'}"></span>
         <span class="text-sm font-semibold text-gray-800 flex-1">${shop.name}</span>
         <span class="text-xs px-2 py-0.5 rounded ${statusBg}">${shop.status}</span>
+        <button onclick="showToast('即将跳转到授权页面');alertCloseTokenAlertModal()" class="px-2.5 py-1 rounded text-xs font-medium bg-red-500 hover:bg-red-600 text-white transition-colors flex-shrink-0">去授权</button>
       </div>`;
     }).join('');
   }
