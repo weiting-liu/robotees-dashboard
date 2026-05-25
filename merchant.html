@@ -356,6 +356,28 @@
   </style>
 </head>
 <body class="min-h-screen flex">
+  <!-- 店铺连接异常弹窗 -->
+  <div id="tokenAlertModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:1000;align-items:center;justify-content:center;" onclick="if(event.target===this)alertCloseTokenAlertModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between bg-red-50">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 bg-red-500 rounded-full inline-block flex-shrink-0"></span>
+          <span class="text-sm font-bold text-red-700">店铺连接异常</span>
+          <span id="tokenModalCount" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-200/80 text-red-700">0</span>
+        </div>
+        <button onclick="alertCloseTokenAlertModal()" class="w-7 h-7 rounded-lg hover:bg-red-100 flex items-center justify-center transition-colors">
+          <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-4 max-h-80 overflow-y-auto">
+        <div id="tokenModalShopList" class="space-y-2"></div>
+      </div>
+      <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+        <span class="text-xs text-gray-400">Token已失效或即将失效，请尽快处理</span>
+        <button onclick="alertCopyShopNames();alertCloseTokenAlertModal()" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors">复制店铺名称</button>
+      </div>
+    </div>
+  </div>
 
   <!-- 左侧导航栏 - 深色主题 -->
   <aside class="w-60 bg-slate-800 flex flex-col fixed h-full z-20">
@@ -754,26 +776,13 @@
       
 
       <!-- ========== 店铺连接异常横幅（平台Tab下方） ========== -->
-      <div id="tokenAlertBanner" class="token-alert-banner mb-5">
-        <div class="flex items-center justify-between px-4 py-2.5 cursor-pointer" onclick="alertToggleTokenBanner()">
-          <div class="flex items-center gap-3">
-            <span class="text-sm font-semibold text-red-600">店铺连接异常</span>
-            <span id="tokenAlertCount" class="text-xs text-red-500 font-medium">2</span>
-            <span class="text-xs text-gray-400">以下店铺Token已失效或即将失效，请尽快处理</span>
-          </div>
-          <div class="flex items-center gap-3">
-            <button onclick="event.stopPropagation();alertCopyShopNames()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded text-xs font-medium border border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 transition-colors">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-              复制店铺名称
-            </button>
-            <svg id="tokenBannerArrow" class="w-4 h-4 text-gray-400 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
-          </div>
-        </div>
-        <div class="token-alert-body px-4 pb-3">
-          <div class="space-y-2" id="tokenAlertShopList">
-            <!-- 由JS渲染 -->
-          </div>
-          
+      <div id="tokenAlertBanner" class="mb-5 px-4 py-2.5 bg-red-50 border-l-4 border-red-500 cursor-pointer hover:bg-red-100 transition-colors rounded-r-lg" onclick="alertOpenTokenAlertModal()">
+        <div class="flex items-center gap-3">
+          <span class="w-2 h-2 bg-red-500 rounded-full inline-block flex-shrink-0"></span>
+          <span class="text-sm font-bold text-red-700">店铺连接异常</span>
+          <span id="tokenAlertCount" class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-200/80 text-red-700">0</span>
+          <span class="text-xs text-red-500/80">以下店铺Token已失效或即将失效，请尽快处理</span>
+          <span class="text-xs text-gray-400 ml-auto">点击查看详情</span>
         </div>
       </div>
 
@@ -1439,10 +1448,9 @@ let alertSelectedIds = new Set();
 
 // ============ 店铺连接异常横幅 ============
 function alertRenderTokenBanner() {
-  const container = document.getElementById('tokenAlertShopList');
   const banner = document.getElementById('tokenAlertBanner');
   const countEl = document.getElementById('tokenAlertCount');
-  if (!container || !banner) return;
+  if (!banner) return;
 
   if (tokenAlertShops.length === 0) {
     banner.style.display = 'none';
@@ -1450,27 +1458,32 @@ function alertRenderTokenBanner() {
   }
   banner.style.display = '';
   countEl.textContent = tokenAlertShops.length;
-
-  container.innerHTML = tokenAlertShops.map(shop => {
-    const isDanger = shop.statusColor === 'danger';
-    const statusBg = isDanger ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600';
-    return `
-    <div class="token-shop-item">
-      <span class="text-sm font-medium text-gray-800">${shop.name}</span>
-      <span class="text-xs font-semibold px-1.5 py-0.5 rounded ${statusBg}">${shop.status}</span>
-    </div>`;
-  }).join('');
 }
 
-function alertToggleTokenBanner() {
-  const banner = document.getElementById('tokenAlertBanner');
-  const arrow = document.getElementById('tokenBannerArrow');
-  banner.classList.toggle('collapsed');
-  if (banner.classList.contains('collapsed')) {
-    arrow.style.transform = 'rotate(-90deg)';
+function alertOpenTokenAlertModal() {
+  const modal = document.getElementById('tokenAlertModal');
+  const listEl = document.getElementById('tokenModalShopList');
+  const countEl = document.getElementById('tokenModalCount');
+  
+  if (tokenAlertShops.length === 0) {
+    listEl.innerHTML = '<div class="text-sm text-gray-400 py-4 text-center">无异常店铺</div>';
   } else {
-    arrow.style.transform = 'rotate(0deg)';
+    listEl.innerHTML = tokenAlertShops.map(shop => {
+      const isDanger = shop.statusColor === 'danger';
+      const statusBg = isDanger ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700';
+      return `<div class="flex items-center gap-3 px-3 py-2 bg-gray-50 rounded-lg">
+        <span class="w-2 h-2 rounded-full ${isDanger ? 'bg-red-500' : 'bg-amber-400'}"></span>
+        <span class="text-sm font-semibold text-gray-800 flex-1">${shop.name}</span>
+        <span class="text-xs px-2 py-0.5 rounded ${statusBg}">${shop.status}</span>
+      </div>`;
+    }).join('');
   }
+  countEl.textContent = tokenAlertShops.length;
+  modal.style.display = 'flex';
+}
+
+function alertCloseTokenAlertModal() {
+  document.getElementById('tokenAlertModal').style.display = 'none';
 }
 
 function alertCopyShopNames() {
