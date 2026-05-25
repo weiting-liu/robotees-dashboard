@@ -3058,6 +3058,7 @@ var acMockData = (function() {
     '非在线下单订单，需客户自行上传面单，已超时',
     '自有面单订单需上传面单后才能发货，请及时处理'
   ];
+  var noLabelUploadShipTimes = [randTime(24), randTime(18), randTime(12)];
   for (var i = 0; i < 3; i++) {
     data.push({
       id: id++,
@@ -3069,7 +3070,7 @@ var acMockData = (function() {
       shop: acShops[i % acShops.length],
       platform: acPlatforms[i % 3],
       reason: noLabelUploadReasons[i],
-      latestShipTime: shipTimes[i],
+      latestShipTime: noLabelUploadShipTimes[i],
       orderStatus: '生产中',
       paymentStatus: 'paid',
       orderStage: 'production',
